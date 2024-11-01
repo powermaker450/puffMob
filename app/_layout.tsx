@@ -1,37 +1,36 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
+import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
+import { Stack } from "expo-router";
+import { useColorScheme } from "react-native";
+import { useState } from "react";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const [colorScheme, setColorScheme] = useState(useColorScheme());
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+  // const colorScheme = useColorScheme();
+  const { theme } = useMaterial3Theme();
+  const getColor = () => colorScheme === "dark" ? "rgb(30, 30, 30)" : "rgb(255, 255, 255)";
+
+  const options = {
+    headerShown: false,
+    contentStyle: {
+      backgroundColor: getColor()
     }
-  }, [loaded]);
+  };
 
-  if (!loaded) {
-    return null;
-  }
+  const paperTheme = colorScheme === "dark" 
+    ? {...MD3DarkTheme, colors: theme.dark}
+    : {...MD3LightTheme, colors: theme.light};
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+    <PaperProvider theme={paperTheme}>
+      <Stack screenOptions={options}>
+        <Stack.Screen
+          name="index"
+          
+        />
       </Stack>
-    </ThemeProvider>
+    </PaperProvider>
   );
 }
