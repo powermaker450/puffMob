@@ -1,121 +1,107 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomView from "@/components/CustomView";
-import { useState } from "react";
-import { View } from "react-native";
-import { BottomNavigation, Button, Text, TextInput } from "react-native-paper";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { StyleProp, TextStyle, View } from "react-native";
+import { Button, Text, TextInput } from "react-native-paper";
 
-type NavBarPage = {
-  key: string;
-  title: string;
-  focusedIcon: string;
-  unfocusedIcon?: string;
-}
+const textInputStyle: StyleProp<TextStyle> = {
+  maxHeight: 70,
+  width: "75%",
+  margin: 10
+};
 
 export default function Index() {
-  const [clientIdText, setClientIdText] = useState("");
-
   const [endpoint, setEndpoint] = useState("");
   const [tokenText, setTokenText] = useState("");
+  const [clientIdText, setClientIdText] = useState("");
+  const [statusText, setStatusText] = useState("");
 
-  const [text, changeText] = useState("");
+  useEffect(() => {
+    AsyncStorage.getItem("settings").then(
+      settings => settings !== null && router.navigate("/home")
+    );
+  }, []);
 
-  const useToken = (id: string, token: string) => {
-    fetch(`https://hosting.povario.com/oauth2/token`, {
+  const login = () => {
+    fetch(`${endpoint || "http://localhost:8080"}/oauth2/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: `grant_type=client_credentials&client_id=${id}&client_secret=${token}`
+      body: `grant_type=client_credentials&client_id=${clientIdText}&client_secret=${tokenText}`
     })
-    .then(response => {
+      .then(async response => {
         if (!response.ok) {
-          changeText("Something went wrong.");
-          return;
+          setStatusText("Something went wrong.");
         }
 
-        response.json()
-        .then(json => {
-            changeText(`Token expires in: ${json.expires_in / 60 / 60} ${json.expires_in / 60 / 60 > 1 ? "hours" : "hour"}`);
-          });
+        await response.json().then(auth => {
+          const settings = {
+            endpoint: endpoint,
+            clientId: clientIdText,
+            clientSecret: tokenText
+          };
+          AsyncStorage.setItem("settings", JSON.stringify(settings));
+
+          router.navigate("/home");
+        });
       })
-    .catch(err => {
-        changeText("Something went wrong.");
+      .catch(err => {
+        setStatusText("Something went wrong.");
         console.error(err);
-      })
-  }
+      });
+  };
 
-  const Settings = () => (
+  return (
     <CustomView>
-      <Text variant="titleLarge">
-        Settings
+      <Text variant="displaySmall" style={{ margin: 30 }}>
+        puffMob
       </Text>
-    </CustomView>
-  );
 
-  const Main = () => (
-    <CustomView>
       <TextInput
         mode="outlined"
-        style={{maxHeight: 70, width: "75%", margin: 10}}
+        style={textInputStyle}
+        label="Endpoint"
+        value={endpoint}
+        placeholder="http://localhost:8080"
+        onChangeText={newText => setEndpoint(newText)}
+      />
+
+      <TextInput
+        mode="outlined"
+        style={textInputStyle}
         label="Client ID"
         value={clientIdText}
         onChangeText={newText => setClientIdText(newText)}
-      >
-      </TextInput>
+      />
 
       <TextInput
         mode="outlined"
-        style={{maxHeight: 70, width: "75%", margin: 10}}
+        style={textInputStyle}
         label="Token"
         value={tokenText}
+        secureTextEntry
+        textContentType="password"
         onChangeText={newText => setTokenText(newText)}
-      >
-      </TextInput>
+      />
 
       <View
-        style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
       >
-        <Button
-          style={{margin: 10}}
-          mode="contained"
-          onPress={() => useToken(clientIdText, tokenText)}
-        >
+        <Button style={{ margin: 10 }} mode="contained" onPress={() => login()}>
           Login
         </Button>
       </View>
 
-      <Text
-        style={{height: 60, maxWidth: "75%"}}
-        variant="bodyLarge">
-        {text}
+      <Text style={{ height: 60, maxWidth: "75%" }} variant="bodyLarge">
+        {statusText}
       </Text>
     </CustomView>
-  )
-
-  const [index, setIndex] = useState(0);
-  const [routes] = useState<NavBarPage[]>([
-    {
-      key: "home",
-      title: "Home",
-      focusedIcon: "home"
-    },
-    {
-      key: "settings",
-      title: "Settings",
-      focusedIcon: "cog"
-    }
-  ]);
-
-  const renderScene = BottomNavigation.SceneMap({
-    home: Main,
-    settings: Settings
-  });
-
-  return (
-    <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={setIndex}
-      renderScene={renderScene}
-      sceneAnimationType="shifting"
-    />
-  )
+  );
 }

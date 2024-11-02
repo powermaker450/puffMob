@@ -1,0 +1,9 @@
+**/node_modules
+.npmrc
+.prettierrc
+app.json
+babel.config.js
+package.json
+pnpm-lock.yaml
+README.md
+tsconfig.json

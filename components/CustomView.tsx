@@ -1,8 +1,8 @@
-import { ReactNode } from "react"
-import { View } from "react-native"
+import { ReactNode } from "react";
+import { View } from "react-native";
 
 interface CustomViewProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function CustomView({ children }: CustomViewProps) {
@@ -11,10 +11,10 @@ export default function CustomView({ children }: CustomViewProps) {
       style={{
         flex: 1,
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "center"
       }}
     >
       {children}
     </View>
-  )
+  );
 }
