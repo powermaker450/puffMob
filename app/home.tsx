@@ -1,17 +1,16 @@
 import CustomView from "@/components/CustomView";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { PuffMobSettings, storage } from "@/util/storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Button, Text } from "react-native-paper";
 
 export default function home() {
   const [text, setText] = useState("");
+  const settings: PuffMobSettings = JSON.parse(storage.getString("settings")!);
 
   useEffect(() => {
-    AsyncStorage.getItem("settings").then(settings => {
-      setText(settings || "");
-    });
-  }, []);
+    setText(settings.clientId);
+  }, [settings])
 
   return (
     <CustomView>

@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomView from "@/components/CustomView";
+import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleProp, TextStyle, View } from "react-native";
@@ -18,9 +18,7 @@ export default function Index() {
   const [statusText, setStatusText] = useState("");
 
   useEffect(() => {
-    AsyncStorage.getItem("settings").then(
-      settings => settings !== null && router.navigate("/home")
-    );
+    storage.contains("settings") && router.navigate("/home");
   }, []);
 
   const login = () => {
@@ -42,7 +40,8 @@ export default function Index() {
             clientId: clientIdText,
             clientSecret: tokenText
           };
-          AsyncStorage.setItem("settings", JSON.stringify(settings));
+
+          storage.set("settings", JSON.stringify(settings));
 
           router.navigate("/home");
         });
