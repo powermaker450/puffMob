@@ -1,7 +1,8 @@
 import CustomView from "@/components/CustomView";
+import { AuthPacket } from "@/util/Panel";
 import { storage } from "@/util/storage";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { Redirect, router } from "expo-router";
+import { useState } from "react";
 import { StyleProp, TextStyle, View } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 
@@ -17,10 +18,6 @@ export default function Index() {
   const [clientIdText, setClientIdText] = useState("");
   const [statusText, setStatusText] = useState("");
 
-  useEffect(() => {
-    storage.contains("settings") && router.navigate("/home");
-  }, []);
-
   const login = () => {
     fetch(`${endpoint || "http://localhost:8080"}/oauth2/token`, {
       method: "POST",
@@ -34,12 +31,14 @@ export default function Index() {
           setStatusText("Something went wrong.");
         }
 
-        await response.json().then(auth => {
+        await response.json().then((auth: AuthPacket) => {
           const settings = {
             endpoint: endpoint,
             clientId: clientIdText,
             clientSecret: tokenText
           };
+
+          console.log("Got token:", auth);
 
           storage.set("settings", JSON.stringify(settings));
 
@@ -54,6 +53,7 @@ export default function Index() {
 
   return (
     <CustomView>
+      {storage.contains("settings") && <Redirect href="/home" />}
       <Text variant="displaySmall" style={{ margin: 30 }}>
         puffMob
       </Text>
