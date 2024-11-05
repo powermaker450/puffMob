@@ -168,8 +168,8 @@ export interface ModelsUserSettingView {
 export interface ModelsUserView {
   email: string;
   id: number;
-  newPassword: string;
-  password: string;
+  newPassword?: string;
+  password?: string;
   username: string;
 }
 
