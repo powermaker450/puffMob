@@ -11,7 +11,7 @@ export default function CustomView({ children }: CustomViewProps) {
       style={{
         flex: 1,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
       }}
     >
       {children}

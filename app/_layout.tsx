@@ -8,7 +8,7 @@ export default function RootLayout() {
 
   const { theme } = useMaterial3Theme();
   const getColor = () =>
-    colorScheme === "dark" ? "rgb(30, 30, 30)" : "rgb(255, 255, 255)";
+    colorScheme === "dark" ? theme.dark.background : theme.light.background;
 
   const options = {
     headerShown: false,
