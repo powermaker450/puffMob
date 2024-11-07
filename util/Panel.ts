@@ -14,14 +14,17 @@ import {
   ModelsUserView, 
   PufferpanelServer
 } from "./models";
-import { storage } from "./storage";
+
+const [cachedToken, setCachedToken] = useMMKVString("cachedToken");
 
 export default class Panel {
-  public readonly serverUrl: string;
-  public readonly clientId: string;
-  public readonly clientSecret: string;
-  public readonly api: string;
-  private cachedToken? = storage.getString("cachedToken");
+  private readonly serverUrl: string;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
+  private readonly api: string;
+
+  private static cachedToken = cachedToken;
+  private static setCachedToken = setCachedToken;
 
   constructor({ serverUrl, clientId, clientSecret }: PanelParams) {
     this.serverUrl = serverUrl;
@@ -40,14 +43,14 @@ export default class Panel {
           "Content-Type": "application/x-www-form-urlencoded"
         },
         body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}` 
-      })
+      });
 
       if (!res.ok) {
         throw await res.text();
       }
 
       return res.json().then((json: AuthPacket) => {
-        storage.set("cachedToken", json.access_token);
+        Panel.setCachedToken(json.access_token);
         return json;
       });
     } catch (err) {
@@ -57,7 +60,7 @@ export default class Panel {
   }
 
   private async authorize(): Promise<string> {
-    return this.cachedToken || await this.getAuth().then(packet => packet.access_token);
+    return Panel.cachedToken || await this.getAuth().then(packet => packet.access_token);
   }
 
   private async defaultHeaders(): Promise<{ Accept: string, Authorization: string }> {
@@ -67,6 +70,27 @@ export default class Panel {
     }
   }
 
+  private async handleResponse(
+    res: Response,
+    req: Function, // TODO: Definitely find a better way to type this 
+    ...args: string[] // :skull:
+  ): Promise<unknown> {
+    if (res.status === 401) {
+      try {
+        this.getAuth();
+        return await req(...args);
+      } catch {
+        throw `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`;
+      }
+    }
+
+    if (!res.ok) {
+      throw await res.text().catch(() => "failed");
+    }
+
+    return await res.json();
+  }
+
   public readonly get = {
     nodes: async (): Promise<ModelsNodeView[]> => {
       try {
@@ -74,11 +98,7 @@ export default class Panel {
           headers: await this.defaultHeaders(),
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsNodeView[];
+        return await this.handleResponse(res, this.get.nodes) as ModelsNodeView[];
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -91,11 +111,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsNodeView;
+        return await this.handleResponse(res, this.get.node, id) as ModelsNodeView;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -108,11 +124,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsDeployment;
+        return await this.handleResponse(res, this.get.nodeDeployment, id) as ModelsDeployment;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -125,11 +137,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsUserView;
+        return await this.handleResponse(res, this.get.self) as ModelsUserView;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -142,11 +150,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsClient[];
+        return await this.handleResponse(res, this.get.selfOauth2) as ModelsClient[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -160,11 +164,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsServerSearchResponse;
+        return await this.handleResponse(res, this.get.servers) as ModelsServerSearchResponse;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -177,11 +177,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsGetServerResponse;
+        return await this.handleResponse(res, this.get.server, id) as ModelsGetServerResponse;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -194,11 +190,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsClient[];
+        return await this.handleResponse(res, this.get.serverOauth2, id) as ModelsClient[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -211,11 +203,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsPermissionView[];
+        return await this.handleResponse(res, this.get.serverUsers, id) as ModelsPermissionView[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -228,11 +216,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsChangeUserSetting;
+        return await this.handleResponse(res, this.get.setting, key) as ModelsChangeUserSetting;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -245,11 +229,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsTemplate;
+        return await this.handleResponse(res, this.get.templates) as ModelsTemplate;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -262,11 +242,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsUserSettingView[];
+        return await this.handleResponse(res, this.get.settings) as ModelsUserSettingView[];
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -281,11 +257,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsUserSearchResponse;
+        return await this.handleResponse(res, this.get.users) as ModelsUserSearchResponse;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -298,11 +270,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsUserView;
+        return await this.handleResponse(res, this.get.user, id) as ModelsUserView;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -315,11 +283,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsPermissionView;
+        return await this.handleResponse(res, this.get.userPerms, id) as ModelsPermissionView;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -335,11 +299,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsNodeView;
+        return await this.handleResponse(res, this.create.node) as ModelsNodeView;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -353,11 +313,7 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        if (!res.ok) {
-          throw await res.text();
-        }
-
-        return await res.json() as ModelsCreatedClient;
+        return await this.handleResponse(res, this.create.oauth2) as ModelsCreatedClient;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
