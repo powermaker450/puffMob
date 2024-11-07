@@ -1,11 +1,10 @@
 import ButtonContainer from "@/components/ButtonContainer";
 import CustomView from "@/components/CustomView";
-import { PanelParams } from "@/util/Panel";
+import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
-import { Redirect, router } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleProp, TextStyle, View } from "react-native";
-import { useMMKVObject, useMMKVString } from "react-native-mmkv";
+import { StyleProp, TextStyle } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 
 const textInputStyle: StyleProp<TextStyle> = {
@@ -15,30 +14,78 @@ const textInputStyle: StyleProp<TextStyle> = {
 };
 
 export default function Index() {
-  const [settings, setSettings] = useMMKVObject<PanelParams>("settings");
+  let settings: PanelParams = storage.getString("settings")
+    ? (JSON.parse(storage.getString("settings")!))
+    : ({
+        serverUrl: "",
+        clientId: "",
+        clientSecret: ""
+      });
+  const [cachedToken, setStateCachedToken] = useState(storage.getString("cachedToken"));
 
-  const setServerUrl = (text: string) => setSettings({
-    serverUrl: text,
-    clientId: settings?.clientId || "",
-    clientSecret: settings?.clientSecret || ""
-  });
+  const setSettings = (params: PanelParams) => {
+    storage.set("settings", JSON.stringify(params));
+    settings = JSON.parse(storage.getString("settings")!);
+  }
 
-  const setClientId = (text: string) => setSettings({
-    serverUrl: settings?.serverUrl || "",
-    clientId: text,
-    clientSecret: settings?.clientSecret || ""
-  });
+  const setCachedToken = (token: string) => {
+    storage.set("cachedToken", token);
+    setStateCachedToken(storage.getString("cachedToken"));
+  }
 
-  const setClientSecret = (text: string) => setSettings({
-    serverUrl: settings?.serverUrl || "",
-    clientId: settings?.clientId || "",
-    clientSecret: text
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  return (
+  const [serverUrl, setServerUrl] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  
+  useEffect(() => {
+    if (!cachedToken) {
+      setLoading(false);
+      return;
+    }
+
+    new Panel({...settings}).get.self()
+      .then(() => {
+        setLoading(false);
+        router.navigate("/servers");
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      })
+  }, [cachedToken]);
+
+  const loadingText = (
     <CustomView>
-      {storage.getString("cachedToken") && <Redirect href="/servers" />}
+      <Text variant="displaySmall" style={{ margin: 30 }}>
+        Loading...
+      </Text>
+    </CustomView>
+  );
+  
+  const errorText = (
+    <CustomView>
+      <Text variant="bodyLarge" style={{ margin: 30 }}>
+        Something went wrong. Check that your server URL and credentials are correct.
+      </Text>
 
+      <Button
+        mode="contained"
+        style={{ margin: 10 }}
+        onPress={() => {
+          setError(false);
+          setLoading(false);
+        }}
+      >
+        Back to login
+      </Button>
+    </CustomView>
+  );
+
+  const loginText = (
+    <CustomView>
       <Text variant="displaySmall" style={{ margin: 30 }}>
         puffMob
       </Text>
@@ -47,7 +94,7 @@ export default function Index() {
         mode="outlined"
         style={textInputStyle}
         label="Endpoint"
-        value={settings?.serverUrl}
+        value={serverUrl}
         placeholder="http://localhost:8080"
         onChangeText={newText => {setServerUrl(newText)}}
       />
@@ -56,7 +103,7 @@ export default function Index() {
         mode="outlined"
         style={textInputStyle}
         label="Client ID"
-        value={settings?.clientId}
+        value={clientId}
         onChangeText={newText => setClientId(newText)}
       />
 
@@ -64,7 +111,7 @@ export default function Index() {
         mode="outlined"
         style={textInputStyle}
         label="Token"
-        value={settings?.clientSecret}
+        value={clientSecret}
         secureTextEntry
         textContentType="password"
         onChangeText={newText => setClientSecret(newText)}
@@ -74,15 +121,28 @@ export default function Index() {
         <Button
           style={{ margin: 10 }}
           mode="contained"
-          onPress={() => router.navigate("/servers")}
-          disabled={
-            !(settings?.serverUrl && (settings.serverUrl.startsWith("http://") || settings.serverUrl.startsWith("https://")))
-            || !settings?.clientId || !settings?.clientSecret
-          }
+          onPress={() => {
+            const params: PanelParams = {
+              serverUrl: serverUrl,
+              clientId: clientId,
+              clientSecret: clientSecret
+            };
+
+            setSettings(params);
+
+            Panel.getToken(params).then(token => setCachedToken(token));
+          }}
+          disabled={!(serverUrl.startsWith("http://") || serverUrl.startsWith("https://")) || !clientId || !clientSecret}
         >
           Login
         </Button>
       </ButtonContainer>
     </CustomView>
+  );
+
+  return (
+    <>
+      {error ? errorText : loading ? loadingText : loginText}
+    </>
   );
 }

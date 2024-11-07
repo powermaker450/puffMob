@@ -1,4 +1,3 @@
-import { useMMKVString } from "react-native-mmkv";
 import {
   ModelsChangeUserSetting,
   ModelsClient,
@@ -14,8 +13,7 @@ import {
   ModelsUserView, 
   PufferpanelServer
 } from "./models";
-
-const [cachedToken, setCachedToken] = useMMKVString("cachedToken");
+import { storage } from "./storage";
 
 export default class Panel {
   private readonly serverUrl: string;
@@ -23,8 +21,11 @@ export default class Panel {
   private readonly clientSecret: string;
   private readonly api: string;
 
-  private static cachedToken = cachedToken;
-  private static setCachedToken = setCachedToken;
+  private static cachedToken = storage.getString("cachedToken");
+  private static setCachedToken = (token: string) => {
+    storage.set("cachedToken", token);
+    Panel.cachedToken = storage.getString("cachedToken");
+  }
 
   constructor({ serverUrl, clientId, clientSecret }: PanelParams) {
     this.serverUrl = serverUrl;
@@ -32,6 +33,28 @@ export default class Panel {
     this.clientSecret = clientSecret;
 
     this.api = this.serverUrl + "/api";
+  }
+
+  public static async getToken({ serverUrl, clientId, clientSecret }: PanelParams): Promise<string> {
+    try {
+      const res = await fetch(`${serverUrl}/oauth2/token`, {
+        method: MethodOpts.post,
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+      });
+
+      if (!res.ok) {
+        throw await res.text().catch(() => "failed");
+      }
+
+      return await res.json().then((packet: AuthPacket) => packet.access_token);
+    } catch (err) {
+      console.warn("An unexpected error occured:", err);
+      throw err;
+    }
   }
 
   public async getAuth(): Promise<AuthPacket> {
@@ -46,7 +69,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw await res.text();
+        throw await res.text().catch(() => "failed");
       }
 
       return res.json().then((json: AuthPacket) => {

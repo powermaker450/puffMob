@@ -8,15 +8,21 @@ import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
-import { useMMKVObject } from "react-native-mmkv";
 import { Button, Text } from "react-native-paper";
 
 export default function home() {
   const { theme } = useMaterial3Theme();
   const buttonMargin = { marginTop: 20, marginBottom: 20, marginLeft: 5, marginRight: 5 };
 
+  let settings: PanelParams = storage.getString("settings")
+    ? JSON.parse(storage.getString("settings")!)
+    : {
+      serverUrl: "",
+      clientId: "",
+      clientSecret: ""
+    };
+
   const [error, setError] = useState(false);
-  const [settings, setSettings] = useMMKVObject<PanelParams>("settings");
   let panel: Panel;
   const [serverList, setServerList] = useState<ModelsServerView[]>([]);
 
