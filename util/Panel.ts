@@ -1,4 +1,5 @@
 import {
+    ModelServerStatusResponse,
   ModelsChangeUserSetting,
   ModelsClient,
   ModelsCreatedClient,
@@ -7,6 +8,7 @@ import {
   ModelsNodeView,
   ModelsPermissionView,
   ModelsServerSearchResponse,
+  ModelsServerView,
   ModelsTemplate,
   ModelsUserSearchResponse,
   ModelsUserSettingView,
@@ -187,7 +189,13 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.servers) as ModelsServerSearchResponse;
+        const data = await this.handleResponse(res, this.get.servers) as ModelsServerSearchResponse;
+
+        for (const server of data.servers) {
+          server.running = await this.get.serverStatus(server.id).then(r => r.running);
+        }
+
+        return data;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -229,6 +237,18 @@ export default class Panel {
         return await this.handleResponse(res, this.get.serverUsers, id) as ModelsPermissionView[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
+        throw err;
+      }
+    },
+
+    serverStatus: async (id: string): Promise<ModelServerStatusResponse> => {
+      try {
+        const res = await fetch(`${this.serverUrl}/proxy/daemon/server/${id}/status`, {
+          headers: await this.defaultHeaders()
+        });
+
+        return await this.handleResponse(res, this.get.serverStatus, id) as ModelServerStatusResponse;
+      } catch (err) {
         throw err;
       }
     },

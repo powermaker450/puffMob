@@ -5,7 +5,7 @@ import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleProp, TextStyle } from "react-native";
-import { Button, Text, TextInput } from "react-native-paper";
+import { ActivityIndicator, Button, Text, TextInput } from "react-native-paper";
 
 const textInputStyle: StyleProp<TextStyle> = {
   maxHeight: 70,
@@ -36,9 +36,9 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const [serverUrl, setServerUrl] = useState("");
-  const [clientId, setClientId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
+  const [serverUrl, setServerUrl] = useState(settings.serverUrl);
+  const [clientId, setClientId] = useState(settings.clientId);
+  const [clientSecret, setClientSecret] = useState(settings.clientSecret);
   
   useEffect(() => {
     if (!cachedToken) {
@@ -59,8 +59,17 @@ export default function Index() {
 
   const loadingText = (
     <CustomView>
-      <Text variant="displaySmall" style={{ margin: 30 }}>
-        Loading...
+      <ActivityIndicator
+        size="large"
+        animating={loading}
+        style={{marginBottom: 20}}
+      />
+
+      <Text
+        variant="bodyLarge"
+        style={{margin: 30}}
+      >
+        Getting your stuff...
       </Text>
     </CustomView>
   );
@@ -122,15 +131,21 @@ export default function Index() {
           style={{ margin: 10 }}
           mode="contained"
           onPress={() => {
+            setLoading(true);
+
             const params: PanelParams = {
               serverUrl: serverUrl,
               clientId: clientId,
               clientSecret: clientSecret
             };
-
             setSettings(params);
 
-            Panel.getToken(params).then(token => setCachedToken(token));
+            Panel.getToken(params)
+              .then(token => setCachedToken(token))
+              .catch(() => {
+                setError(true);
+                setLoading(false);
+              });
           }}
           disabled={!(serverUrl.startsWith("http://") || serverUrl.startsWith("https://")) || !clientId || !clientSecret}
         >

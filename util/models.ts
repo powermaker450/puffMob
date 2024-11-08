@@ -122,6 +122,7 @@ export interface ModelsServerView {
   port: number;
   type: string;
   users: ModelsServerUserView[];
+  running?: boolean; // This differs from the API documentation, but it gets added after fetching the server list
 }
 
 export interface ModelsSettingResponse {
@@ -288,4 +289,8 @@ export interface ResponsePaging {
   page: number;
   pageSize: number;
   total: number;
+}
+
+export interface ModelServerStatusResponse {
+  running: boolean;
 }

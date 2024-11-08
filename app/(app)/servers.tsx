@@ -8,9 +8,24 @@ import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
-import { Button, Text } from "react-native-paper";
+import { ActivityIndicator, Button, Divider, Text } from "react-native-paper";
 
 export default function home() {
+  const getServerList = () => {
+    let serverListSkeleton: object[] = [];
+    for (let i = 0; i < 5; i++) {
+      serverListSkeleton.push({
+        name: "...",
+        ip: "0.0.0.0",
+        port: 0
+      });
+    }
+
+    return storage.getString("cachedServerList")
+      ? JSON.parse(storage.getString("cachedServerList")!)
+      : serverListSkeleton;
+  }
+
   const { theme } = useMaterial3Theme();
   const buttonMargin = { marginTop: 20, marginBottom: 20, marginLeft: 5, marginRight: 5 };
 
@@ -23,16 +38,24 @@ export default function home() {
     };
 
   const [error, setError] = useState(false);
-  let panel: Panel;
-  const [serverList, setServerList] = useState<ModelsServerView[]>([]);
+  const serverCache: ModelsServerView[] = storage.getString("cachedServerList")
+    ? JSON.parse(storage.getString("cachedServerList")!)
+    : [];
+  const [serverList, setServerList] = useState<ModelsServerView[]>(serverCache);
+  const [loading, setLoading] = useState(true);
 
+  let panel: Panel;
   if (settings) {
     panel = new Panel({...settings});
   }
 
   useEffect(() => {
     panel.get.servers()
-      .then(({ servers }) => setServerList(servers))
+      .then(({ servers }) => {
+        storage.set("cachedServerList", JSON.stringify(servers));
+        setServerList(servers);
+        setLoading(false);
+      })
       .catch(() => setError(true));
   }, []);
 
@@ -55,6 +78,14 @@ export default function home() {
     </>
   );
 
+  const loadingIcon = (
+    <ActivityIndicator
+      animating={loading}
+      size="large"
+      style={{paddingTop: 30, paddingBottom: 30}}
+    />
+  );
+
   const normalView = (
     <>
       <Text style={{ maxWidth: "75%", margin: 20 }} variant="displaySmall">
@@ -65,41 +96,36 @@ export default function home() {
         backgroundColor: useColorScheme() === "dark" ? theme.dark.surfaceVariant : theme.light.surfaceVariant,
         paddingLeft: 20,
         paddingRight: 20,
-        maxWidth: "85%",
-        borderRadius: 15
+        paddingTop: 10,
+        paddingBottom: 10,
+        width: "85%",
+        borderRadius: 20
       }}>
-        {serverList.map((server, index) => {
-          return <Server name={server.name} ip={server.ip} port={server.port} key={index} />
+
+        {serverCache.length === 0 && loading ? loadingIcon : serverList.map((server, index) => {
+          return <Server
+            name={server.name}
+            ip={server.ip}
+            port={server.port}
+            key={index}
+            node={server.node}
+            running={server.running}
+          />
         })}
       </View>
 
       <ButtonContainer>
         <Button
-          mode="contained-tonal"
-          onPress={() => {
-            // setSettings({
-            //   serverUrl: "",
-            //   clientId: "",
-            //   clientSecret: ""
-            // });
-            router.navigate("/");
-            setError(false);
-          }}
-          style={{...buttonMargin}}
-        >
-          Back
-        </Button>
-
-        <Button
           mode="contained"
           onPress={() => {
-            router.replace("/");
+            router.back();
             setError(false);
             storage.delete("cachedToken");
+            storage.delete("cachedServerList");
           }}
           style={{...buttonMargin}}
         >
-          Delete cached token
+          Logout
         </Button>
       </ButtonContainer>
     </>
