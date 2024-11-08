@@ -1,7 +1,8 @@
 import { ModelsNodeView } from "@/util/models";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
+import { useState } from "react";
 import { useColorScheme } from "react-native";
-import { List } from "react-native-paper";
+import { List, Tooltip } from "react-native-paper";
 
 interface ServerProps {
   name: string;
@@ -12,6 +13,7 @@ interface ServerProps {
 }
 
 export default function Server({ name, ip, port, node, running }: ServerProps) {
+  const [waiting, setWaiting] = useState(true);
   const { theme } = useMaterial3Theme();
   const colorScheme = useColorScheme();
 
@@ -31,16 +33,29 @@ export default function Server({ name, ip, port, node, running }: ServerProps) {
     return (node.publicHost + (port ? ":" + port : ""));
   }
 
-  return (
-    <List.Item
-      title={name}
-      description={getDescription()}
-      onPress={() => console.log("Clicked", { name, ip, port, node, running })}
-      style={{
-        paddingLeft: 10,
-        paddingRight: 10,
-      }}
-      left={() => <List.Icon icon={running ? "server-network" : "server-network-off"} color={chooseColor()} />}
+  const serverIcon = (
+    <List.Icon
+      icon={running ? "server" : "server-off"}
+      color={chooseColor()}
     />
+  );
+
+  return (
+    <Tooltip
+      title={name}
+      enterTouchDelay={300}
+      leaveTouchDelay={150}
+    >
+      <List.Item
+        title={name}
+        description={getDescription()}
+        onPress={() => console.log("Clicked", { name, ip, port, node, running })}
+        style={{
+          paddingLeft: 10,
+          paddingRight: 10,
+        }}
+        left={() => serverIcon}
+      />
+    </Tooltip>
   )
 }
