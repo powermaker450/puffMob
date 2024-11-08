@@ -36,7 +36,7 @@ export default class Panel {
     this.clientSecret = clientSecret;
 
     this.api = this.serverUrl + "/api";
-    this.daemon = this.serverUrl + "/daemon";
+    this.daemon = this.serverUrl + "/proxy/daemon";
   }
 
   public static async getToken({ serverUrl, clientId, clientSecret }: PanelParams): Promise<string> {

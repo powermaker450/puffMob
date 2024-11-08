@@ -100,8 +100,12 @@ export default function ServerScreen() {
           borderRadius: 20
         }}> 
           <ScrollView
-            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}>
-            <Text selectable style={{fontFamily: "monospace, monospace"}}>{logs}</Text>
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
+            ref={scrollViewRef}
+          >
+            <ScrollView horizontal>
+              <Text selectable style={{ fontFamily: "monospace, monospace", fontSize: 10 }}>{logs}</Text>
+            </ScrollView>
           </ScrollView>
         </View>
       </CustomView>
