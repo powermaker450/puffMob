@@ -4,14 +4,15 @@ import Server from "@/components/Server";
 import Panel, { PanelParams } from "@/util/Panel";
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { ActivityIndicator, Button, Text, useTheme } from "react-native-paper";
+import { ActivityIndicator, Button, Dialog, Portal, Text, useTheme } from "react-native-paper";
 
 export default function home() {
   const theme = useTheme();
   const buttonMargin = { marginTop: 20, marginBottom: 20, marginLeft: 5, marginRight: 5 };
+  const [logoutSplash, setLogoutSplash] = useState(false);
 
   let settings: PanelParams = storage.getString("settings")
     ? JSON.parse(storage.getString("settings")!)
@@ -33,15 +34,18 @@ export default function home() {
     panel = new Panel({...settings});
   }
 
+  const navigation = useNavigation();
   useEffect(() => {
-    panel.get.servers()
-      .then(({ servers }) => {
-        storage.set("cachedServerList", JSON.stringify(servers));
-        setServerList(servers);
-        setLoading(false);
-      })
-      .catch(() => setError(true));
-  }, []);
+    navigation.addListener("focus", () => {
+      panel.get.servers()
+        .then(({ servers }) => {
+          storage.set("cachedServerList", JSON.stringify(servers));
+          setServerList(servers);
+          setLoading(false);
+        })
+        .catch(() => setError(true));
+    });
+  }, [navigation]);
 
   const errorScreen = (
     <>
@@ -89,6 +93,7 @@ export default function home() {
         {serverCache.length === 0 && loading ? loadingIcon : serverList.map((server, index) => {
           return <Server
             name={server.name}
+            id={server.id}
             ip={server.ip}
             port={server.port}
             key={index}
@@ -98,15 +103,35 @@ export default function home() {
         })}
       </View>
 
+      <Portal>
+        <Dialog visible={logoutSplash} onDismiss={() => setLogoutSplash(false)}>
+          <Dialog.Title>
+            <Text style={{ fontWeight: "bold" }}>Logout</Text>
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text>Are you sure you want to logout?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setLogoutSplash(false)}>
+              <Text>Cancel</Text>
+            </Button>
+
+            <Button onPress={() => {
+              storage.delete("cachedToken");
+              storage.delete("cachedServerList");
+              router.back();
+              setLogoutSplash(false);
+            }}>
+              <Text style={{ color: theme.colors.tertiary, fontWeight: "bold" }}>Log out</Text>
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
       <ButtonContainer>
         <Button
           mode="contained"
-          onPress={() => {
-            router.back();
-            setError(false);
-            storage.delete("cachedToken");
-            storage.delete("cachedServerList");
-          }}
+          onPress={() => setLogoutSplash(true)}
           style={{...buttonMargin}}
         >
           Logout

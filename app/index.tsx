@@ -49,7 +49,7 @@ export default function Index() {
     new Panel({...settings}).get.self()
       .then(() => {
         setLoading(false);
-        router.navigate("/servers");
+        router.replace("/server");
       })
       .catch(() => {
         setError(true);
@@ -69,7 +69,7 @@ export default function Index() {
         variant="bodyLarge"
         style={{margin: 30}}
       >
-        Getting your stuff...
+        Logging in...
       </Text>
     </CustomView>
   );

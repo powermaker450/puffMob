@@ -1,5 +1,4 @@
 import {
-  ModelServerStatusResponse,
   ModelsChangeUserSetting,
   ModelsClient,
   ModelsCreatedClient,
@@ -12,7 +11,9 @@ import {
   ModelsUserSearchResponse,
   ModelsUserSettingView,
   ModelsUserView, 
-  PufferpanelServer
+  PufferpanelServer,
+  PufferpanelServerLogs,
+  PufferpanelServerRunning
 } from "./models";
 import { storage } from "./storage";
 
@@ -21,6 +22,7 @@ export default class Panel {
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly api: string;
+  private readonly daemon: string;
 
   private static cachedToken = storage.getString("cachedToken");
   private static setCachedToken = (token: string) => {
@@ -34,6 +36,7 @@ export default class Panel {
     this.clientSecret = clientSecret;
 
     this.api = this.serverUrl + "/api";
+    this.daemon = this.serverUrl + "/daemon";
   }
 
   public static async getToken({ serverUrl, clientId, clientSecret }: PanelParams): Promise<string> {
@@ -190,7 +193,33 @@ export default class Panel {
         const data = await this.handleResponse(res, this.get.servers) as ModelsServerSearchResponse;
 
         for (const server of data.servers) {
-          server.running = await this.get.serverStatus(server.id).then(r => r.running);
+          server.running = await this.get.serverStatus(server.id).then(({ running }) => running);
+          
+          server.start = async (): Promise<boolean> => {
+            const res = await fetch(`${this.daemon}/server/${server.id}/start`, {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders()
+            });
+
+            return res.status === 202 || res.status === 204;
+          }
+
+          server.stop = async (): Promise<boolean> => {
+            const res = await fetch(`${this.daemon}/server/${server.id}/start`, {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders()
+            });
+
+            return res.status === 202 || res.status === 204;
+          }
+
+          server.getConsole = async (): Promise<string> => {
+            const res = await fetch(`${this.daemon}/server/${server.id}/console`, {
+              headers: await this.defaultHeaders()
+            });
+
+            return await res.json().then((json: PufferpanelServerLogs) => json.logs);
+          }
         }
 
         return data;
@@ -206,7 +235,39 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.server, id) as ModelsGetServerResponse;
+        const data = await this.handleResponse(res, this.get.server, id) as ModelsGetServerResponse;
+
+        data.server.running = await this.get.serverStatus(id).then(({ running }) => running);
+
+        data.server.start = async (): Promise<boolean> => {
+          const res = await fetch(`${this.daemon}/server/${data.server.id}/start`, {
+            method: MethodOpts.post,
+            headers: await this.defaultHeaders()
+          });
+
+          return res.status === 202 || res.status === 204;
+        }
+
+        data.server.stop = async (): Promise<boolean> => {
+          const res = await fetch(`${this.daemon}/server/${data.server.id}/stop`, {
+            method: MethodOpts.post,
+            headers: await this.defaultHeaders()
+          });
+
+          return res.status === 202 || res.status === 204;
+        }
+
+        data.server.getConsole = async (): Promise<string> => {
+          const res = await fetch(`${this.daemon}/server/${data.server.id}/console`, {
+            headers: await this.defaultHeaders()
+          });
+
+          return await res.json()
+            .then((json: PufferpanelServerLogs) => json.logs)
+            .catch(() => "");
+        }
+
+        return data;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -239,13 +300,13 @@ export default class Panel {
       }
     },
 
-    serverStatus: async (id: string): Promise<ModelServerStatusResponse> => {
+    serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
       try {
         const res = await fetch(`${this.serverUrl}/proxy/daemon/server/${id}/status`, {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.serverStatus, id) as ModelServerStatusResponse;
+        return await this.handleResponse(res, this.get.serverStatus, id) as PufferpanelServerRunning;
       } catch (err) {
         throw err;
       }
