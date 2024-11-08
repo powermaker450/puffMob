@@ -3,12 +3,13 @@ import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { ScrollViewBase, View } from "react-native";
+import { View } from "react-native";
 import { 
   ActivityIndicator,
   Appbar,
   Text,
   Tooltip,
+  configureFonts,
   useTheme
 } from "react-native-paper";
 import { ScrollView } from "react-native";
@@ -17,6 +18,9 @@ export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
   const control = new Panel(settings);
   const theme = useTheme();
+  const monospace = {
+    fontFamily: "'NotoSansMono_400Regular'"
+  };
 
   const { id } = useLocalSearchParams();
   const [serverName, setServerName] = useState("");
@@ -104,7 +108,11 @@ export default function ServerScreen() {
             ref={scrollViewRef}
           >
             <ScrollView horizontal>
-              <Text selectable style={{ fontFamily: "monospace, monospace", fontSize: 10 }}>{logs}</Text>
+              <Text
+                selectable
+                style={{ fontSize: 12 }}
+                theme={{fonts: configureFonts({config: monospace})}}
+              >{logs}</Text>
             </ScrollView>
           </ScrollView>
         </View>

@@ -218,7 +218,12 @@ export default class Panel {
               headers: await this.defaultHeaders()
             });
 
-            return await res.json().then((json: PufferpanelServerLogs) => json.logs);
+            const serverLogs = await res.json()
+              .then((json: PufferpanelServerLogs) => json.logs)
+              .catch(() => "");
+
+            // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
+            return serverLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
           }
         }
 
@@ -262,9 +267,12 @@ export default class Panel {
             headers: await this.defaultHeaders()
           });
 
-          return await res.json()
+          const serverLogs = await res.json()
             .then((json: PufferpanelServerLogs) => json.logs)
             .catch(() => "");
+
+          // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
+          return serverLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
         }
 
         return data;
