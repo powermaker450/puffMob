@@ -2,7 +2,7 @@ import CustomView from "@/components/CustomView";
 import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ScrollViewBase, View } from "react-native";
 import { 
   ActivityIndicator,
@@ -77,6 +77,8 @@ export default function ServerScreen() {
     </Tooltip>
   );
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
   return (
     <>
       <Appbar.Header>
@@ -96,9 +98,10 @@ export default function ServerScreen() {
           width: "85%",
           height: "75%",
           borderRadius: 20
-        }}>
-          <ScrollView>
-            <Text style={{fontFamily: "monospace, monospace"}}>{logs}</Text>
+        }}> 
+          <ScrollView
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}>
+            <Text selectable style={{fontFamily: "monospace, monospace"}}>{logs}</Text>
           </ScrollView>
         </View>
       </CustomView>
