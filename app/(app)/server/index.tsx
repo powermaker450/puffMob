@@ -119,7 +119,7 @@ export default function home() {
             <Button onPress={() => {
               storage.delete("cachedToken");
               storage.delete("cachedServerList");
-              router.back();
+              router.replace("/");
               setLogoutSplash(false);
             }}>
               <Text style={{ color: theme.colors.tertiary, fontWeight: "bold" }}>Log out</Text>
