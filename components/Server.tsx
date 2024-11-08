@@ -2,7 +2,8 @@ import { ModelsNodeView } from "@/util/models";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { useState } from "react";
 import { useColorScheme } from "react-native";
-import { List, Tooltip } from "react-native-paper";
+import { List, Tooltip, useTheme } from "react-native-paper";
+import { Marquee } from "@animatereactnative/marquee";
 
 interface ServerProps {
   name: string;
@@ -14,16 +15,10 @@ interface ServerProps {
 
 export default function Server({ name, ip, port, node, running }: ServerProps) {
   const [waiting, setWaiting] = useState(true);
-  const { theme } = useMaterial3Theme();
+  const theme = useTheme();
   const colorScheme = useColorScheme();
 
-  const chooseColor = () => {
-    if (running) {
-      return colorScheme === "dark" ? theme.dark.primary : theme.light.primary;
-    } else {
-      return colorScheme === "dark" ? theme.dark.surfaceDisabled : theme.light.surfaceDisabled;
-    }
-  }
+  const chooseColor = () => running ? theme.colors.primary : theme.colors.surfaceDisabled;
 
   const getDescription = () => {
     if (!node) {

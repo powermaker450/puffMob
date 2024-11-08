@@ -4,29 +4,13 @@ import Server from "@/components/Server";
 import Panel, { PanelParams } from "@/util/Panel";
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
-import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, useColorScheme } from "react-native";
-import { ActivityIndicator, Button, Divider, Text } from "react-native-paper";
+import { View } from "react-native";
+import { ActivityIndicator, Button, Text, useTheme } from "react-native-paper";
 
 export default function home() {
-  const getServerList = () => {
-    let serverListSkeleton: object[] = [];
-    for (let i = 0; i < 5; i++) {
-      serverListSkeleton.push({
-        name: "...",
-        ip: "0.0.0.0",
-        port: 0
-      });
-    }
-
-    return storage.getString("cachedServerList")
-      ? JSON.parse(storage.getString("cachedServerList")!)
-      : serverListSkeleton;
-  }
-
-  const { theme } = useMaterial3Theme();
+  const theme = useTheme();
   const buttonMargin = { marginTop: 20, marginBottom: 20, marginLeft: 5, marginRight: 5 };
 
   let settings: PanelParams = storage.getString("settings")
@@ -93,7 +77,7 @@ export default function home() {
       </Text>
 
       <View style={{
-        backgroundColor: useColorScheme() === "dark" ? theme.dark.surfaceVariant : theme.light.surfaceVariant,
+        backgroundColor: theme.colors.surfaceVariant,
         paddingLeft: 20,
         paddingRight: 20,
         paddingTop: 10,

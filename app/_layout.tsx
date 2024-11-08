@@ -6,7 +6,7 @@ import { useColorScheme } from "react-native";
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  const { theme } = useMaterial3Theme();
+  const { theme } = useMaterial3Theme({ fallbackSourceColor: "#07a7e3" });
   const getColor = () =>
     colorScheme === "dark" ? theme.dark.background : theme.light.background;
 

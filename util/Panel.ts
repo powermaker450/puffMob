@@ -1,5 +1,5 @@
 import {
-    ModelServerStatusResponse,
+  ModelServerStatusResponse,
   ModelsChangeUserSetting,
   ModelsClient,
   ModelsCreatedClient,
@@ -8,7 +8,6 @@ import {
   ModelsNodeView,
   ModelsPermissionView,
   ModelsServerSearchResponse,
-  ModelsServerView,
   ModelsTemplate,
   ModelsUserSearchResponse,
   ModelsUserSettingView,
@@ -54,8 +53,7 @@ export default class Panel {
 
       return await res.json().then((packet: AuthPacket) => packet.access_token);
     } catch (err) {
-      console.warn("An unexpected error occured:", err);
-      throw err;
+      throw "An unexpected error occured:" + err;
     }
   }
 
