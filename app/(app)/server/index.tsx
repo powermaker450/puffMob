@@ -1,5 +1,4 @@
 import AccountPage from "@/components/AccountPage";
-import ButtonContainer from "@/components/ButtonContainer";
 import CustomView from "@/components/CustomView";
 import Server from "@/components/Server";
 import Panel, { PanelParams } from "@/util/Panel";
@@ -7,13 +6,11 @@ import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
 import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import {
   ActivityIndicator,
   BottomNavigation,
   Button,
-  Dialog,
-  Portal,
   Text,
   useTheme
 } from "react-native-paper";
@@ -88,21 +85,23 @@ export default function home() {
         paddingRight: 20,
         paddingTop: 10,
         paddingBottom: 10,
+        maxHeight: "85%",
         width: "85%",
         borderRadius: 20
       }}>
-
-        {serverCache.length === 0 && loading ? loadingIcon : serverList.map((server, index) => {
-          return <Server
-            name={server.name}
-            id={server.id}
-            ip={server.ip}
-            port={server.port}
-            key={index}
-            node={server.node}
-            running={server.running}
-          />
-        })}
+        <ScrollView>
+          {serverCache.length === 0 && loading ? loadingIcon : serverList.map((server, index) => {
+            return <Server
+              name={server.name}
+              id={server.id}
+              ip={server.ip}
+              port={server.port}
+              key={index}
+              node={server.node}
+              running={server.running}
+            />
+          })}
+        </ScrollView>
       </View>
 
     </>

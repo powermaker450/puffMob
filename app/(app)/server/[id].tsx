@@ -3,7 +3,6 @@ import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { SectionListComponent, View } from "react-native";
 import { 
   ActivityIndicator,
   Appbar,
@@ -13,7 +12,7 @@ import {
   TextInput,
   configureFonts,
   useTheme,
-  IconButton
+  Surface
 } from "react-native-paper";
 import { ScrollView } from "react-native";
 
@@ -198,16 +197,19 @@ export default function ServerScreen() {
       </Appbar.Header>
 
       <CustomView>
-        <View style={{
-          backgroundColor: theme.colors.surfaceVariant,
-          paddingTop: 10,
-          paddingBottom: 10,
-          paddingLeft: 20,
-          paddingRight: 20,
-          width: "85%",
-          height: "75%",
-          borderRadius: 20
-        }}> 
+        <Surface
+          style={{
+            backgroundColor: theme.colors.surfaceVariant,
+            paddingTop: 10,
+            paddingBottom: 10,
+            paddingLeft: 20,
+            paddingRight: 20,
+            width: "85%",
+            height: "75%",
+            borderRadius: 20
+          }}
+          elevation={2}
+        > 
           <ScrollView
             style={{marginBottom: 5}}
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
@@ -230,7 +232,7 @@ export default function ServerScreen() {
             onChangeText={newText => setCommand(newText)}
             right={sendButton}
           />
-        </View>
+        </Surface>
       </CustomView>
     </>
   );
