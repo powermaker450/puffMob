@@ -39,7 +39,6 @@ export default function ServerScreen() {
   useEffect(() => {
     control.get.server(id as string)
       .then(({ server }) => {
-        setRunning(server.running);
         setServerName(server.name);
       });
 
@@ -109,7 +108,6 @@ export default function ServerScreen() {
       .then(({ server }) => server.stop())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
-        setRunning(false);
         setLoading(false);
       });
   }
@@ -120,7 +118,6 @@ export default function ServerScreen() {
       .then(({ server }) => server.kill())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
-        setRunning(false);
         setLoading(false);
       })
   }
