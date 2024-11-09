@@ -7,6 +7,7 @@ import { View } from "react-native";
 import { 
   ActivityIndicator,
   Appbar,
+  Icon,
   Text,
   Tooltip,
   configureFonts,
@@ -87,7 +88,8 @@ export default function ServerScreen() {
     <>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={serverName} />
+        <Icon source="circle" size={12} color={running ? theme.colors.primary : theme.colors.surfaceDisabled} />
+        <Appbar.Content style={{marginLeft: 10}} title={serverName} />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
       </Appbar.Header>
