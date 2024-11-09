@@ -86,7 +86,7 @@ export interface ModelsPermissionView {
 }
 
 export interface ModelsServerCreation {
-  data: PufferpanelVariable;
+  data: { [key: string]: PufferpanelVariable };
   display: string;
   environment: object;
   id: string;
@@ -113,7 +113,7 @@ export interface ModelsServerUserView {
 }
 
 export interface ModelsServerView {
-  data: object;
+  data: { [key: string]: PufferpanelVariable };
   id: string;
   ip: string;
   name: string;
@@ -134,17 +134,22 @@ export interface ModelsSettingResponse {
   value: object;
 }
 
+export interface ModelsSupportedEnv {
+  type: string;
+  image?: string;
+}
+
 export interface ModelsTemplate {
-  data: PufferpanelVariable;
+  data: { [key: string]: PufferpanelVariable };
   display: string;
-  environment: object;
+  environment: ModelsSupportedEnv;
   id: string;
   install: object[];
   name: string;
   readme: string;
   requirements: PufferpanelRequirements;
   run: PufferpanelExecution;
-  supportedEnvironments: object[];
+  supportedEnvironments: ModelsSupportedEnv[];
   tasks: PufferpanelTask;
   type: string;
   uninstall: object[];
@@ -172,11 +177,11 @@ export interface ModelsUserSettingView {
 }
 
 export interface ModelsUserView {
-  email: string;
-  id: number;
+  email?: string;
+  id?: number;
   newPassword?: string;
   password?: string;
-  username: string;
+  username?: string;
 }
 
 export interface PufferpanelDaemonRunning {
