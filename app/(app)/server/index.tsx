@@ -11,7 +11,9 @@ import {
   ActivityIndicator,
   BottomNavigation,
   Button,
+  FAB,
   Text,
+  Tooltip,
   useTheme
 } from "react-native-paper";
 
@@ -102,8 +104,14 @@ export default function home() {
             />
           })}
         </ScrollView>
+
       </View>
 
+      <FAB
+        icon="plus"
+        disabled={true}
+        style={{ position: "absolute", bottom: 25, right: 25 }}
+      />
     </>
   );
 
