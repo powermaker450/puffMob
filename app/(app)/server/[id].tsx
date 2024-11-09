@@ -200,14 +200,16 @@ export default function ServerScreen() {
       <CustomView>
         <View style={{
           backgroundColor: theme.colors.surfaceVariant,
+          paddingTop: 10,
+          paddingBottom: 10,
           paddingLeft: 20,
           paddingRight: 20,
-          paddingBottom: 10,
           width: "85%",
           height: "75%",
           borderRadius: 20
         }}> 
           <ScrollView
+            style={{marginBottom: 5}}
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
             ref={scrollViewRef}
           >
@@ -222,6 +224,7 @@ export default function ServerScreen() {
 
           <TextInput
             label={running ? "Enter command..." : "Server offline"}
+            mode="outlined"
             value={command}
             disabled={!running}
             onChangeText={newText => setCommand(newText)}

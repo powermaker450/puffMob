@@ -15,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@animatereactnative/marquee": "^0.3.1",
     "@expo-google-fonts/noto-sans-mono": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
     "@pchmn/expo-material3-theme": "github:pchmn/expo-material3-theme",
