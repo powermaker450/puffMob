@@ -1,7 +1,7 @@
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { View, useColorScheme } from "react-native";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -24,9 +24,11 @@ export default function RootLayout() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <Stack screenOptions={options}>
-        <Stack.Screen name="index" />
-      </Stack>
+      <View style={{ flex: 1, backgroundColor: colorScheme === "dark" ? theme.dark.background : theme.light.background }}>
+        <Stack screenOptions={options}>
+          <Stack.Screen name="index" />
+        </Stack>
+      </View>
     </PaperProvider>
   );
 }
