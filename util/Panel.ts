@@ -195,6 +195,15 @@ export default class Panel {
         for (const server of data.servers) {
           server.running = await this.get.serverStatus(server.id).then(({ running }) => running);
           
+          server.kill = async (): Promise<boolean> => {
+            const res = await fetch(`${this.daemon}/server/${server.id}/kill`, {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders()
+            });
+
+            return res.status === 204;
+          }
+
           server.start = async (): Promise<boolean> => {
             const res = await fetch(`${this.daemon}/server/${server.id}/start`, {
               method: MethodOpts.post,
@@ -225,6 +234,15 @@ export default class Panel {
             // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
             return serverLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
           }
+
+          server.execute = async (command: string): Promise<boolean> => {
+            const res = await fetch(`${this.daemon}/server/${server.id}/console`, {
+              headers: await this.defaultHeaders(),
+              body: command
+            });
+            
+            return res.status === 204;
+          }
         }
 
         return data;
@@ -243,6 +261,15 @@ export default class Panel {
         const data = await this.handleResponse(res, this.get.server, id) as ModelsGetServerResponse;
 
         data.server.running = await this.get.serverStatus(id).then(({ running }) => running);
+
+        data.server.kill = async (): Promise<boolean> => {
+          const res = await fetch(`${this.daemon}/server/${data.server.id}/kill`, {
+            method: MethodOpts.post,
+            headers: await this.defaultHeaders()
+          });
+
+          return res.status === 204;
+        }
 
         data.server.start = async (): Promise<boolean> => {
           const res = await fetch(`${this.daemon}/server/${data.server.id}/start`, {
@@ -273,6 +300,16 @@ export default class Panel {
 
           // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
           return serverLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
+        }
+
+        data.server.execute = async (command: string): Promise<boolean> => {
+          const res = await fetch(`${this.daemon}/server/${data.server.id}/console`, {
+            method: MethodOpts.post,
+            headers: await this.defaultHeaders(),
+            body: command
+          });
+          
+          return res.status === 204;
         }
 
         return data;

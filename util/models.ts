@@ -124,7 +124,8 @@ export interface ModelsServerView {
   users: ModelsServerUserView[];
   running?: boolean;
   getConsole: () => Promise<string>;
-  execute: () => Promise<boolean>;
+  execute: (command: string) => Promise<boolean>;
+  kill: () => Promise<boolean>;
   start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
 }

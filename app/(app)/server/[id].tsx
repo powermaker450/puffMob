@@ -3,15 +3,17 @@ import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
+import { SectionListComponent, View } from "react-native";
 import { 
   ActivityIndicator,
   Appbar,
   Icon,
   Text,
   Tooltip,
+  TextInput,
   configureFonts,
-  useTheme
+  useTheme,
+  IconButton
 } from "react-native-paper";
 import { ScrollView } from "react-native";
 
@@ -48,7 +50,6 @@ export default function ServerScreen() {
       serverSocket.send(JSON.stringify({ type: "status" }));
 
       const interval = setInterval(() => {
-        serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
         serverSocket.send(JSON.stringify({ type: "status" }));
         console.log("Sent keepalive");
       }, 45_000);
@@ -63,11 +64,7 @@ export default function ServerScreen() {
     serverSocket.addEventListener("message", e => {
       const packet = JSON.parse(e.data);
 
-      if (packet.type !== "console") {
-        return;
-      }
-
-      if (!packet.data) {
+      if (packet.type !== "console" || !packet.data) {
         return;
       }
 
@@ -93,6 +90,7 @@ export default function ServerScreen() {
 
   const [running, setRunning] = useState<boolean | undefined>(false);
   const [loading, setLoading] = useState(false);
+  const [command, setCommand] = useState("");
   const [logs, setLogs] = useState("");
 
   const handleStart = () => {
@@ -117,6 +115,33 @@ export default function ServerScreen() {
       });
   }
 
+  const handleKill = () => {
+    setLoading(true);
+    control.get.server(id as string)
+      .then(({ server }) => server.kill())
+      .catch(err => console.warn("An unexpected error occured:", err))
+      .finally(() => {
+        setRunning(false);
+        setLoading(false);
+      })
+  }
+
+  const handleCommand = () => {
+    if (!command) {
+      return;
+    }
+
+    control.get.server(id as string)
+      .then(({ server }) => {
+        server.execute(command);
+        setCommand("");
+      })
+      .catch(err => {
+        console.warn("An unexpected error occured:", err);
+        setCommand("");
+      })
+  }
+
   const loadingIcon = (
     <ActivityIndicator animating={true} />
   );
@@ -137,8 +162,26 @@ export default function ServerScreen() {
       enterTouchDelay={300}
       leaveTouchDelay={150}
     >
-      <Appbar.Action icon="stop-circle-outline" onPress={handleStop} />
+      <Appbar.Action icon="stop" onPress={handleStop} />
     </Tooltip>
+  );
+
+  const killButton = (
+    <Tooltip
+      title="Kill"
+      enterTouchDelay={300}
+      leaveTouchDelay={150}
+    >
+      <Appbar.Action icon="skull-outline" onPress={handleKill} />
+    </Tooltip>
+  );
+
+  const sendButton = (
+    <TextInput.Icon
+      icon="send-outline"
+      onPress={handleCommand}
+      disabled={!running || !command.trim()}
+    />
   );
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -151,6 +194,7 @@ export default function ServerScreen() {
         <Appbar.Content style={{marginLeft: 10}} title={serverName} />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
+        {(!loading && running) && killButton}
       </Appbar.Header>
 
       <CustomView>
@@ -158,7 +202,6 @@ export default function ServerScreen() {
           backgroundColor: theme.colors.surfaceVariant,
           paddingLeft: 20,
           paddingRight: 20,
-          paddingTop: 10,
           paddingBottom: 10,
           width: "85%",
           height: "75%",
@@ -176,6 +219,14 @@ export default function ServerScreen() {
               >{logs}</Text>
             </ScrollView>
           </ScrollView>
+
+          <TextInput
+            label={running ? "Enter command..." : "Server offline"}
+            value={command}
+            disabled={!running}
+            onChangeText={newText => setCommand(newText)}
+            right={sendButton}
+          />
         </View>
       </CustomView>
     </>
