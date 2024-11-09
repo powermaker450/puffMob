@@ -45,6 +45,19 @@ export default function ServerScreen() {
     serverSocket.onopen = () => {
       console.log("Connected to server websocket");
       serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
+      serverSocket.send(JSON.stringify({ type: "status" }));
+
+      const interval = setInterval(() => {
+        serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
+        serverSocket.send(JSON.stringify({ type: "status" }));
+        console.log("Sent keepalive");
+      }, 45_000);
+
+      serverSocket.onclose = m => {
+        console.log("Socket closed:", m.code, m.reason);
+        clearInterval(interval);
+        console.log("Killed keepalive");
+      };
     }
 
     serverSocket.addEventListener("message", e => {
@@ -76,10 +89,6 @@ export default function ServerScreen() {
       setRunning(packet.data.running);
     })
 
-    serverSocket.onclose = m => {
-      console.log("Waving goodbye to the server...");
-      console.log(m.code, m.reason);
-    };
   }, []);
 
   const [running, setRunning] = useState<boolean | undefined>(false);
