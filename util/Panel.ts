@@ -441,6 +441,20 @@ export default class Panel {
       // }
     }
   }
+
+  public getSocket(id: string) {
+    const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";
+    const address = this.daemon.replace("https://", "").replace("http://", "");
+
+    // Sending Authorization through the websocket is possible, but tsc won't like it
+    // https://stackoverflow.com/a/69366089
+    // @ts-ignore
+    return new WebSocket(`${protocol}${address}/socket/${id}`, null, {
+      headers: {
+        ["Authorization"]: `Bearer ${Panel.cachedToken}`
+      }
+    });
+  }
 }
 
 export interface ServerSearchParams {

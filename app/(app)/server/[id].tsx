@@ -1,8 +1,8 @@
 import CustomView from "@/components/CustomView";
 import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
-import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { 
   ActivityIndicator,
@@ -24,13 +24,63 @@ export default function ServerScreen() {
   };
 
   const { id } = useLocalSearchParams();
+  const navigation = useNavigation();
   const [serverName, setServerName] = useState("");
-  control.get.server(id as string)
-    .then(({ server }) => {
-      setRunning(server.running);
-      setServerName(server.name);
-      server.getConsole().then(logs => setLogs(logs));
+
+  const serverSocket = control.getSocket(id as string);
+
+  useEffect(() => {
+    navigation.addListener("beforeRemove", () => {
+      serverSocket.close();
+    })
+  }, [navigation]);
+
+  useEffect(() => {
+    control.get.server(id as string)
+      .then(({ server }) => {
+        setRunning(server.running);
+        setServerName(server.name);
+      });
+
+    serverSocket.onopen = () => {
+      console.log("Connected to server websocket");
+      serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
+    }
+
+    serverSocket.addEventListener("message", e => {
+      const packet = JSON.parse(e.data);
+
+      if (packet.type !== "console") {
+        return;
+      }
+
+      if (!packet.data) {
+        return;
+      }
+
+      let newLogs = "";
+      for (const line of Object.values(packet.data.logs)) {
+        newLogs += line;
+      }
+
+      setLogs((logs) => logs + newLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""))
     });
+
+    serverSocket.addEventListener("message", e => {
+      const packet = JSON.parse(e.data);
+
+      if (packet.type !== "status") {
+        return;
+      }
+
+      setRunning(packet.data.running);
+    })
+
+    serverSocket.onclose = m => {
+      console.log("Waving goodbye to the server...");
+      console.log(m.code, m.reason);
+    };
+  }, []);
 
   const [running, setRunning] = useState<boolean | undefined>(false);
   const [loading, setLoading] = useState(false);
