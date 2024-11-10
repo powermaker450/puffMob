@@ -5,7 +5,7 @@ import Panel, { PanelParams } from "@/util/Panel";
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
 import { router, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import {
   ActivityIndicator,
@@ -32,7 +32,7 @@ export default function home() {
 
   let panel: Panel;
   if (settings) {
-    panel = new Panel({ ...settings });
+    panel = new Panel(settings);
   }
 
   const navigation = useNavigation();
@@ -53,17 +53,18 @@ export default function home() {
     <>
       <Text style={{ maxWidth: "85%", margin: 10 }} variant="bodyLarge">
         An error occured. Please check that your endpoint and credentials are
-        correct.
+        correct and that the server is online.
       </Text>
 
       <Button
-        mode="contained-tonal"
+        mode="contained"
         onPress={() => {
+          storage.delete("cachedToken");
+          storage.delete("cachedServerList");
           router.replace("/");
-          setError(false);
         }}
       >
-        Back
+        Logout
       </Button>
     </>
   );
@@ -123,17 +124,10 @@ export default function home() {
 
   const NavigationBar = () => {
     const [index, setIndex] = useState(0);
+
     const [routes] = useState([
-      {
-        key: "servers",
-        title: "Servers",
-        focusedIcon: "server"
-      },
-      {
-        key: "settings",
-        title: "Settings",
-        focusedIcon: "cog"
-      }
+      { key: "servers", title: "Servers", focusedIcon: "server" },
+      { key: "settings", title: "Settings", focusedIcon: "cog" }
     ]);
 
     const renderScene = BottomNavigation.SceneMap({
@@ -150,5 +144,5 @@ export default function home() {
     );
   };
 
-  return <NavigationBar />;
+  return error ? <></> : <NavigationBar />;
 }

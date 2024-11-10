@@ -17,10 +17,10 @@ export default function Index() {
   let settings: PanelParams = storage.getString("settings")
     ? JSON.parse(storage.getString("settings")!)
     : {
-        serverUrl: "",
-        clientId: "",
-        clientSecret: ""
-      };
+      serverUrl: "",
+      email: "",
+      password: ""
+    };
   const [cachedToken, setStateCachedToken] = useState(
     storage.getString("cachedToken")
   );
@@ -39,8 +39,8 @@ export default function Index() {
   const [error, setError] = useState(false);
 
   const [serverUrl, setServerUrl] = useState(settings.serverUrl);
-  const [clientId, setClientId] = useState(settings.clientId);
-  const [clientSecret, setClientSecret] = useState(settings.clientSecret);
+  const [email, setEmail] = useState(settings.email);
+  const [password, setPassword] = useState(settings.password);
 
   useEffect(() => {
     if (!cachedToken) {
@@ -52,7 +52,7 @@ export default function Index() {
       .self()
       .then(() => {
         setLoading(false);
-        router.replace("/server");
+        router.replace("/home");
       })
       .catch(() => {
         setError(true);
@@ -114,19 +114,19 @@ export default function Index() {
       <TextInput
         mode="outlined"
         style={textInputStyle}
-        label="Client ID"
-        value={clientId}
-        onChangeText={newText => setClientId(newText)}
+        label="Email"
+        value={email}
+        onChangeText={newText => setEmail(newText)}
       />
 
       <TextInput
         mode="outlined"
         style={textInputStyle}
-        label="Token"
-        value={clientSecret}
+        label="Password"
+        value={password}
         secureTextEntry
         textContentType="password"
-        onChangeText={newText => setClientSecret(newText)}
+        onChangeText={newText => setPassword(newText)}
       />
 
       <ButtonContainer>
@@ -137,9 +137,9 @@ export default function Index() {
             setLoading(true);
 
             const params: PanelParams = {
-              serverUrl: serverUrl,
-              clientId: clientId,
-              clientSecret: clientSecret
+              serverUrl,
+              email,
+              password
             };
             setSettings(params);
 
@@ -155,8 +155,8 @@ export default function Index() {
               serverUrl.startsWith("http://") ||
               serverUrl.startsWith("https://")
             ) ||
-            !clientId ||
-            !clientSecret
+            !email.match(/[a-zA-Z0-9].*@[a-zA-Z0-9].*\.[a-zA-Z0-9]/) ||
+            !password
           }
         >
           Login

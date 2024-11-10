@@ -19,8 +19,9 @@ import { storage } from "./storage";
 
 export default class Panel {
   private readonly serverUrl: string;
-  private readonly clientId: string;
-  private readonly clientSecret: string;
+  private readonly email: string;
+  private readonly password: string;
+
   private readonly api: string;
   private readonly daemon: string;
 
@@ -30,10 +31,10 @@ export default class Panel {
     Panel.cachedToken = storage.getString("cachedToken");
   };
 
-  constructor({ serverUrl, clientId, clientSecret }: PanelParams) {
+  constructor({ serverUrl, email, password }: PanelParams) {
     this.serverUrl = serverUrl;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
+    this.email = email;
+    this.password = password;
 
     this.api = this.serverUrl + "/api";
     this.daemon = this.serverUrl + "/proxy/daemon";
@@ -41,24 +42,24 @@ export default class Panel {
 
   public static async getToken({
     serverUrl,
-    clientId,
-    clientSecret
+    email,
+    password
   }: PanelParams): Promise<string> {
     try {
-      const res = await fetch(`${serverUrl}/oauth2/token`, {
+      const res = await fetch(`${serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded"
+          "Accept": "application/json",
+          "Content-Type": "application/json"
         },
-        body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+        body: JSON.stringify({ email, password })
       });
 
       if (!res.ok) {
         throw await res.text().catch(() => "failed");
       }
 
-      return await res.json().then((packet: AuthPacket) => packet.access_token);
+      return await res.json().then((packet: AuthPacket) => packet.session);
     } catch (err) {
       throw "An unexpected error occured:" + err;
     }
@@ -66,13 +67,13 @@ export default class Panel {
 
   public async getAuth(): Promise<AuthPacket> {
     try {
-      const res = await fetch(`${this.serverUrl}/oauth2/token`, {
+      const res = await fetch(`${this.serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded"
+          "Accept": "application/json",
+          "Content-Type": "application/json"
         },
-        body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}`
+        body: JSON.stringify({ email: this.email, password: this.password })
       });
 
       if (!res.ok) {
@@ -80,7 +81,7 @@ export default class Panel {
       }
 
       return res.json().then((json: AuthPacket) => {
-        Panel.setCachedToken(json.access_token);
+        Panel.setCachedToken(json.session);
         return json;
       });
     } catch (err) {
@@ -92,7 +93,7 @@ export default class Panel {
   private async authorize(): Promise<string> {
     return (
       Panel.cachedToken ||
-      (await this.getAuth().then(packet => packet.access_token))
+      (await this.getAuth().then(packet => packet.session))
     );
   }
 
@@ -628,19 +629,19 @@ export interface Ouauth2CreationParams {
 
 export interface PanelParams {
   serverUrl: string;
-  clientId: string;
-  clientSecret: string;
+  email: string;
+  password: string;
 }
 
 export interface AuthError {
   error: string;
 }
 
+export type AuthScope = "servers.admin" | "servers.create" | "nodes.view" | "nodes.deploy" | "nodes.edit" | "templates.view" | "users.view" | "users.edit" | "panel.settings" | "servers.view";
+
 export interface AuthPacket {
-  access_token: string;
-  expires_in: number;
-  scope: "oauth2.auth";
-  token_type: "Bearer";
+  session: string;
+  scopes: AuthScope[];
 }
 
 export enum MethodOpts {
