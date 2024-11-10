@@ -49,7 +49,7 @@ export default class Panel {
       const res = await fetch(`${serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ email, password })
@@ -70,7 +70,7 @@ export default class Panel {
       const res = await fetch(`${this.serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ email: this.email, password: this.password })
@@ -92,8 +92,7 @@ export default class Panel {
 
   private async authorize(): Promise<string> {
     return (
-      Panel.cachedToken ||
-      (await this.getAuth().then(packet => packet.session))
+      Panel.cachedToken || (await this.getAuth().then(packet => packet.session))
     );
   }
 
@@ -637,7 +636,17 @@ export interface AuthError {
   error: string;
 }
 
-export type AuthScope = "servers.admin" | "servers.create" | "nodes.view" | "nodes.deploy" | "nodes.edit" | "templates.view" | "users.view" | "users.edit" | "panel.settings" | "servers.view";
+export type AuthScope =
+  | "servers.admin"
+  | "servers.create"
+  | "nodes.view"
+  | "nodes.deploy"
+  | "nodes.edit"
+  | "templates.view"
+  | "users.view"
+  | "users.edit"
+  | "panel.settings"
+  | "servers.view";
 
 export interface AuthPacket {
   session: string;

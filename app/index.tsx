@@ -17,10 +17,10 @@ export default function Index() {
   let settings: PanelParams = storage.getString("settings")
     ? JSON.parse(storage.getString("settings")!)
     : {
-      serverUrl: "",
-      email: "",
-      password: ""
-    };
+        serverUrl: "",
+        email: "",
+        password: ""
+      };
   const [cachedToken, setStateCachedToken] = useState(
     storage.getString("cachedToken")
   );

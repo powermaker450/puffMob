@@ -1,22 +1,20 @@
-import AccountPage from "@/components/AccountPage";
-import CustomView from "@/components/CustomView";
-import Server from "@/components/Server";
 import Panel, { PanelParams } from "@/util/Panel";
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
-import { router, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import {
   ActivityIndicator,
-  BottomNavigation,
   Button,
   FAB,
   Text,
   useTheme
 } from "react-native-paper";
+import Server from "./Server";
+import CustomView from "./CustomView";
 
-export default function home() {
+export default function ServerPage() {
   const theme = useTheme();
 
   let settings: PanelParams = storage.getString("settings")
@@ -28,7 +26,7 @@ export default function home() {
     ? JSON.parse(storage.getString("cachedServerList")!)
     : [];
   const [serverList, setServerList] = useState<ModelsServerView[]>(serverCache);
-  const [loading, setLoading] = useState(true);
+  const [serversLoading, setServersLoading] = useState(true);
 
   let panel: Panel;
   if (settings) {
@@ -43,7 +41,7 @@ export default function home() {
         .then(({ servers }) => {
           storage.set("cachedServerList", JSON.stringify(servers));
           setServerList(servers);
-          setLoading(false);
+          setServersLoading(false);
         })
         .catch(() => setError(true));
     });
@@ -70,7 +68,7 @@ export default function home() {
 
   const loadingIcon = (
     <ActivityIndicator
-      animating={loading}
+      animating={true}
       size="large"
       style={{ paddingTop: 30, paddingBottom: 30 }}
     />
@@ -91,7 +89,7 @@ export default function home() {
         }}
       >
         <ScrollView>
-          {serverCache.length === 0 && loading
+          {serverCache.length === 0 && serversLoading
             ? loadingIcon
             : serverList.map((server, index) => {
                 return (
@@ -117,38 +115,5 @@ export default function home() {
     </>
   );
 
-  const serverPage = () => (
-    <CustomView>{error ? errorScreen : normalView}</CustomView>
-  );
-
-  const NavigationBar = () => {
-    const [index, setIndex] = useState(0);
-    const [routes] = useState([
-      {
-        key: "servers",
-        title: "Servers",
-        focusedIcon: "server"
-      },
-      {
-        key: "settings",
-        title: "Settings",
-        focusedIcon: "cog"
-      }
-    ]);
-
-    const renderScene = BottomNavigation.SceneMap({
-      servers: serverPage,
-      settings: AccountPage
-    });
-
-    return (
-      <BottomNavigation
-        navigationState={{ index, routes }}
-        onIndexChange={setIndex}
-        renderScene={renderScene}
-      />
-    );
-  };
-
-  return <NavigationBar />;
+  return <CustomView>{error ? errorScreen : normalView}</CustomView>;
 }
