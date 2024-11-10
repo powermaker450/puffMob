@@ -48,7 +48,7 @@ export default function Index() {
       return;
     }
 
-    new Panel({ ...settings }).get
+    new Panel(settings).get
       .self()
       .then(() => {
         setLoading(false);
