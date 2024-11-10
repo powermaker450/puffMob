@@ -15,23 +15,25 @@ const textInputStyle: StyleProp<TextStyle> = {
 
 export default function Index() {
   let settings: PanelParams = storage.getString("settings")
-    ? (JSON.parse(storage.getString("settings")!))
-    : ({
+    ? JSON.parse(storage.getString("settings")!)
+    : {
         serverUrl: "",
         clientId: "",
         clientSecret: ""
-      });
-  const [cachedToken, setStateCachedToken] = useState(storage.getString("cachedToken"));
+      };
+  const [cachedToken, setStateCachedToken] = useState(
+    storage.getString("cachedToken")
+  );
 
   const setSettings = (params: PanelParams) => {
     storage.set("settings", JSON.stringify(params));
     settings = JSON.parse(storage.getString("settings")!);
-  }
+  };
 
   const setCachedToken = (token: string) => {
     storage.set("cachedToken", token);
     setStateCachedToken(storage.getString("cachedToken"));
-  }
+  };
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -39,14 +41,15 @@ export default function Index() {
   const [serverUrl, setServerUrl] = useState(settings.serverUrl);
   const [clientId, setClientId] = useState(settings.clientId);
   const [clientSecret, setClientSecret] = useState(settings.clientSecret);
-  
+
   useEffect(() => {
     if (!cachedToken) {
       setLoading(false);
       return;
     }
 
-    new Panel({...settings}).get.self()
+    new Panel({ ...settings }).get
+      .self()
       .then(() => {
         setLoading(false);
         router.replace("/server");
@@ -54,7 +57,7 @@ export default function Index() {
       .catch(() => {
         setError(true);
         setLoading(false);
-      })
+      });
   }, [cachedToken]);
 
   const loadingText = (
@@ -62,22 +65,20 @@ export default function Index() {
       <ActivityIndicator
         size="large"
         animating={loading}
-        style={{marginBottom: 20}}
+        style={{ marginBottom: 20 }}
       />
 
-      <Text
-        variant="bodyLarge"
-        style={{margin: 30}}
-      >
+      <Text variant="bodyLarge" style={{ margin: 30 }}>
         Logging in...
       </Text>
     </CustomView>
   );
-  
+
   const errorText = (
     <CustomView>
       <Text variant="bodyLarge" style={{ margin: 30 }}>
-        Something went wrong. Check that your server URL and credentials are correct.
+        Something went wrong. Check that your server URL and credentials are
+        correct.
       </Text>
 
       <Button
@@ -105,7 +106,9 @@ export default function Index() {
         label="Endpoint"
         value={serverUrl}
         placeholder="http://localhost:8080"
-        onChangeText={newText => {setServerUrl(newText)}}
+        onChangeText={newText => {
+          setServerUrl(newText);
+        }}
       />
 
       <TextInput
@@ -147,7 +150,14 @@ export default function Index() {
                 setLoading(false);
               });
           }}
-          disabled={!(serverUrl.startsWith("http://") || serverUrl.startsWith("https://")) || !clientId || !clientSecret}
+          disabled={
+            !(
+              serverUrl.startsWith("http://") ||
+              serverUrl.startsWith("https://")
+            ) ||
+            !clientId ||
+            !clientSecret
+          }
         >
           Login
         </Button>
@@ -155,9 +165,5 @@ export default function Index() {
     </CustomView>
   );
 
-  return (
-    <>
-      {error ? errorText : loading ? loadingText : loginText}
-    </>
-  );
+  return <>{error ? errorText : loading ? loadingText : loginText}</>;
 }

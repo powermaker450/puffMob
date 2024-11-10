@@ -24,7 +24,15 @@ export default function RootLayout() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <View style={{ flex: 1, backgroundColor: colorScheme === "dark" ? theme.dark.background : theme.light.background }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor:
+            colorScheme === "dark"
+              ? theme.dark.background
+              : theme.light.background
+        }}
+      >
         <Stack screenOptions={options}>
           <Stack.Screen name="index" />
         </Stack>

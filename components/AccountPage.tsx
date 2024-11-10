@@ -8,9 +8,14 @@ import { useState } from "react";
 export default function AccountPage() {
   const theme = useTheme();
 
-  const buttonMargin = { marginTop: 20, marginBottom: 20, marginLeft: 5, marginRight: 5 };
+  const buttonMargin = {
+    marginTop: 20,
+    marginBottom: 20,
+    marginLeft: 5,
+    marginRight: 5
+  };
   const [logoutSplash, setLogoutSplash] = useState(false);
-  
+
   return (
     <CustomView>
       <Portal>
@@ -26,13 +31,19 @@ export default function AccountPage() {
               <Text>Cancel</Text>
             </Button>
 
-            <Button onPress={() => {
-              storage.delete("cachedToken");
-              storage.delete("cachedServerList");
-              router.replace("/");
-              setLogoutSplash(false);
-            }}>
-              <Text style={{ color: theme.colors.tertiary, fontWeight: "bold" }}>Log out</Text>
+            <Button
+              onPress={() => {
+                storage.delete("cachedToken");
+                storage.delete("cachedServerList");
+                router.replace("/");
+                setLogoutSplash(false);
+              }}
+            >
+              <Text
+                style={{ color: theme.colors.tertiary, fontWeight: "bold" }}
+              >
+                Log out
+              </Text>
             </Button>
           </Dialog.Actions>
         </Dialog>
@@ -42,7 +53,7 @@ export default function AccountPage() {
         <Button
           mode="contained"
           onPress={() => setLogoutSplash(true)}
-          style={{...buttonMargin}}
+          style={{ ...buttonMargin }}
         >
           Logout
         </Button>

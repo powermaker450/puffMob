@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode } from "react";
 import { View } from "react-native";
 
 interface ButtonContainerProps {
@@ -17,5 +17,5 @@ export default function ButtonContainer({ children }: ButtonContainerProps) {
     >
       {children}
     </View>
-  )
+  );
 }

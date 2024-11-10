@@ -3,7 +3,7 @@ import Panel, { PanelParams } from "@/util/Panel";
 import { storage } from "@/util/storage";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { 
+import {
   ActivityIndicator,
   Appbar,
   Icon,
@@ -29,14 +29,13 @@ export default function ServerScreen() {
   useEffect(() => {
     navigation.addListener("beforeRemove", () => {
       serverSocket.close();
-    })
+    });
   }, [navigation]);
 
   useEffect(() => {
-    control.get.server(id as string)
-      .then(({ server }) => {
-        setServerName(server.name);
-      });
+    control.get.server(id as string).then(({ server }) => {
+      setServerName(server.name);
+    });
 
     serverSocket.onopen = () => {
       console.log("Connected to server websocket");
@@ -53,7 +52,7 @@ export default function ServerScreen() {
         clearInterval(interval);
         console.log("Killed keepalive");
       };
-    }
+    };
 
     serverSocket.addEventListener("message", e => {
       const packet = JSON.parse(e.data);
@@ -67,7 +66,14 @@ export default function ServerScreen() {
         newLogs += line;
       }
 
-      setLogs((logs) => logs + newLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""))
+      setLogs(
+        logs =>
+          logs +
+          newLogs.replace(
+            /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+            ""
+          )
+      );
     });
 
     serverSocket.addEventListener("message", e => {
@@ -78,8 +84,7 @@ export default function ServerScreen() {
       }
 
       setRunning(packet.data.running);
-    })
-
+    });
   }, []);
 
   const [running, setRunning] = useState<boolean | undefined>(false);
@@ -89,41 +94,45 @@ export default function ServerScreen() {
 
   const handleStart = () => {
     setLoading(true);
-    control.get.server(id as string)
+    control.get
+      .server(id as string)
       .then(({ server }) => server.start())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
         setRunning(true);
         setLoading(false);
       });
-  }
+  };
 
   const handleStop = () => {
     setLoading(true);
-    control.get.server(id as string)
+    control.get
+      .server(id as string)
       .then(({ server }) => server.stop())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
         setLoading(false);
       });
-  }
+  };
 
   const handleKill = () => {
     setLoading(true);
-    control.get.server(id as string)
+    control.get
+      .server(id as string)
       .then(({ server }) => server.kill())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
         setLoading(false);
-      })
-  }
+      });
+  };
 
   const handleCommand = () => {
     if (!command) {
       return;
     }
 
-    control.get.server(id as string)
+    control.get
+      .server(id as string)
       .then(({ server }) => {
         server.execute(command);
         setCommand("");
@@ -131,39 +140,25 @@ export default function ServerScreen() {
       .catch(err => {
         console.warn("An unexpected error occured:", err);
         setCommand("");
-      })
-  }
+      });
+  };
 
-  const loadingIcon = (
-    <ActivityIndicator animating={true} />
-  );
+  const loadingIcon = <ActivityIndicator animating={true} />;
 
   const startButton = (
-    <Tooltip
-      title="Start"
-      enterTouchDelay={300}
-      leaveTouchDelay={150}
-    >
+    <Tooltip title="Start" enterTouchDelay={300} leaveTouchDelay={150}>
       <Appbar.Action icon="play-outline" onPress={handleStart} />
     </Tooltip>
   );
 
   const stopButton = (
-    <Tooltip 
-      title="Stop"
-      enterTouchDelay={300}
-      leaveTouchDelay={150}
-    >
+    <Tooltip title="Stop" enterTouchDelay={300} leaveTouchDelay={150}>
       <Appbar.Action icon="stop" onPress={handleStop} />
     </Tooltip>
   );
 
   const killButton = (
-    <Tooltip
-      title="Kill"
-      enterTouchDelay={300}
-      leaveTouchDelay={150}
-    >
+    <Tooltip title="Kill" enterTouchDelay={300} leaveTouchDelay={150}>
       <Appbar.Action icon="skull-outline" onPress={handleKill} />
     </Tooltip>
   );
@@ -182,11 +177,15 @@ export default function ServerScreen() {
     <>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Icon source="circle" size={12} color={running ? theme.colors.primary : theme.colors.surfaceDisabled} />
-        <Appbar.Content style={{marginLeft: 10}} title={serverName} />
+        <Icon
+          source="circle"
+          size={12}
+          color={running ? theme.colors.primary : theme.colors.surfaceDisabled}
+        />
+        <Appbar.Content style={{ marginLeft: 10 }} title={serverName} />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
-        {(!loading && running) && killButton}
+        {!loading && running && killButton}
       </Appbar.Header>
 
       <CustomView>
@@ -202,9 +201,9 @@ export default function ServerScreen() {
             borderRadius: 20
           }}
           elevation={2}
-        > 
+        >
           <ScrollView
-            style={{marginBottom: 5}}
+            style={{ marginBottom: 5 }}
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
             ref={scrollViewRef}
           >
@@ -212,7 +211,9 @@ export default function ServerScreen() {
               <Text
                 selectable
                 style={{ fontSize: 11, fontFamily: "NotoSansMono_400Regular" }}
-              >{logs}</Text>
+              >
+                {logs}
+              </Text>
             </ScrollView>
           </ScrollView>
 

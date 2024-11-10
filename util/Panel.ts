@@ -10,7 +10,7 @@ import {
   ModelsTemplate,
   ModelsUserSearchResponse,
   ModelsUserSettingView,
-  ModelsUserView, 
+  ModelsUserView,
   PufferpanelServer,
   PufferpanelServerLogs,
   PufferpanelServerRunning
@@ -28,7 +28,7 @@ export default class Panel {
   private static setCachedToken = (token: string) => {
     storage.set("cachedToken", token);
     Panel.cachedToken = storage.getString("cachedToken");
-  }
+  };
 
   constructor({ serverUrl, clientId, clientSecret }: PanelParams) {
     this.serverUrl = serverUrl;
@@ -39,12 +39,16 @@ export default class Panel {
     this.daemon = this.serverUrl + "/proxy/daemon";
   }
 
-  public static async getToken({ serverUrl, clientId, clientSecret }: PanelParams): Promise<string> {
+  public static async getToken({
+    serverUrl,
+    clientId,
+    clientSecret
+  }: PanelParams): Promise<string> {
     try {
       const res = await fetch(`${serverUrl}/oauth2/token`, {
         method: MethodOpts.post,
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded"
         },
         body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
@@ -65,10 +69,10 @@ export default class Panel {
       const res = await fetch(`${this.serverUrl}/oauth2/token`, {
         method: MethodOpts.post,
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}` 
+        body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}`
       });
 
       if (!res.ok) {
@@ -86,19 +90,25 @@ export default class Panel {
   }
 
   private async authorize(): Promise<string> {
-    return Panel.cachedToken || await this.getAuth().then(packet => packet.access_token);
+    return (
+      Panel.cachedToken ||
+      (await this.getAuth().then(packet => packet.access_token))
+    );
   }
 
-  private async defaultHeaders(): Promise<{ Accept: string, Authorization: string }> {
+  private async defaultHeaders(): Promise<{
+    Accept: string;
+    Authorization: string;
+  }> {
     return {
       Accept: "application/json",
       Authorization: `Bearer ${await this.authorize()}`
-    }
+    };
   }
 
   private async handleResponse(
     res: Response,
-    req: Function, // TODO: Definitely find a better way to type this 
+    req: Function, // TODO: Definitely find a better way to type this
     ...args: string[] // :skull:
   ): Promise<unknown> {
     if (res.status === 401) {
@@ -121,10 +131,13 @@ export default class Panel {
     nodes: async (): Promise<ModelsNodeView[]> => {
       try {
         const res = await fetch(`${this.api}/nodes`, {
-          headers: await this.defaultHeaders(),
+          headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.nodes) as ModelsNodeView[];
+        return (await this.handleResponse(
+          res,
+          this.get.nodes
+        )) as ModelsNodeView[];
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -137,7 +150,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.node, id) as ModelsNodeView;
+        return (await this.handleResponse(
+          res,
+          this.get.node,
+          id
+        )) as ModelsNodeView;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -150,7 +167,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.nodeDeployment, id) as ModelsDeployment;
+        return (await this.handleResponse(
+          res,
+          this.get.nodeDeployment,
+          id
+        )) as ModelsDeployment;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -163,7 +184,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.self) as ModelsUserView;
+        return (await this.handleResponse(
+          res,
+          this.get.self
+        )) as ModelsUserView;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -176,7 +200,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.selfOauth2) as ModelsClient[];
+        return (await this.handleResponse(
+          res,
+          this.get.selfOauth2
+        )) as ModelsClient[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -184,73 +211,98 @@ export default class Panel {
     },
 
     // TODO: Implement optional search parameters
-    servers: async (/*{ username, node, name, limit, page }: ServerSearchParams*/): Promise<ModelsServerSearchResponse> => {
-      try {
-        const res = await fetch(`${this.api}/servers`, {
-          headers: await this.defaultHeaders()
-        });
+    servers:
+      async (/*{ username, node, name, limit, page }: ServerSearchParams*/): Promise<ModelsServerSearchResponse> => {
+        try {
+          const res = await fetch(`${this.api}/servers`, {
+            headers: await this.defaultHeaders()
+          });
 
-        const data = await this.handleResponse(res, this.get.servers) as ModelsServerSearchResponse;
+          const data = (await this.handleResponse(
+            res,
+            this.get.servers
+          )) as ModelsServerSearchResponse;
 
-        for (const server of data.servers) {
-          server.running = await this.get.serverStatus(server.id).then(({ running }) => running);
-          
-          server.kill = async (): Promise<boolean> => {
-            const res = await fetch(`${this.daemon}/server/${server.id}/kill`, {
-              method: MethodOpts.post,
-              headers: await this.defaultHeaders()
-            });
+          for (const server of data.servers) {
+            server.running = await this.get
+              .serverStatus(server.id)
+              .then(({ running }) => running);
 
-            return res.status === 204;
+            server.kill = async (): Promise<boolean> => {
+              const res = await fetch(
+                `${this.daemon}/server/${server.id}/kill`,
+                {
+                  method: MethodOpts.post,
+                  headers: await this.defaultHeaders()
+                }
+              );
+
+              return res.status === 204;
+            };
+
+            server.start = async (): Promise<boolean> => {
+              const res = await fetch(
+                `${this.daemon}/server/${server.id}/start`,
+                {
+                  method: MethodOpts.post,
+                  headers: await this.defaultHeaders()
+                }
+              );
+
+              return res.status === 202 || res.status === 204;
+            };
+
+            server.stop = async (): Promise<boolean> => {
+              const res = await fetch(
+                `${this.daemon}/server/${server.id}/start`,
+                {
+                  method: MethodOpts.post,
+                  headers: await this.defaultHeaders()
+                }
+              );
+
+              return res.status === 202 || res.status === 204;
+            };
+
+            server.getConsole = async (): Promise<string> => {
+              const res = await fetch(
+                `${this.daemon}/server/${server.id}/console`,
+                {
+                  headers: await this.defaultHeaders()
+                }
+              );
+
+              const serverLogs = await res
+                .json()
+                .then((json: PufferpanelServerLogs) => json.logs)
+                .catch(() => "");
+
+              // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
+              return serverLogs.replace(
+                /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+                ""
+              );
+            };
+
+            server.execute = async (command: string): Promise<boolean> => {
+              const res = await fetch(
+                `${this.daemon}/server/${server.id}/console`,
+                {
+                  headers: await this.defaultHeaders(),
+                  body: command
+                }
+              );
+
+              return res.status === 204;
+            };
           }
 
-          server.start = async (): Promise<boolean> => {
-            const res = await fetch(`${this.daemon}/server/${server.id}/start`, {
-              method: MethodOpts.post,
-              headers: await this.defaultHeaders()
-            });
-
-            return res.status === 202 || res.status === 204;
-          }
-
-          server.stop = async (): Promise<boolean> => {
-            const res = await fetch(`${this.daemon}/server/${server.id}/start`, {
-              method: MethodOpts.post,
-              headers: await this.defaultHeaders()
-            });
-
-            return res.status === 202 || res.status === 204;
-          }
-
-          server.getConsole = async (): Promise<string> => {
-            const res = await fetch(`${this.daemon}/server/${server.id}/console`, {
-              headers: await this.defaultHeaders()
-            });
-
-            const serverLogs = await res.json()
-              .then((json: PufferpanelServerLogs) => json.logs)
-              .catch(() => "");
-
-            // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-            return serverLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
-          }
-
-          server.execute = async (command: string): Promise<boolean> => {
-            const res = await fetch(`${this.daemon}/server/${server.id}/console`, {
-              headers: await this.defaultHeaders(),
-              body: command
-            });
-            
-            return res.status === 204;
-          }
+          return data;
+        } catch (err) {
+          console.warn("An unexpected error occured:", err);
+          throw err;
         }
-
-        return data;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
-    },
+      },
 
     server: async (id: string): Promise<ModelsGetServerResponse> => {
       try {
@@ -258,59 +310,84 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        const data = await this.handleResponse(res, this.get.server, id) as ModelsGetServerResponse;
+        const data = (await this.handleResponse(
+          res,
+          this.get.server,
+          id
+        )) as ModelsGetServerResponse;
 
-        data.server.running = await this.get.serverStatus(id).then(({ running }) => running);
+        data.server.running = await this.get
+          .serverStatus(id)
+          .then(({ running }) => running);
 
         data.server.kill = async (): Promise<boolean> => {
-          const res = await fetch(`${this.daemon}/server/${data.server.id}/kill`, {
-            method: MethodOpts.post,
-            headers: await this.defaultHeaders()
-          });
+          const res = await fetch(
+            `${this.daemon}/server/${data.server.id}/kill`,
+            {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders()
+            }
+          );
 
           return res.status === 204;
-        }
+        };
 
         data.server.start = async (): Promise<boolean> => {
-          const res = await fetch(`${this.daemon}/server/${data.server.id}/start`, {
-            method: MethodOpts.post,
-            headers: await this.defaultHeaders()
-          });
+          const res = await fetch(
+            `${this.daemon}/server/${data.server.id}/start`,
+            {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders()
+            }
+          );
 
           return res.status === 202 || res.status === 204;
-        }
+        };
 
         data.server.stop = async (): Promise<boolean> => {
-          const res = await fetch(`${this.daemon}/server/${data.server.id}/stop`, {
-            method: MethodOpts.post,
-            headers: await this.defaultHeaders()
-          });
+          const res = await fetch(
+            `${this.daemon}/server/${data.server.id}/stop`,
+            {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders()
+            }
+          );
 
           return res.status === 202 || res.status === 204;
-        }
+        };
 
         data.server.getConsole = async (): Promise<string> => {
-          const res = await fetch(`${this.daemon}/server/${data.server.id}/console`, {
-            headers: await this.defaultHeaders()
-          });
+          const res = await fetch(
+            `${this.daemon}/server/${data.server.id}/console`,
+            {
+              headers: await this.defaultHeaders()
+            }
+          );
 
-          const serverLogs = await res.json()
+          const serverLogs = await res
+            .json()
             .then((json: PufferpanelServerLogs) => json.logs)
             .catch(() => "");
 
           // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-          return serverLogs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
-        }
+          return serverLogs.replace(
+            /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+            ""
+          );
+        };
 
         data.server.execute = async (command: string): Promise<boolean> => {
-          const res = await fetch(`${this.daemon}/server/${data.server.id}/console`, {
-            method: MethodOpts.post,
-            headers: await this.defaultHeaders(),
-            body: command
-          });
-          
+          const res = await fetch(
+            `${this.daemon}/server/${data.server.id}/console`,
+            {
+              method: MethodOpts.post,
+              headers: await this.defaultHeaders(),
+              body: command
+            }
+          );
+
           return res.status === 204;
-        }
+        };
 
         return data;
       } catch (err) {
@@ -325,7 +402,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.serverOauth2, id) as ModelsClient[];
+        return (await this.handleResponse(
+          res,
+          this.get.serverOauth2,
+          id
+        )) as ModelsClient[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -338,7 +419,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.serverUsers, id) as ModelsPermissionView[];
+        return (await this.handleResponse(
+          res,
+          this.get.serverUsers,
+          id
+        )) as ModelsPermissionView[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -347,11 +432,18 @@ export default class Panel {
 
     serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
       try {
-        const res = await fetch(`${this.serverUrl}/proxy/daemon/server/${id}/status`, {
-          headers: await this.defaultHeaders()
-        });
+        const res = await fetch(
+          `${this.serverUrl}/proxy/daemon/server/${id}/status`,
+          {
+            headers: await this.defaultHeaders()
+          }
+        );
 
-        return await this.handleResponse(res, this.get.serverStatus, id) as PufferpanelServerRunning;
+        return (await this.handleResponse(
+          res,
+          this.get.serverStatus,
+          id
+        )) as PufferpanelServerRunning;
       } catch (err) {
         throw err;
       }
@@ -363,7 +455,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.setting, key) as ModelsChangeUserSetting;
+        return (await this.handleResponse(
+          res,
+          this.get.setting,
+          key
+        )) as ModelsChangeUserSetting;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -376,7 +472,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.templates) as ModelsTemplate;
+        return (await this.handleResponse(
+          res,
+          this.get.templates
+        )) as ModelsTemplate;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -389,7 +488,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.settings) as ModelsUserSettingView[];
+        return (await this.handleResponse(
+          res,
+          this.get.settings
+        )) as ModelsUserSettingView[];
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -404,7 +506,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.users) as ModelsUserSearchResponse;
+        return (await this.handleResponse(
+          res,
+          this.get.users
+        )) as ModelsUserSearchResponse;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -417,7 +522,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.user, id) as ModelsUserView;
+        return (await this.handleResponse(
+          res,
+          this.get.user,
+          id
+        )) as ModelsUserView;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -430,7 +539,11 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.get.userPerms, id) as ModelsPermissionView;
+        return (await this.handleResponse(
+          res,
+          this.get.userPerms,
+          id
+        )) as ModelsPermissionView;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -446,7 +559,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.create.node) as ModelsNodeView;
+        return (await this.handleResponse(
+          res,
+          this.create.node
+        )) as ModelsNodeView;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -460,7 +576,10 @@ export default class Panel {
           headers: await this.defaultHeaders()
         });
 
-        return await this.handleResponse(res, this.create.oauth2) as ModelsCreatedClient;
+        return (await this.handleResponse(
+          res,
+          this.create.oauth2
+        )) as ModelsCreatedClient;
       } catch (err) {
         console.warn("An unexpected error occured", err);
         throw err;
@@ -477,7 +596,7 @@ export default class Panel {
       //   throw err;
       // }
     }
-  }
+  };
 
   public getSocket(id: string) {
     const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";

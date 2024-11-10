@@ -1,4 +1,5 @@
 **/node_modules
+**/android
 .npmrc
 .prettierrc
 app.json
