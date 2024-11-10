@@ -10,7 +10,6 @@ import {
   Text,
   Tooltip,
   TextInput,
-  configureFonts,
   useTheme,
   Surface
 } from "react-native-paper";
@@ -20,9 +19,6 @@ export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
   const control = new Panel(settings);
   const theme = useTheme();
-  const monospace = {
-    fontFamily: "'NotoSansMono_400Regular'"
-  };
 
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
@@ -215,8 +211,7 @@ export default function ServerScreen() {
             <ScrollView horizontal>
               <Text
                 selectable
-                style={{ fontSize: 12 }}
-                theme={{fonts: configureFonts({config: monospace})}}
+                style={{ fontSize: 11, fontFamily: "NotoSansMono_400Regular" }}
               >{logs}</Text>
             </ScrollView>
           </ScrollView>
