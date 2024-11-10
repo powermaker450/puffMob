@@ -33,6 +33,7 @@ export default function AccountPage() {
 
             <Button
               onPress={() => {
+                storage.delete("settings");
                 storage.delete("cachedToken");
                 storage.delete("cachedServerList");
                 router.replace("/");

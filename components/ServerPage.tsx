@@ -1,7 +1,7 @@
 import Panel, { PanelParams } from "@/util/Panel";
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import {
@@ -26,14 +26,25 @@ export default function ServerPage() {
     ? JSON.parse(storage.getString("cachedServerList")!)
     : [];
   const [serverList, setServerList] = useState<ModelsServerView[]>(serverCache);
-  const [serversLoading, setServersLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   let panel: Panel;
   if (settings) {
-    panel = new Panel({ ...settings });
+    panel = new Panel(settings);
   }
 
   const navigation = useNavigation();
+  useEffect(() => {
+    panel.get
+      .servers()
+      .then(({ servers }) => {
+        storage.set("cachedServerList", JSON.stringify(servers));
+        setServerList(servers);
+        setLoading(false);
+      })
+      .catch(() => setError(true));
+  }, [])
+
   useEffect(() => {
     navigation.addListener("focus", () => {
       panel.get
@@ -41,7 +52,7 @@ export default function ServerPage() {
         .then(({ servers }) => {
           storage.set("cachedServerList", JSON.stringify(servers));
           setServerList(servers);
-          setServersLoading(false);
+          setLoading(false);
         })
         .catch(() => setError(true));
     });
@@ -89,7 +100,7 @@ export default function ServerPage() {
         }}
       >
         <ScrollView>
-          {serverCache.length === 0 && serversLoading
+          {serverCache.length === 0 && loading
             ? loadingIcon
             : serverList.map((server, index) => {
                 return (

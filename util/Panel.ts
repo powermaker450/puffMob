@@ -31,6 +31,12 @@ export default class Panel {
     Panel.cachedToken = storage.getString("cachedToken");
   };
 
+  private static scopes = storage.getString("scopes") ? JSON.parse(storage.getString("scopes")!) : [];
+  private static setScopes = (scopes: AuthScope[]) => {
+    storage.set("scopes", JSON.stringify(scopes));
+    Panel.scopes = JSON.parse(storage.getString("scopes")!);
+  }
+
   constructor({ serverUrl, email, password }: PanelParams) {
     this.serverUrl = serverUrl;
     this.email = email;
@@ -49,8 +55,9 @@ export default class Panel {
       const res = await fetch(`${serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "User-Agent": "puffMob/0.0.1"
         },
         body: JSON.stringify({ email, password })
       });
@@ -70,8 +77,9 @@ export default class Panel {
       const res = await fetch(`${this.serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "User-Agent": "puffMob/0.0.1"
         },
         body: JSON.stringify({ email: this.email, password: this.password })
       });
@@ -82,12 +90,18 @@ export default class Panel {
 
       return res.json().then((json: AuthPacket) => {
         Panel.setCachedToken(json.session);
+        Panel.setScopes(json.scopes || []);
         return json;
       });
     } catch (err) {
       console.warn("An unexpected error occured:", err);
       throw err;
     }
+  }
+
+  public async getScopes(): Promise<AuthScope[]> {
+    // It's possible for the user to have no scopes if the server admin is really mean
+    return Panel.scopes || await this.getAuth().then(({ scopes }) => scopes || []);
   }
 
   private async authorize(): Promise<string> {
@@ -97,12 +111,14 @@ export default class Panel {
   }
 
   private async defaultHeaders(): Promise<{
-    Accept: string;
-    Authorization: string;
+    "Accept": string;
+    "Authorization": string;
+    "User-Agent": "puffMob/0.0.1"
   }> {
     return {
-      Accept: "application/json",
-      Authorization: `Bearer ${await this.authorize()}`
+      "Accept": "application/json",
+      "Authorization": `Bearer ${await this.authorize()}`,
+      "User-Agent": "puffMob/0.0.1"
     };
   }
 
@@ -650,7 +666,7 @@ export type AuthScope =
 
 export interface AuthPacket {
   session: string;
-  scopes: AuthScope[];
+  scopes?: AuthScope[];
 }
 
 export enum MethodOpts {
