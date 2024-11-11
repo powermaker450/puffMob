@@ -11,10 +11,14 @@ import {
   Tooltip,
   TextInput,
   useTheme,
-  Surface
+  Surface,
+  Dialog,
+  Portal,
+  Button,
+  Snackbar
 } from "react-native-paper";
-import { ScrollView } from "react-native";
-import { handleTouch } from "@/util/haptic";
+import { ScrollView, View } from "react-native";
+import haptic, { handleTouch } from "@/util/haptic";
 
 export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
@@ -24,6 +28,7 @@ export default function ServerScreen() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const [serverName, setServerName] = useState("");
+  const [newName, setNewName] = useState("");
 
   const serverSocket = control.getSocket(id as string);
 
@@ -36,6 +41,7 @@ export default function ServerScreen() {
   useEffect(() => {
     control.get.server(id as string).then(({ server }) => {
       setServerName(server.name);
+      setNewName(server.name);
     });
 
     serverSocket.onopen = () => {
@@ -92,6 +98,17 @@ export default function ServerScreen() {
   const [loading, setLoading] = useState(false);
   const [command, setCommand] = useState("");
   const [logs, setLogs] = useState("");
+  const [nameUpdating, setNameUpdating] = useState(false);
+  const [notice, setNotice] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const openNameChange = () => {
+    haptic();
+    setVisible(true);
+  }
+  const closeNameChange = () => {
+    setVisible(false);
+    setNewName(serverName);
+  }
 
   const handleStart = () => {
     setLoading(true);
@@ -126,6 +143,28 @@ export default function ServerScreen() {
         setLoading(false);
       });
   };
+
+  const handleNameChange = () => {
+    setNameUpdating(true);
+    control.get
+      .server(id as string)
+      .then(({ server }) => {
+        server.edit.name(newName).then(() => {
+          setServerName(newName);
+          setNewName(newName);
+          haptic("notificationSuccess");
+          setNotice(true);
+          setTimeout(() => {
+            setNotice(false);
+          }, 2000);
+        });
+      })
+      .catch(err => console.warn("An unexpected error occured:", err))
+      .finally(() => {
+        setNameUpdating(false);
+        closeNameChange();
+      })
+  }
 
   const handleCommand = () => {
     if (!command) {
@@ -184,11 +223,24 @@ export default function ServerScreen() {
           size={12}
           color={running ? theme.colors.primary : theme.colors.surfaceDisabled}
         />
-        <Appbar.Content style={{ marginLeft: 10 }} title={serverName} />
+        <Appbar.Content style={{ marginLeft: 10 }} title={serverName} onPress={openNameChange} />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
         {!loading && running && killButton}
       </Appbar.Header>
+
+      <Portal>
+        <Dialog visible={visible} onDismiss={closeNameChange} dismissable={!nameUpdating}>
+          <Dialog.Title>Edit Name</Dialog.Title>
+          <Dialog.Content>
+            <TextInput mode="outlined" label="Server Name" value={newName} onChangeText={newText => setNewName(newText)} />
+          </Dialog.Content>
+          <Dialog.Actions>
+            { !nameUpdating && <Button onPress={closeNameChange}>Cancel</Button> }
+            { nameUpdating ? loadingIcon : <Button onPressIn={handleTouch} onPress={handleNameChange} disabled={newName === serverName || !newName.trim()} mode="contained" style={{ paddingLeft: 10, paddingRight: 10 }}>Save</Button> }
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
       <CustomView>
         <Surface
@@ -229,6 +281,10 @@ export default function ServerScreen() {
           />
         </Surface>
       </CustomView>
+
+      <View style={{ width: "90%", alignSelf: "center" }}>
+        <Snackbar visible={notice} onDismiss={() => setNotice(false)} style={{ bottom: 20 }}>Name saved!</Snackbar>
+      </View>
     </>
   );
 }

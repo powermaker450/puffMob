@@ -236,74 +236,90 @@ export default class Panel {
             server.running = await this.get
               .serverStatus(server.id)
               .then(({ running }) => running);
+            server.actions = {
+              kill: async (): Promise<boolean> => {
+                const res = await fetch(
+                  `${this.daemon}/server/${server.id}/kill`,
+                  {
+                    method: MethodOpts.post,
+                    headers: await this.defaultHeaders()
+                  }
+                );
 
-            server.actions.kill = async (): Promise<boolean> => {
-              const res = await fetch(
-                `${this.daemon}/server/${server.id}/kill`,
-                {
-                  method: MethodOpts.post,
+                return res.status === 204;
+              },
+
+              start: async (): Promise<boolean> => {
+                const res = await fetch(
+                  `${this.daemon}/server/${server.id}/start`,
+                  {
+                    method: MethodOpts.post,
+                    headers: await this.defaultHeaders()
+                  }
+                );
+
+                return res.status === 202 || res.status === 204;
+              },
+
+              stop: async (): Promise<boolean> => {
+                const res = await fetch(
+                  `${this.daemon}/server/${server.id}/start`,
+                  {
+                    method: MethodOpts.post,
+                    headers: await this.defaultHeaders()
+                  }
+                );
+
+                return res.status === 202 || res.status === 204;
+              },
+
+              execute: async (command: string): Promise<boolean> => {
+                const res = await fetch(
+                  `${this.daemon}/server/${server.id}/console`,
+                  {
+                    headers: await this.defaultHeaders(),
+                    body: command
+                  }
+                );
+
+                return res.status === 204;
+              }
+            }
+            
+            server.edit = {
+              name: async (newName: string): Promise<boolean> => {
+                const res = await fetch(`${this.api}/servers/${server.id}/name/${encodeURIComponent(newName)}`, {
+                  method: MethodOpts.put,
                   headers: await this.defaultHeaders()
-                }
-              );
+                });
 
-              return res.status === 204;
-            };
+                return res.status === 204;
+              }
+            }
 
-            server.actions.start = async (): Promise<boolean> => {
-              const res = await fetch(
-                `${this.daemon}/server/${server.id}/start`,
-                {
-                  method: MethodOpts.post,
-                  headers: await this.defaultHeaders()
-                }
-              );
 
-              return res.status === 202 || res.status === 204;
-            };
+            server.get = {
+              console: async (): Promise<string> => {
+                const res = await fetch(
+                  `${this.daemon}/server/${server.id}/console`,
+                  {
+                    headers: await this.defaultHeaders()
+                  }
+                );
 
-            server.actions.stop = async (): Promise<boolean> => {
-              const res = await fetch(
-                `${this.daemon}/server/${server.id}/start`,
-                {
-                  method: MethodOpts.post,
-                  headers: await this.defaultHeaders()
-                }
-              );
+                const serverLogs = await res
+                  .json()
+                  .then((json: PufferpanelServerLogs) => json.logs)
+                  .catch(() => "");
 
-              return res.status === 202 || res.status === 204;
-            };
+                // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
+                return serverLogs.replace(
+                  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+                  ""
+                );
+              }
+            }
 
-            server.get.console = async (): Promise<string> => {
-              const res = await fetch(
-                `${this.daemon}/server/${server.id}/console`,
-                {
-                  headers: await this.defaultHeaders()
-                }
-              );
-
-              const serverLogs = await res
-                .json()
-                .then((json: PufferpanelServerLogs) => json.logs)
-                .catch(() => "");
-
-              // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-              return serverLogs.replace(
-                /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-                ""
-              );
-            };
-
-            server.actions.execute = async (command: string): Promise<boolean> => {
-              const res = await fetch(
-                `${this.daemon}/server/${server.id}/console`,
-                {
-                  headers: await this.defaultHeaders(),
-                  body: command
-                }
-              );
-
-              return res.status === 204;
-            };
           }
 
           return data;
@@ -329,76 +345,90 @@ export default class Panel {
           .serverStatus(id)
           .then(({ running }) => running);
 
-        data.server.actions.kill = async (): Promise<boolean> => {
-          const res = await fetch(
-            `${this.daemon}/server/${data.server.id}/kill`,
-            {
-              method: MethodOpts.post,
+        data.server.actions = {
+          kill: async (): Promise<boolean> => {
+            const res = await fetch(
+              `${this.daemon}/server/${data.server.id}/kill`,
+              {
+                method: MethodOpts.post,
+                headers: await this.defaultHeaders()
+              }
+            );
+
+            return res.status === 204;
+          },
+
+          start: async (): Promise<boolean> => {
+            const res = await fetch(
+              `${this.daemon}/server/${data.server.id}/start`,
+              {
+                method: MethodOpts.post,
+                headers: await this.defaultHeaders()
+              }
+            );
+
+            return res.status === 202 || res.status === 204;
+          },
+
+          stop: async (): Promise<boolean> => {
+            const res = await fetch(
+              `${this.daemon}/server/${data.server.id}/stop`,
+              {
+                method: MethodOpts.post,
+                headers: await this.defaultHeaders()
+              }
+            );
+
+            return res.status === 202 || res.status === 204;
+          },
+
+          execute: async (command: string): Promise<boolean> => {
+            const res = await fetch(
+              `${this.daemon}/server/${data.server.id}/console`,
+              {
+                method: MethodOpts.post,
+                headers: await this.defaultHeaders(),
+                body: command
+              }
+            );
+
+            return res.status === 204;
+          }
+        };
+
+
+        data.server.get = {
+          console: async (): Promise<string> => {
+            const res = await fetch(
+              `${this.daemon}/server/${data.server.id}/console`,
+              {
+                headers: await this.defaultHeaders()
+              }
+            );
+
+            const serverLogs = await res
+              .json()
+              .then((json: PufferpanelServerLogs) => json.logs)
+              .catch(() => "");
+
+            // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
+            return serverLogs.replace(
+              /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+              ""
+            );
+          }
+        };
+
+        data.server.edit = {
+          name: async (newName: string): Promise<boolean> => {
+            const res = await fetch(`${this.api}/servers/${data.server.id}/name/${encodeURIComponent(newName)}`, {
+              method: MethodOpts.put,
               headers: await this.defaultHeaders()
-            }
-          );
+            });
 
-          return res.status === 204;
-        };
-
-        data.server.actions.start = async (): Promise<boolean> => {
-          const res = await fetch(
-            `${this.daemon}/server/${data.server.id}/start`,
-            {
-              method: MethodOpts.post,
-              headers: await this.defaultHeaders()
-            }
-          );
-
-          return res.status === 202 || res.status === 204;
-        };
-
-        data.server.actions.stop = async (): Promise<boolean> => {
-          const res = await fetch(
-            `${this.daemon}/server/${data.server.id}/stop`,
-            {
-              method: MethodOpts.post,
-              headers: await this.defaultHeaders()
-            }
-          );
-
-          return res.status === 202 || res.status === 204;
-        };
-
-        data.server.get.console = async (): Promise<string> => {
-          const res = await fetch(
-            `${this.daemon}/server/${data.server.id}/console`,
-            {
-              headers: await this.defaultHeaders()
-            }
-          );
-
-          const serverLogs = await res
-            .json()
-            .then((json: PufferpanelServerLogs) => json.logs)
-            .catch(() => "");
-
-        data
-
-          // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-          return serverLogs.replace(
-            /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-            ""
-          );
-        };
-
-        data.server.actions.execute = async (command: string): Promise<boolean> => {
-          const res = await fetch(
-            `${this.daemon}/server/${data.server.id}/console`,
-            {
-              method: MethodOpts.post,
-              headers: await this.defaultHeaders(),
-              body: command
-            }
-          );
-
-          return res.status === 204;
-        };
+            return res.status === 204;
+          }
+        }
 
         return data;
       } catch (err) {
@@ -666,5 +696,7 @@ export interface AuthPacket {
 
 export enum MethodOpts {
   get = "GET",
-  post = "POST"
+  post = "POST",
+  put = "PUT",
+  delete = "DELETE"
 }

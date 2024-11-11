@@ -132,6 +132,9 @@ export interface ModelsServerView {
     stop: () => Promise<boolean>;
     execute: (command: string) => Promise<boolean>;
   }
+  edit: {
+    name: (newName: string) => Promise<boolean>;
+  }
 }
 
 export interface ModelsSettingResponse {
