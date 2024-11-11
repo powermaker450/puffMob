@@ -2,6 +2,7 @@ import AccountPage from "@/components/AccountPage";
 import CustomView from "@/components/CustomView";
 import ServerPage from "@/components/ServerPage";
 import Panel, { PanelParams } from "@/util/Panel";
+import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, BottomNavigation, Text } from "react-native-paper";
@@ -66,6 +67,7 @@ export default function home() {
       { loading ? loadingScreen : <BottomNavigation
         navigationState={{ index, routes }}
         onIndexChange={setIndex}
+        onTabPress={handleTouch}
         renderScene={renderScene}
       /> }
     </>

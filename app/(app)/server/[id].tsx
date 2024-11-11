@@ -14,6 +14,7 @@ import {
   Surface
 } from "react-native-paper";
 import { ScrollView } from "react-native";
+import { handleTouch } from "@/util/haptic";
 
 export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
@@ -147,19 +148,19 @@ export default function ServerScreen() {
 
   const startButton = (
     <Tooltip title="Start" enterTouchDelay={300} leaveTouchDelay={150}>
-      <Appbar.Action icon="play-outline" onPress={handleStart} />
+      <Appbar.Action icon="play-outline" onPress={handleStart} onPressIn={handleTouch} />
     </Tooltip>
   );
 
   const stopButton = (
     <Tooltip title="Stop" enterTouchDelay={300} leaveTouchDelay={150}>
-      <Appbar.Action icon="stop" onPress={handleStop} />
+      <Appbar.Action icon="stop" onPress={handleStop} onPressIn={handleTouch} />
     </Tooltip>
   );
 
   const killButton = (
     <Tooltip title="Kill" enterTouchDelay={300} leaveTouchDelay={150}>
-      <Appbar.Action icon="skull-outline" onPress={handleKill} />
+      <Appbar.Action icon="skull-outline" onPress={handleKill} onPressIn={handleTouch} />
     </Tooltip>
   );
 
@@ -167,6 +168,7 @@ export default function ServerScreen() {
     <TextInput.Icon
       icon="send-outline"
       onPress={handleCommand}
+      onPressIn={handleTouch}
       disabled={!running || !command.trim()}
     />
   );
@@ -176,7 +178,7 @@ export default function ServerScreen() {
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.BackAction onPress={() => router.back()} onPressIn={handleTouch} />
         <Icon
           source="circle"
           size={12}

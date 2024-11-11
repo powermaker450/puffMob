@@ -4,6 +4,7 @@ import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import ButtonContainer from "./ButtonContainer";
 import { useState } from "react";
+import { handleTouch } from "@/util/haptic";
 
 export default function AccountPage() {
   const theme = useTheme();
@@ -53,6 +54,7 @@ export default function AccountPage() {
       <ButtonContainer>
         <Button
           mode="contained"
+          onPressIn={handleTouch}
           onPress={() => setLogoutSplash(true)}
           style={{ ...buttonMargin }}
         >

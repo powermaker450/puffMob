@@ -1,6 +1,7 @@
 import ButtonContainer from "@/components/ButtonContainer";
 import CustomView from "@/components/CustomView";
 import Panel, { PanelParams } from "@/util/Panel";
+import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -133,6 +134,7 @@ export default function Index() {
         <Button
           style={{ margin: 10 }}
           mode="contained"
+          onPressIn={handleTouch}
           onPress={() => {
             setLoading(true);
 
