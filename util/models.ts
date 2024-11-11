@@ -123,11 +123,15 @@ export interface ModelsServerView {
   type: string;
   users: ModelsServerUserView[];
   running?: boolean;
-  getConsole: () => Promise<string>;
-  execute: (command: string) => Promise<boolean>;
-  kill: () => Promise<boolean>;
-  start: () => Promise<boolean>;
-  stop: () => Promise<boolean>;
+  get: {
+    console: () => Promise<string>;
+  }
+  actions: {
+    kill: () => Promise<boolean>;
+    start: () => Promise<boolean>;
+    stop: () => Promise<boolean>;
+    execute: (command: string) => Promise<boolean>;
+  }
 }
 
 export interface ModelsSettingResponse {

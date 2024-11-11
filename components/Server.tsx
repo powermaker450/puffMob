@@ -1,4 +1,3 @@
-import { handleTouch } from "@/util/haptic";
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
 import { List, Tooltip, useTheme } from "react-native-paper";

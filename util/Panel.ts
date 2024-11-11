@@ -237,7 +237,7 @@ export default class Panel {
               .serverStatus(server.id)
               .then(({ running }) => running);
 
-            server.kill = async (): Promise<boolean> => {
+            server.actions.kill = async (): Promise<boolean> => {
               const res = await fetch(
                 `${this.daemon}/server/${server.id}/kill`,
                 {
@@ -249,7 +249,7 @@ export default class Panel {
               return res.status === 204;
             };
 
-            server.start = async (): Promise<boolean> => {
+            server.actions.start = async (): Promise<boolean> => {
               const res = await fetch(
                 `${this.daemon}/server/${server.id}/start`,
                 {
@@ -261,7 +261,7 @@ export default class Panel {
               return res.status === 202 || res.status === 204;
             };
 
-            server.stop = async (): Promise<boolean> => {
+            server.actions.stop = async (): Promise<boolean> => {
               const res = await fetch(
                 `${this.daemon}/server/${server.id}/start`,
                 {
@@ -273,7 +273,7 @@ export default class Panel {
               return res.status === 202 || res.status === 204;
             };
 
-            server.getConsole = async (): Promise<string> => {
+            server.get.console = async (): Promise<string> => {
               const res = await fetch(
                 `${this.daemon}/server/${server.id}/console`,
                 {
@@ -293,7 +293,7 @@ export default class Panel {
               );
             };
 
-            server.execute = async (command: string): Promise<boolean> => {
+            server.actions.execute = async (command: string): Promise<boolean> => {
               const res = await fetch(
                 `${this.daemon}/server/${server.id}/console`,
                 {
@@ -329,7 +329,7 @@ export default class Panel {
           .serverStatus(id)
           .then(({ running }) => running);
 
-        data.server.kill = async (): Promise<boolean> => {
+        data.server.actions.kill = async (): Promise<boolean> => {
           const res = await fetch(
             `${this.daemon}/server/${data.server.id}/kill`,
             {
@@ -341,7 +341,7 @@ export default class Panel {
           return res.status === 204;
         };
 
-        data.server.start = async (): Promise<boolean> => {
+        data.server.actions.start = async (): Promise<boolean> => {
           const res = await fetch(
             `${this.daemon}/server/${data.server.id}/start`,
             {
@@ -353,7 +353,7 @@ export default class Panel {
           return res.status === 202 || res.status === 204;
         };
 
-        data.server.stop = async (): Promise<boolean> => {
+        data.server.actions.stop = async (): Promise<boolean> => {
           const res = await fetch(
             `${this.daemon}/server/${data.server.id}/stop`,
             {
@@ -365,7 +365,7 @@ export default class Panel {
           return res.status === 202 || res.status === 204;
         };
 
-        data.server.getConsole = async (): Promise<string> => {
+        data.server.get.console = async (): Promise<string> => {
           const res = await fetch(
             `${this.daemon}/server/${data.server.id}/console`,
             {
@@ -378,6 +378,8 @@ export default class Panel {
             .then((json: PufferpanelServerLogs) => json.logs)
             .catch(() => "");
 
+        data
+
           // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
           return serverLogs.replace(
             /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
@@ -385,7 +387,7 @@ export default class Panel {
           );
         };
 
-        data.server.execute = async (command: string): Promise<boolean> => {
+        data.server.actions.execute = async (command: string): Promise<boolean> => {
           const res = await fetch(
             `${this.daemon}/server/${data.server.id}/console`,
             {
@@ -442,7 +444,7 @@ export default class Panel {
     serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
       try {
         const res = await fetch(
-          `${this.serverUrl}/proxy/daemon/server/${id}/status`,
+          `${this.daemon}/server/${id}/status`,
           {
             headers: await this.defaultHeaders()
           }

@@ -97,7 +97,7 @@ export default function ServerScreen() {
     setLoading(true);
     control.get
       .server(id as string)
-      .then(({ server }) => server.start())
+      .then(({ server }) => server.actions.start())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
         setRunning(true);
@@ -109,7 +109,7 @@ export default function ServerScreen() {
     setLoading(true);
     control.get
       .server(id as string)
-      .then(({ server }) => server.stop())
+      .then(({ server }) => server.actions.stop())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
         setLoading(false);
@@ -120,7 +120,7 @@ export default function ServerScreen() {
     setLoading(true);
     control.get
       .server(id as string)
-      .then(({ server }) => server.kill())
+      .then(({ server }) => server.actions.kill())
       .catch(err => console.warn("An unexpected error occured:", err))
       .finally(() => {
         setLoading(false);
@@ -135,7 +135,7 @@ export default function ServerScreen() {
     control.get
       .server(id as string)
       .then(({ server }) => {
-        server.execute(command);
+        server.actions.execute(command);
         setCommand("");
       })
       .catch(err => {
