@@ -31,12 +31,6 @@ export default class Panel {
     Panel.cachedToken = storage.getString("cachedToken");
   };
 
-  private static scopes = storage.getString("scopes") ? JSON.parse(storage.getString("scopes")!) : [];
-  private static setScopes = (scopes: AuthScope[]) => {
-    storage.set("scopes", JSON.stringify(scopes));
-    Panel.scopes = JSON.parse(storage.getString("scopes")!);
-  }
-
   constructor({ serverUrl, email, password }: PanelParams) {
     this.serverUrl = serverUrl;
     this.email = email;
@@ -90,7 +84,6 @@ export default class Panel {
 
       return res.json().then((json: AuthPacket) => {
         Panel.setCachedToken(json.session);
-        Panel.setScopes(json.scopes || []);
         return json;
       });
     } catch (err) {
@@ -101,7 +94,7 @@ export default class Panel {
 
   public async getScopes(): Promise<AuthScope[]> {
     // It's possible for the user to have no scopes if the server admin is really mean
-    return Panel.scopes || await this.getAuth().then(({ scopes }) => scopes || []);
+    return await this.getAuth().then(packet => packet.scopes || []);
   }
 
   private async authorize(): Promise<string> {
