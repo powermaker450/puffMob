@@ -118,6 +118,7 @@ export default function Index() {
         label="Email"
         value={email}
         onChangeText={newText => setEmail(newText)}
+        textContentType="emailAddress"
       />
 
       <TextInput

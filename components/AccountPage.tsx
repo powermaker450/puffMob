@@ -1,10 +1,12 @@
-import { Button, Dialog, Portal, Text, useTheme } from "react-native-paper";
+import { Button, Dialog, Portal, Snackbar, Surface, Text, TextInput, useTheme } from "react-native-paper";
 import CustomView from "./CustomView";
 import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import ButtonContainer from "./ButtonContainer";
-import { useState } from "react";
-import { handleTouch } from "@/util/haptic";
+import { useEffect, useState } from "react";
+import haptic, { handleTouch } from "@/util/haptic";
+import { ScrollView, View } from "react-native";
+import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
 
 export default function AccountPage() {
   const theme = useTheme();
@@ -15,52 +17,163 @@ export default function AccountPage() {
     marginLeft: 5,
     marginRight: 5
   };
+  const textInputMargin = {
+    marginTop: 5,
+    marginBottom: 5
+  };
+
   const [logoutSplash, setLogoutSplash] = useState(false);
+  const [notice, setNotice] = useState(false);
+  const [noticeText, setNoticeText] = useState("");
+  const showNotice = (error?: boolean) => {
+    setNotice(true);
+    setNoticeText(error ? "Incorrect password." : "Saved!");
+    setTimeout(() => {
+      setNotice(false);
+      setNoticeText("");
+    }, 2000);
+  }
+
+  const [username, setUsername] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  
+  const [email, setEmail] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const handleLogout = () => {
+    storage.delete("settings");
+    storage.delete("cachedToken");
+    storage.delete("cachedServerList");
+    router.replace("/");
+    setLogoutSplash(false);
+  }
+
+  useEffect(() => {
+    const settings = JSON.parse(storage.getString("settings")!);
+    const panel = new Panel(settings);
+    
+    panel.get.self().then(({ username, email }) => {
+      setUsername(username!);
+      setNewUsername(username!);
+      
+      setEmail(email!);
+      setNewEmail(email!);
+    });
+  }, []);
+
+  const handleDetailsChange = () => {
+    const settings: PanelParams = JSON.parse(storage.getString("settings")!);
+    const panel = new Panel(settings);
+    let obj: UpdateUserParams;
+
+    if (newUsername !== username && newEmail !== email) {
+      obj = { password, email: newEmail, username: newUsername}
+    } else if (newUsername === username) {
+      obj = { password, email: newEmail };
+    } else {
+      obj = { password, username: newUsername };
+    }
+    
+    panel.edit.user(obj)
+      .then(() => {
+        showNotice();
+        haptic("notificationSuccess");
+
+        if (newUsername !== username && newEmail !== email) {
+          setUsername(newUsername);
+          setEmail(newEmail);
+        } else if (newUsername === username) {
+          setEmail(newEmail);
+          storage.set("settings", JSON.stringify({ password: settings.password, serverUrl: settings.serverUrl, email: newEmail }))
+        } else {
+          setUsername(newUsername);
+        }
+
+        setPassword("");
+      })
+      .catch(() => {
+        showNotice(true);
+        haptic("notificationError");
+      })
+  }
 
   return (
-    <CustomView>
-      <Portal>
-        <Dialog visible={logoutSplash} onDismiss={() => setLogoutSplash(false)}>
-          <Dialog.Title>
-            <Text style={{ fontWeight: "bold" }}>Logout</Text>
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text>Are you sure you want to logout?</Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setLogoutSplash(false)}>
-              <Text>Cancel</Text>
-            </Button>
+    <>
+      <CustomView>
+        <Portal>
+          <Dialog visible={logoutSplash} onDismiss={() => setLogoutSplash(false)}>
+            <Dialog.Title>
+              <Text style={{ fontWeight: "bold" }}>Log out</Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text>Are you sure you want to log out?</Text>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={() => setLogoutSplash(false)}>Cancel</Button>
+              <Button mode="contained" style={{ backgroundColor: theme.colors.tertiary, paddingLeft: 10, paddingRight: 10 }} onPress={handleLogout}>Log out</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
 
-            <Button
-              onPress={() => {
-                storage.delete("settings");
-                storage.delete("cachedToken");
-                storage.delete("cachedServerList");
-                router.replace("/");
-                setLogoutSplash(false);
-              }}
-            >
-              <Text
-                style={{ color: theme.colors.tertiary, fontWeight: "bold" }}
-              >
-                Log out
-              </Text>
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+        <Surface style={{ padding: 20, borderRadius: 20, width: "85%" }}>
+          <Text style={{ marginTop: 15, marginBottom: 15, alignSelf: "center" }} variant="titleLarge">Account Details</Text>
 
-      <ButtonContainer>
-        <Button
-          mode="contained"
-          onPressIn={handleTouch}
-          onPress={() => setLogoutSplash(true)}
-          style={{ ...buttonMargin }}
-        >
-          Logout
-        </Button>
-      </ButtonContainer>
-    </CustomView>
+          <TextInput
+            mode="outlined"
+            style={textInputMargin}
+            label="Username"
+            value={newUsername}
+            onChangeText={text => setNewUsername(text)}
+          />
+          
+          <TextInput
+            mode="outlined"
+            style={textInputMargin}
+            label="Email"
+            value={newEmail}
+            onChangeText={text => setNewEmail(text)}
+            textContentType="emailAddress"
+          />
+
+          <TextInput
+            mode="outlined"
+            style={textInputMargin}
+            label="Password"
+            value={password}
+            onChangeText={text => setPassword(text)}
+            secureTextEntry
+            textContentType="password"
+          />
+
+          <Button
+            mode="contained"
+            onPressIn={handleTouch}
+            onPress={handleDetailsChange}
+            disabled={!password || (username === newUsername && email === newEmail)}
+            style={{ marginTop: 15, marginBottom: 15, width: "50%", alignSelf: "center" }}
+          >
+            Save
+          </Button>
+        </Surface>
+
+        <ButtonContainer>
+          <Button
+            mode="contained"
+            onPressIn={handleTouch}
+            onPress={() => setLogoutSplash(true)}
+            style={{ ...buttonMargin }}
+          >
+            Log out
+          </Button>
+        </ButtonContainer>
+
+      </CustomView>
+
+      <View style={{ width: "90%", alignSelf: "center", bottom: 20 }}>
+        <Snackbar visible={notice} onDismiss={() => setNotice(false)}>{noticeText}</Snackbar>
+      </View>
+    </>
   );
 }

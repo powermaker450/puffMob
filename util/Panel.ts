@@ -639,6 +639,20 @@ export default class Panel {
     }
   };
 
+  public readonly edit = {
+    user: async (params: UpdateUserParams): Promise<void> => {
+      const res = await fetch(`${this.api}/self`, {
+        method: MethodOpts.put,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(params)
+      });
+
+      if (!res.ok) {
+        throw "Credentials invalid";
+      }
+    }
+  }
+
   public getSocket(id: string) {
     const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";
     const address = this.daemon.replace("https://", "").replace("http://", "");
@@ -652,6 +666,12 @@ export default class Panel {
       }
     });
   }
+}
+
+export interface UpdateUserParams {
+  password: string;
+  email?: string;
+  username?: string;
 }
 
 export interface ServerSearchParams {
