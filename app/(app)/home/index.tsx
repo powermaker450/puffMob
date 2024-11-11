@@ -68,6 +68,8 @@ export default function home() {
         navigationState={{ index, routes }}
         onIndexChange={setIndex}
         onTabPress={handleTouch}
+        sceneAnimationType="shifting"
+        sceneAnimationEnabled
         renderScene={renderScene}
       /> }
     </>
