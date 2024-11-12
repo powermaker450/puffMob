@@ -142,7 +142,7 @@ export default function account() {
           onPressIn={handleTouch}
           onPress={() => router.back()}
         />
-        <Appbar.Content title="Account Settings" />
+        <Appbar.Content title="Account" />
       </Appbar.Header>
 
       <CustomView>
