@@ -1,11 +1,11 @@
-import { Button, Dialog, Portal, Snackbar, Surface, Text, TextInput, useTheme } from "react-native-paper";
+import { ActivityIndicator, Button, Dialog, Portal, Snackbar, Surface, Text, TextInput, useTheme } from "react-native-paper";
 import CustomView from "./CustomView";
 import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import ButtonContainer from "./ButtonContainer";
 import { useEffect, useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
 
 export default function AccountPage() {
@@ -28,11 +28,13 @@ export default function AccountPage() {
   const showNotice = (error?: boolean) => {
     setNotice(true);
     setNoticeText(error ? "Incorrect password." : "Saved!");
-    setTimeout(() => {
+    !notice && setTimeout(() => {
       setNotice(false);
       setNoticeText("");
     }, 2000);
   }
+
+  const [loading, setLoading] = useState(false);
 
   const [username, setUsername] = useState("");
   const [newUsername, setNewUsername] = useState("");
@@ -64,6 +66,8 @@ export default function AccountPage() {
   }, []);
 
   const handleDetailsChange = () => {
+    setLoading(true);
+
     const settings: PanelParams = JSON.parse(storage.getString("settings")!);
     const panel = new Panel(settings);
     let obj: UpdateUserParams;
@@ -97,7 +101,12 @@ export default function AccountPage() {
         showNotice(true);
         haptic("notificationError");
       })
+      .finally(() => setLoading(false));
   }
+
+  const loadingIcon = (
+    <ActivityIndicator animating size="large" style={{ marginTop: 15, marginBottom: 15 }} />
+  );
 
   return (
     <>
@@ -147,7 +156,7 @@ export default function AccountPage() {
             textContentType="password"
           />
 
-          <Button
+          { loading ? loadingIcon : <Button
             mode="contained"
             onPressIn={handleTouch}
             onPress={handleDetailsChange}
@@ -155,7 +164,7 @@ export default function AccountPage() {
             style={{ marginTop: 15, marginBottom: 15, width: "50%", alignSelf: "center" }}
           >
             Save
-          </Button>
+          </Button> }
         </Surface>
 
         <ButtonContainer>
