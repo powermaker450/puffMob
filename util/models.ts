@@ -125,16 +125,16 @@ export interface ModelsServerView {
   running?: boolean;
   get: {
     console: () => Promise<string>;
-  }
+  };
   actions: {
     kill: () => Promise<boolean>;
     start: () => Promise<boolean>;
     stop: () => Promise<boolean>;
     execute: (command: string) => Promise<boolean>;
-  }
+  };
   edit: {
     name: (newName: string) => Promise<boolean>;
-  }
+  };
 }
 
 export interface ModelsSettingResponse {

@@ -1,6 +1,6 @@
-import AccountPage from "@/components/AccountPage";
 import CustomView from "@/components/CustomView";
 import ServerPage from "@/components/ServerPage";
+import SettingsPage from "@/components/SettingsPage";
 import Panel, { PanelParams } from "@/util/Panel";
 import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
@@ -13,17 +13,17 @@ interface NavigationRoute {
   focusedIcon: "server" | "server-network" | "people" | "file-code" | "cog";
 }
 
-const mainRoute: NavigationRoute = { key: "settings", title: "Settings", focusedIcon: "cog" }; 
+const mainRoute: NavigationRoute = {
+  key: "settings",
+  title: "Settings",
+  focusedIcon: "cog"
+};
 
 export default function home() {
-
   const [loading, setLoading] = useState(true);
   const loadingScreen = (
     <CustomView>
-      <ActivityIndicator
-        animating={loading}
-        size="large"
-      />
+      <ActivityIndicator animating={loading} size="large" />
 
       <Text variant="bodyLarge" style={{ margin: 30 }}>
         Checking permissions...
@@ -46,32 +46,40 @@ export default function home() {
       for (const scope of scopes) {
         switch (scope) {
           case "servers.view":
-            newRoutes.unshift({ key: "servers", title: "Servers", focusedIcon: "server" })
-          default:
-            {}
+            newRoutes.unshift({
+              key: "servers",
+              title: "Servers",
+              focusedIcon: "server"
+            });
+          default: {
+          }
         }
       }
 
       setRoutes(newRoutes);
       setLoading(false);
-    })
+    });
   }, []);
 
   const renderScene = BottomNavigation.SceneMap({
     servers: ServerPage,
-    settings: AccountPage
+    settings: SettingsPage
   });
 
   return (
     <>
-      { loading ? loadingScreen : <BottomNavigation
-        navigationState={{ index, routes }}
-        onIndexChange={setIndex}
-        onTabPress={handleTouch}
-        sceneAnimationType="shifting"
-        sceneAnimationEnabled
-        renderScene={renderScene}
-      /> }
+      {loading ? (
+        loadingScreen
+      ) : (
+        <BottomNavigation
+          navigationState={{ index, routes }}
+          onIndexChange={setIndex}
+          onTabPress={handleTouch}
+          sceneAnimationType="shifting"
+          sceneAnimationEnabled
+          renderScene={renderScene}
+        />
+      )}
     </>
   );
 }

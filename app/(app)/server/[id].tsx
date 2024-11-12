@@ -104,11 +104,11 @@ export default function ServerScreen() {
   const openNameChange = () => {
     haptic();
     setVisible(true);
-  }
+  };
   const closeNameChange = () => {
     setVisible(false);
     setNewName(serverName);
-  }
+  };
 
   const handleStart = () => {
     setLoading(true);
@@ -163,8 +163,8 @@ export default function ServerScreen() {
       .finally(() => {
         setNameUpdating(false);
         closeNameChange();
-      })
-  }
+      });
+  };
 
   const handleCommand = () => {
     if (!command) {
@@ -187,7 +187,11 @@ export default function ServerScreen() {
 
   const startButton = (
     <Tooltip title="Start" enterTouchDelay={300} leaveTouchDelay={150}>
-      <Appbar.Action icon="play-outline" onPress={handleStart} onPressIn={handleTouch} />
+      <Appbar.Action
+        icon="play-outline"
+        onPress={handleStart}
+        onPressIn={handleTouch}
+      />
     </Tooltip>
   );
 
@@ -199,7 +203,11 @@ export default function ServerScreen() {
 
   const killButton = (
     <Tooltip title="Kill" enterTouchDelay={300} leaveTouchDelay={150}>
-      <Appbar.Action icon="skull-outline" onPress={handleKill} onPressIn={handleTouch} />
+      <Appbar.Action
+        icon="skull-outline"
+        onPress={handleKill}
+        onPressIn={handleTouch}
+      />
     </Tooltip>
   );
 
@@ -217,27 +225,55 @@ export default function ServerScreen() {
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} onPressIn={handleTouch} />
+        <Appbar.BackAction
+          onPress={() => router.back()}
+          onPressIn={handleTouch}
+        />
         <Icon
           source="circle"
           size={12}
           color={running ? theme.colors.primary : theme.colors.surfaceDisabled}
         />
-        <Appbar.Content style={{ marginLeft: 10 }} title={serverName} onPress={openNameChange} />
+        <Appbar.Content
+          style={{ marginLeft: 10 }}
+          title={serverName}
+          onPress={openNameChange}
+        />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
         {!loading && running && killButton}
       </Appbar.Header>
 
       <Portal>
-        <Dialog visible={visible} onDismiss={closeNameChange} dismissable={!nameUpdating}>
+        <Dialog
+          visible={visible}
+          onDismiss={closeNameChange}
+          dismissable={!nameUpdating}
+        >
           <Dialog.Title>Edit Name</Dialog.Title>
           <Dialog.Content>
-            <TextInput mode="outlined" label="Server Name" value={newName} onChangeText={newText => setNewName(newText)} />
+            <TextInput
+              mode="outlined"
+              label="Server Name"
+              value={newName}
+              onChangeText={newText => setNewName(newText)}
+            />
           </Dialog.Content>
           <Dialog.Actions>
-            { !nameUpdating && <Button onPress={closeNameChange}>Cancel</Button> }
-            { nameUpdating ? loadingIcon : <Button onPressIn={handleTouch} onPress={handleNameChange} disabled={newName === serverName || !newName.trim()} mode="contained" style={{ paddingLeft: 10, paddingRight: 10 }}>Save</Button> }
+            {!nameUpdating && <Button onPress={closeNameChange}>Cancel</Button>}
+            {nameUpdating ? (
+              loadingIcon
+            ) : (
+              <Button
+                onPressIn={handleTouch}
+                onPress={handleNameChange}
+                disabled={newName === serverName || !newName.trim()}
+                mode="contained"
+                style={{ paddingLeft: 10, paddingRight: 10 }}
+              >
+                Save
+              </Button>
+            )}
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -283,7 +319,13 @@ export default function ServerScreen() {
       </CustomView>
 
       <View style={{ width: "90%", alignSelf: "center" }}>
-        <Snackbar visible={notice} onDismiss={() => setNotice(false)} style={{ bottom: 20 }}>Name saved!</Snackbar>
+        <Snackbar
+          visible={notice}
+          onDismiss={() => setNotice(false)}
+          style={{ bottom: 20 }}
+        >
+          Name saved!
+        </Snackbar>
       </View>
     </>
   );

@@ -43,7 +43,7 @@ export default function ServerPage() {
         setLoading(false);
       })
       .catch(() => setError(true));
-  }, [])
+  }, []);
 
   useEffect(() => {
     navigation.addListener("focus", () => {

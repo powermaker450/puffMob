@@ -53,11 +53,7 @@ export default function Server({
       style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 10 }}
       onPress={() => router.navigate(`/server/${id}`)}
     >
-      <Card.Title
-        title={name}
-        subtitle={getDescription()}
-        left={serverIcon}
-      />
+      <Card.Title title={name} subtitle={getDescription()} left={serverIcon} />
     </Card>
   );
 }

@@ -1,14 +1,25 @@
-import { ActivityIndicator, Button, Dialog, Portal, Snackbar, Surface, Text, TextInput, useTheme } from "react-native-paper";
-import CustomView from "./CustomView";
+import {
+  ActivityIndicator,
+  Appbar,
+  Button,
+  Dialog,
+  Portal,
+  Snackbar,
+  Surface,
+  Text,
+  TextInput,
+  useTheme
+} from "react-native-paper";
+import CustomView from "@/components/CustomView";
 import { storage } from "@/util/storage";
 import { router } from "expo-router";
-import ButtonContainer from "./ButtonContainer";
+import ButtonContainer from "@/components/ButtonContainer";
 import { useEffect, useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
 import { View } from "react-native";
 import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
 
-export default function AccountPage() {
+export default function account() {
   const theme = useTheme();
 
   const buttonMargin = {
@@ -28,17 +39,18 @@ export default function AccountPage() {
   const showNotice = (error?: boolean) => {
     setNotice(true);
     setNoticeText(error ? "Incorrect password." : "Saved!");
-    !notice && setTimeout(() => {
-      setNotice(false);
-      setNoticeText("");
-    }, 2000);
-  }
+    !notice &&
+      setTimeout(() => {
+        setNotice(false);
+        setNoticeText("");
+      }, 2000);
+  };
 
   const [loading, setLoading] = useState(false);
 
   const [username, setUsername] = useState("");
   const [newUsername, setNewUsername] = useState("");
-  
+
   const [email, setEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
 
@@ -50,16 +62,16 @@ export default function AccountPage() {
     storage.delete("cachedServerList");
     router.replace("/");
     setLogoutSplash(false);
-  }
+  };
 
   useEffect(() => {
     const settings = JSON.parse(storage.getString("settings")!);
     const panel = new Panel(settings);
-    
+
     panel.get.self().then(({ username, email }) => {
       setUsername(username!);
       setNewUsername(username!);
-      
+
       setEmail(email!);
       setNewEmail(email!);
     });
@@ -73,14 +85,15 @@ export default function AccountPage() {
     let obj: UpdateUserParams;
 
     if (newUsername !== username && newEmail !== email) {
-      obj = { password, email: newEmail, username: newUsername}
+      obj = { password, email: newEmail, username: newUsername };
     } else if (newUsername === username) {
       obj = { password, email: newEmail };
     } else {
       obj = { password, username: newUsername };
     }
-    
-    panel.edit.user(obj)
+
+    panel.edit
+      .user(obj)
       .then(() => {
         showNotice();
         haptic("notificationSuccess");
@@ -90,7 +103,14 @@ export default function AccountPage() {
           setEmail(newEmail);
         } else if (newUsername === username) {
           setEmail(newEmail);
-          storage.set("settings", JSON.stringify({ password: settings.password, serverUrl: settings.serverUrl, email: newEmail }))
+          storage.set(
+            "settings",
+            JSON.stringify({
+              password: settings.password,
+              serverUrl: settings.serverUrl,
+              email: newEmail
+            })
+          );
         } else {
           setUsername(newUsername);
         }
@@ -102,17 +122,29 @@ export default function AccountPage() {
         haptic("notificationError");
       })
       .finally(() => setLoading(false));
-  }
+  };
 
   const loadingIcon = (
-    <ActivityIndicator animating size="large" style={{ marginTop: 15, marginBottom: 15 }} />
+    <ActivityIndicator
+      animating
+      size="large"
+      style={{ marginTop: 15, marginBottom: 15 }}
+    />
   );
 
   return (
     <>
+      <Appbar.Header>
+        <Appbar.BackAction onPressIn={handleTouch} onPress={() => router.back()} />
+        <Appbar.Content title="Account Settings" />
+      </Appbar.Header>
+
       <CustomView>
         <Portal>
-          <Dialog visible={logoutSplash} onDismiss={() => setLogoutSplash(false)}>
+          <Dialog
+            visible={logoutSplash}
+            onDismiss={() => setLogoutSplash(false)}
+          >
             <Dialog.Title>
               <Text style={{ fontWeight: "bold" }}>Log out</Text>
             </Dialog.Title>
@@ -121,13 +153,28 @@ export default function AccountPage() {
             </Dialog.Content>
             <Dialog.Actions>
               <Button onPress={() => setLogoutSplash(false)}>Cancel</Button>
-              <Button mode="contained" style={{ backgroundColor: theme.colors.tertiary, paddingLeft: 10, paddingRight: 10 }} onPress={handleLogout}>Log out</Button>
+              <Button
+                mode="contained"
+                style={{
+                  backgroundColor: theme.colors.tertiary,
+                  paddingLeft: 10,
+                  paddingRight: 10
+                }}
+                onPress={handleLogout}
+              >
+                Log out
+              </Button>
             </Dialog.Actions>
           </Dialog>
         </Portal>
 
         <Surface style={{ padding: 20, borderRadius: 20, width: "85%" }}>
-          <Text style={{ marginTop: 15, marginBottom: 15, alignSelf: "center" }} variant="titleLarge">Account Details</Text>
+          <Text
+            style={{ marginTop: 15, marginBottom: 15, alignSelf: "center" }}
+            variant="titleLarge"
+          >
+            Account Details
+          </Text>
 
           <TextInput
             mode="outlined"
@@ -136,7 +183,7 @@ export default function AccountPage() {
             value={newUsername}
             onChangeText={text => setNewUsername(text)}
           />
-          
+
           <TextInput
             mode="outlined"
             style={textInputMargin}
@@ -156,15 +203,26 @@ export default function AccountPage() {
             textContentType="password"
           />
 
-          { loading ? loadingIcon : <Button
-            mode="contained"
-            onPressIn={handleTouch}
-            onPress={handleDetailsChange}
-            disabled={!password || (username === newUsername && email === newEmail)}
-            style={{ marginTop: 15, marginBottom: 15, width: "50%", alignSelf: "center" }}
-          >
-            Save
-          </Button> }
+          {loading ? (
+            loadingIcon
+          ) : (
+            <Button
+              mode="contained"
+              onPressIn={handleTouch}
+              onPress={handleDetailsChange}
+              disabled={
+                !password || (username === newUsername && email === newEmail)
+              }
+              style={{
+                marginTop: 15,
+                marginBottom: 15,
+                width: "50%",
+                alignSelf: "center"
+              }}
+            >
+              Save
+            </Button>
+          )}
         </Surface>
 
         <ButtonContainer>
@@ -177,11 +235,12 @@ export default function AccountPage() {
             Log out
           </Button>
         </ButtonContainer>
-
       </CustomView>
 
       <View style={{ width: "90%", alignSelf: "center", bottom: 20 }}>
-        <Snackbar visible={notice} onDismiss={() => setNotice(false)}>{noticeText}</Snackbar>
+        <Snackbar visible={notice} onDismiss={() => setNotice(false)}>
+          {noticeText}
+        </Snackbar>
       </View>
     </>
   );

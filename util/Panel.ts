@@ -49,7 +49,7 @@ export default class Panel {
       const res = await fetch(`${serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/json",
           "User-Agent": "puffMob/0.0.1"
         },
@@ -71,7 +71,7 @@ export default class Panel {
       const res = await fetch(`${this.serverUrl}/auth/login`, {
         method: MethodOpts.post,
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/json",
           "User-Agent": "puffMob/0.0.1"
         },
@@ -104,13 +104,13 @@ export default class Panel {
   }
 
   private async defaultHeaders(): Promise<{
-    "Accept": string;
-    "Authorization": string;
-    "User-Agent": "puffMob/0.0.1"
+    Accept: string;
+    Authorization: string;
+    "User-Agent": "puffMob/0.0.1";
   }> {
     return {
-      "Accept": "application/json",
-      "Authorization": `Bearer ${await this.authorize()}`,
+      Accept: "application/json",
+      Authorization: `Bearer ${await this.authorize()}`,
       "User-Agent": "puffMob/0.0.1"
     };
   }
@@ -284,19 +284,21 @@ export default class Panel {
 
                 return res.status === 204;
               }
-            }
-            
+            };
+
             server.edit = {
               name: async (newName: string): Promise<boolean> => {
-                const res = await fetch(`${this.api}/servers/${server.id}/name/${encodeURIComponent(newName)}`, {
-                  method: MethodOpts.put,
-                  headers: await this.defaultHeaders()
-                });
+                const res = await fetch(
+                  `${this.api}/servers/${server.id}/name/${encodeURIComponent(newName)}`,
+                  {
+                    method: MethodOpts.put,
+                    headers: await this.defaultHeaders()
+                  }
+                );
 
                 return res.status === 204;
               }
-            }
-
+            };
 
             server.get = {
               console: async (): Promise<string> => {
@@ -318,8 +320,7 @@ export default class Panel {
                   ""
                 );
               }
-            }
-
+            };
           }
 
           return data;
@@ -396,7 +397,6 @@ export default class Panel {
           }
         };
 
-
         data.server.get = {
           console: async (): Promise<string> => {
             const res = await fetch(
@@ -421,14 +421,17 @@ export default class Panel {
 
         data.server.edit = {
           name: async (newName: string): Promise<boolean> => {
-            const res = await fetch(`${this.api}/servers/${data.server.id}/name/${encodeURIComponent(newName)}`, {
-              method: MethodOpts.put,
-              headers: await this.defaultHeaders()
-            });
+            const res = await fetch(
+              `${this.api}/servers/${data.server.id}/name/${encodeURIComponent(newName)}`,
+              {
+                method: MethodOpts.put,
+                headers: await this.defaultHeaders()
+              }
+            );
 
             return res.status === 204;
           }
-        }
+        };
 
         return data;
       } catch (err) {
@@ -473,12 +476,9 @@ export default class Panel {
 
     serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
       try {
-        const res = await fetch(
-          `${this.daemon}/server/${id}/status`,
-          {
-            headers: await this.defaultHeaders()
-          }
-        );
+        const res = await fetch(`${this.daemon}/server/${id}/status`, {
+          headers: await this.defaultHeaders()
+        });
 
         return (await this.handleResponse(
           res,
@@ -651,7 +651,7 @@ export default class Panel {
         throw "Credentials invalid";
       }
     }
-  }
+  };
 
   public getSocket(id: string) {
     const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";
