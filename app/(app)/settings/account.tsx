@@ -47,6 +47,7 @@ export default function account() {
   };
 
   const [loading, setLoading] = useState(false);
+  const [gettingDetails, setGettingDetails] = useState(true);
 
   const [username, setUsername] = useState("");
   const [newUsername, setNewUsername] = useState("");
@@ -74,6 +75,8 @@ export default function account() {
 
       setEmail(email!);
       setNewEmail(email!);
+
+      setGettingDetails(false);
     });
   }, []);
 
@@ -172,6 +175,7 @@ export default function account() {
           <Text
             style={{ marginTop: 15, marginBottom: 15, alignSelf: "center" }}
             variant="titleLarge"
+            disabled={gettingDetails}
           >
             Account Details
           </Text>
@@ -181,6 +185,7 @@ export default function account() {
             style={textInputMargin}
             label="Username"
             value={newUsername}
+            disabled={gettingDetails}
             onChangeText={text => setNewUsername(text)}
           />
 
@@ -190,6 +195,7 @@ export default function account() {
             label="Email"
             value={newEmail}
             onChangeText={text => setNewEmail(text)}
+            disabled={gettingDetails}
             textContentType="emailAddress"
           />
 
@@ -200,6 +206,7 @@ export default function account() {
             value={password}
             onChangeText={text => setPassword(text)}
             secureTextEntry
+            disabled={gettingDetails}
             textContentType="password"
           />
 
