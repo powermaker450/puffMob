@@ -10,12 +10,14 @@ export default function appearance() {
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPressIn={handleTouch} onPress={() => router.back()} />
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => router.back()}
+        />
         <Appbar.Content title="Appearance" />
       </Appbar.Header>
 
-      <CustomView>
-      </CustomView>
+      <CustomView></CustomView>
     </>
   );
 }

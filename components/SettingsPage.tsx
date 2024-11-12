@@ -9,7 +9,9 @@ export default function SettingsPage() {
         <Appbar.Content title="Settings" />
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={{ marginLeft: 15, justifyContent: "center" }}>
+      <ScrollView
+        contentContainerStyle={{ marginLeft: 15, justifyContent: "center" }}
+      >
         <List.Item
           title="Account"
           description="Manage account settings"

@@ -138,7 +138,10 @@ export default function account() {
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPressIn={handleTouch} onPress={() => router.back()} />
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => router.back()}
+        />
         <Appbar.Content title="Account Settings" />
       </Appbar.Header>
 
