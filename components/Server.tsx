@@ -1,6 +1,8 @@
+import haptic from "@/util/haptic";
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
-import { List, Tooltip, useTheme } from "react-native-paper";
+import { useState } from "react";
+import { Card, Icon, Modal, Portal, Text, useTheme } from "react-native-paper";
 
 interface ServerProps {
   name: string;
@@ -38,22 +40,24 @@ export default function Server({
     return node.publicHost + (port ? ":" + port : "");
   };
 
-  const serverIcon = (
-    <List.Icon icon={running ? "server" : "server-off"} color={chooseColor()} />
+  const serverIcon = () => (
+    <Icon
+      source={running ? "server" : "server-off"}
+      color={chooseColor()}
+      size={25}
+    />
   );
 
   return (
-    <Tooltip title={name} enterTouchDelay={300} leaveTouchDelay={150}>
-      <List.Item
+    <Card
+      style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 10 }}
+      onPress={() => router.navigate(`/server/${id}`)}
+    >
+      <Card.Title
         title={name}
-        description={getDescription()}
-        onPress={() => router.navigate(`/server/${id}`)}
-        style={{
-          paddingLeft: 10,
-          paddingRight: 10
-        }}
-        left={() => serverIcon}
+        subtitle={getDescription()}
+        left={serverIcon}
       />
-    </Tooltip>
+    </Card>
   );
 }

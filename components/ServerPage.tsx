@@ -89,13 +89,12 @@ export default function ServerPage() {
     <>
       <View
         style={{
-          backgroundColor: theme.colors.surfaceVariant,
           paddingLeft: 20,
           paddingRight: 20,
           paddingTop: 10,
           paddingBottom: 10,
           maxHeight: "85%",
-          width: "85%",
+          width: "100%",
           borderRadius: 20
         }}
       >
