@@ -333,7 +333,8 @@ export default class Panel {
 
     server: async (id: string): Promise<ModelsGetServerResponse> => {
       try {
-        const res = await fetch(`${this.api}/servers/${id}`, {
+        // Perms is a constant parameter because without it `permissions` is null
+        const res = await fetch(`${this.api}/servers/${id}?perms`, {
           headers: await this.defaultHeaders()
         });
 

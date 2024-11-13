@@ -29,6 +29,7 @@ export default function ServerScreen() {
   const navigation = useNavigation();
   const [serverName, setServerName] = useState("");
   const [newName, setNewName] = useState("");
+  const [consolePerms, setConsolePerms] = useState(false);
 
   const serverSocket = control.getSocket(id as string);
 
@@ -39,9 +40,16 @@ export default function ServerScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    control.get.server(id as string).then(({ server }) => {
+    control.get.server(id as string).then(({ server, permissions }) => {
       setServerName(server.name);
       setNewName(server.name);
+
+      switch (true) {
+        case permissions.sendServerConsole:
+          setConsolePerms(true);
+        default:
+          {}
+      }
     });
 
     serverSocket.onopen = () => {
@@ -307,14 +315,14 @@ export default function ServerScreen() {
             </ScrollView>
           </ScrollView>
 
-          <TextInput
-            label={running ? "Enter command..." : "Server offline"}
+          { consolePerms && <TextInput
+            label={running ?  "Enter command..." : "Server offline"}
             mode="outlined"
             value={command}
             disabled={!running}
             onChangeText={newText => setCommand(newText)}
             right={sendButton}
-          />
+          /> }
         </Surface>
       </CustomView>
 
