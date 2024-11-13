@@ -13,7 +13,8 @@ import {
   ModelsUserView,
   PufferpanelServer,
   PufferpanelServerLogs,
-  PufferpanelServerRunning
+  PufferpanelServerRunning,
+  PanelSettingResponse
 } from "./models";
 import { storage } from "./storage";
 
@@ -539,6 +540,14 @@ export default class Panel {
       }
     },
 
+    panelSetting: async (setting: PanelSetting): Promise<PanelSettingResponse> => {
+      const res = await fetch(`${this.api}/settings/${setting}`, {
+        headers: await this.defaultHeaders()
+      });
+
+      return await this.handleResponse(res, this.get.panelSetting, setting) as PanelSettingResponse;
+    },
+
     // The documentation states that this endpoint must send a request body,
     // but you cannot send a request body in a GET request, so this is kind of broken? :P
     users: async (): Promise<ModelsUserSearchResponse> => {
@@ -708,6 +717,8 @@ export type AuthScope =
   | "users.edit"
   | "panel.settings"
   | "servers.view";
+
+export type PanelSetting = "panel.settings.masterUrl" | "panel.settings.companyName" | "panel.settings.defaultTheme" | "panel.registrationEnabled" | "panel.email.provider" | "panel.email.from" | "panel.email.domain" | "panel.email.key" | "panel.email.host" | "panel.email.username" | "panel.email.password";
 
 export interface AuthPacket {
   session: string;

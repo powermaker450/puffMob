@@ -13,17 +13,14 @@ export default function SettingsPage() {
     const settings = JSON.parse(storage.getString("settings")!);
     const panel = new Panel(settings);
 
-    panel.getScopes().then(scopes => {
-      for (const scope of scopes) {
-        switch (scope) {
-          case "servers.admin":
-            setAdmin(true);
-            break;
-          default:
-            {}
-        }
+    panel.get.self().then(({ id }) => panel.get.userPerms(id! + "").then(perms => {
+      switch (true) {
+        case perms.admin:
+          setAdmin(true);
+        default:
+          {}
       }
-    })
+    }))
   })
 
   return (
@@ -39,7 +36,7 @@ export default function SettingsPage() {
           title="Panel Settings"
           description="Manage your Pufferpanel instance"
           style={{ display: admin ? "flex" : "none" }}
-          onPress={() => console.log("admin")}
+          onPress={() => router.navigate("/settings/panel_settings")}
           left={() => <List.Icon icon="shield-edit" />}
         />
 

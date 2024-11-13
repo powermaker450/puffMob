@@ -14,6 +14,10 @@ export interface ModelsChangeSetting {
   value: object;
 }
 
+export interface PanelSettingResponse {
+  value: string | boolean;
+}
+
 export interface ModelsChangeUserSetting {
   value: string;
 }

@@ -9,14 +9,11 @@ import {
   Button,
   FAB,
   Text,
-  useTheme
 } from "react-native-paper";
 import Server from "./Server";
 import CustomView from "./CustomView";
 
 export default function ServerPage() {
-  const theme = useTheme();
-
   let settings: PanelParams = storage.getString("settings")
     ? JSON.parse(storage.getString("settings")!)
     : null;
