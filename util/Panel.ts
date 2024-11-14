@@ -695,6 +695,18 @@ export default class Panel {
       if (!res.ok) {
         throw "Credentials invalid";
       }
+    },
+
+    settings: async (params: UpdateServerParams): Promise<void> => {
+      const res = await fetch(`${this.api}/settings`, {
+        method: MethodOpts.post,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(params)
+      })
+
+      if (!res.ok) {
+        throw "Invalid server response";
+      }
     }
   };
 
@@ -736,6 +748,14 @@ export interface UpdateUserParams {
   password: string;
   email?: string;
   username?: string;
+}
+
+// Quotes because uhhh dot notation
+export interface UpdateServerParams {
+  "panel.registrationEnabled": boolean;
+  "panel.settings.companyName": string;
+  "panel.settings.defaultTheme": string;
+  "panel.settings.masterUrl": string;
 }
 
 export interface ServerSearchParams {
