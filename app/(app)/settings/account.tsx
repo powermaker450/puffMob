@@ -19,6 +19,7 @@ import haptic, { handleTouch } from "@/util/haptic";
 import { View } from "react-native";
 import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
 import UnsavedChanges from "@/components/UnsavedChanges";
+import Notice from "@/components/Notice";
 
 export default function account() {
   const theme = useTheme();
@@ -255,11 +256,11 @@ export default function account() {
         </ButtonContainer>
       </CustomView>
 
-      <View style={{ width: "90%", alignSelf: "center", bottom: 20 }}>
-        <Snackbar visible={notice} onDismiss={() => setNotice(false)}>
-          {noticeText}
-        </Snackbar>
-      </View>
+      <Notice 
+        condition={notice}
+        setCondition={setNotice}
+        text={noticeText}
+      />
 
       <UnsavedChanges
         condition={username !== newUsername || email !== newEmail}

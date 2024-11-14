@@ -1,4 +1,5 @@
 import CustomView from "@/components/CustomView";
+import Notice from "@/components/Notice";
 import UnsavedChanges from "@/components/UnsavedChanges";
 import Panel, { UpdateServerParams } from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
@@ -259,11 +260,11 @@ export default function panel_settings() {
         </Surface>
       </CustomView>
 
-      <View style={{ width: "90%", alignSelf: "center", bottom: 20 }}>
-        <Snackbar visible={notice} onDismiss={() => setNotice(false)}>
-          {noticeText}
-        </Snackbar>
-      </View>
+      <Notice
+        condition={notice}
+        setCondition={setNotice}
+        text={noticeText}
+      />
 
       <UnsavedChanges
         condition={masterUrl !== newMasterUrl || companyName !== newCompanyName || allowReg !== newAllowReg || defaultTheme !== newDefaultTheme}
