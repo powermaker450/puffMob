@@ -159,7 +159,10 @@ export default function panel_settings() {
         showNotice(true);
         haptic("notificationError");
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setExpanded(false);
+      });
   }
 
   const loadingIcon = (

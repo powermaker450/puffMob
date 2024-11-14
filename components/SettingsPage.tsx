@@ -27,21 +27,21 @@ export default function SettingsPage() {
       </Appbar.Header>
 
       <ScrollView
-        contentContainerStyle={{ marginLeft: 15, justifyContent: "center" }}
+        contentContainerStyle={{ justifyContent: "center" }}
       >
         <List.Item
           title="Panel Settings"
           description="Manage your Pufferpanel instance"
           style={{ display: admin ? "flex" : "none" }}
           onPress={() => router.navigate("/settings/panel_settings")}
-          left={() => <List.Icon icon="shield-edit" />}
+          left={() => <List.Icon icon="shield-edit" style={{ marginLeft: 15 }} />}
         />
 
         <List.Item
           title="Account"
           description="Manage account settings"
           onPress={() => router.navigate("/settings/account")}
-          left={() => <List.Icon icon="account-circle" />}
+          left={() => <List.Icon icon="account-circle" style={{ marginLeft: 15 }} />}
         />
 
         <List.Item
@@ -49,7 +49,7 @@ export default function SettingsPage() {
           disabled
           description="Look and feel of the app"
           onPress={() => router.navigate("/settings/appearance")}
-          left={() => <List.Icon icon="palette" color={theme.colors.onSurfaceDisabled} />}
+          left={() => <List.Icon icon="palette" color={theme.colors.onSurfaceDisabled} style={{ marginLeft: 15 }} />}
         />
       </ScrollView>
     </>
