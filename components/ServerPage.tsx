@@ -55,6 +55,8 @@ export default function ServerPage() {
           setLoading(false);
         })
         .catch(() => setError(true));
+
+      panel.get.config().then(({ branding }) => setName(branding.name));
     });
   }, [navigation]);
 
