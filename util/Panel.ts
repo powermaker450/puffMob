@@ -32,6 +32,17 @@ export default class Panel {
     Panel.cachedToken = storage.getString("cachedToken");
   };
 
+  private static cachedScopes: AuthScope[] = storage.getString("cachedScopes")
+    ? JSON.parse(storage.getString("cachedScopes")!)
+    : [];
+
+  public static getCachedScopes = (): AuthScope[] => this.cachedScopes;
+
+  public static setCachedScopes = (scopes: AuthScope[]) => {
+    storage.set("cachedScopes", JSON.stringify(scopes));
+    Panel.cachedScopes = scopes;
+  }
+
   constructor({ serverUrl, email, password }: PanelParams) {
     this.serverUrl = serverUrl;
     this.email = email;
@@ -85,6 +96,7 @@ export default class Panel {
 
       return res.json().then((json: AuthPacket) => {
         Panel.setCachedToken(json.session);
+        Panel.setCachedScopes(json.scopes || []);
         return json;
       });
     } catch (err) {

@@ -2,7 +2,6 @@ import { Appbar, List, useTheme } from "react-native-paper";
 import { router } from "expo-router";
 import { ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import { storage } from "@/util/storage";
 import Panel from "@/util/Panel";
 
 export default function SettingsPage() {
@@ -10,17 +9,15 @@ export default function SettingsPage() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-    const settings = JSON.parse(storage.getString("settings")!);
-    const panel = new Panel(settings);
-
-    panel.get.self().then(({ id }) => panel.get.userPerms(id! + "").then(perms => {
-      switch (true) {
-        case perms.admin:
+    Panel.getCachedScopes().forEach(scope => {
+      switch (scope) {
+        case "servers.admin":
           setAdmin(true);
+          break;
         default:
           {}
       }
-    }))
+    })
   })
 
   return (
