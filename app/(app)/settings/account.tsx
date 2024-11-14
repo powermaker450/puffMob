@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
 import { View } from "react-native";
 import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
+import UnsavedChanges from "@/components/UnsavedChanges";
 
 export default function account() {
   const theme = useTheme();
@@ -64,6 +65,12 @@ export default function account() {
     router.replace("/");
     setLogoutSplash(false);
   };
+
+  const reset = () => {
+    setNewUsername(username);
+    setNewEmail(email);
+    setPassword("");
+  }
 
   useEffect(() => {
     const settings = JSON.parse(storage.getString("settings")!);
@@ -141,6 +148,7 @@ export default function account() {
         <Appbar.BackAction
           onPressIn={handleTouch}
           onPress={() => router.back()}
+          disabled={username !== newUsername || email !== newEmail}
         />
         <Appbar.Content title="Account" />
       </Appbar.Header>
@@ -252,6 +260,11 @@ export default function account() {
           {noticeText}
         </Snackbar>
       </View>
+
+      <UnsavedChanges
+        condition={username !== newUsername || email !== newEmail}
+        reset={reset}
+      />
     </>
   );
 }

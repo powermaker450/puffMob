@@ -1,4 +1,5 @@
 import CustomView from "@/components/CustomView";
+import UnsavedChanges from "@/components/UnsavedChanges";
 import Panel, { UpdateServerParams } from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
@@ -264,19 +265,10 @@ export default function panel_settings() {
         </Snackbar>
       </View>
 
-      <View style={{ width: "90%", alignSelf: "center", bottom: 20 }}>
-        <Snackbar
-          visible={masterUrl !== newMasterUrl || companyName !== newCompanyName || allowReg !== newAllowReg || defaultTheme !== newDefaultTheme}
-          onDismiss={reset}
-          action={{
-            label: "Discard",
-            onPressIn: handleTouch,
-            onPress: reset
-          }}
-        >
-          You have unsaved changes.
-        </Snackbar>
-      </View>
+      <UnsavedChanges
+        condition={masterUrl !== newMasterUrl || companyName !== newCompanyName || allowReg !== newAllowReg || defaultTheme !== newDefaultTheme}
+        reset={reset}
+      />
     </>
   );
 }
