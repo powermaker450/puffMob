@@ -50,7 +50,7 @@ export default function Server({
 
   return (
     <Card
-      style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 10 }}
+      style={{ marginTop: 7, marginBottom: 7, width: "90%", alignSelf: "center" }}
       onPress={() => router.navigate(`/server/${id}`)}
     >
       <Card.Title title={name} subtitle={getDescription()} left={serverIcon} />

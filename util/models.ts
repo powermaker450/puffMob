@@ -311,3 +311,12 @@ export interface ResponsePaging {
   pageSize: number;
   total: number;
 }
+
+export interface ConfigResponse {
+  branding: { name: string };
+  registrationEnabled: boolean;
+  themes: {
+    active: string;
+    available: string[];
+  };
+}

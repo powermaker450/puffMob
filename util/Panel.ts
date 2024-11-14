@@ -14,7 +14,8 @@ import {
   PufferpanelServer,
   PufferpanelServerLogs,
   PufferpanelServerRunning,
-  PanelSettingResponse
+  PanelSettingResponse,
+  ConfigResponse
 } from "./models";
 import { storage } from "./storage";
 
@@ -41,7 +42,7 @@ export default class Panel {
   public static setCachedScopes = (scopes: AuthScope[]) => {
     storage.set("cachedScopes", JSON.stringify(scopes));
     Panel.cachedScopes = scopes;
-  }
+  };
 
   constructor({ serverUrl, email, password }: PanelParams) {
     this.serverUrl = serverUrl;
@@ -553,12 +554,18 @@ export default class Panel {
       }
     },
 
-    panelSetting: async (setting: PanelSetting): Promise<PanelSettingResponse> => {
+    panelSetting: async (
+      setting: PanelSetting
+    ): Promise<PanelSettingResponse> => {
       const res = await fetch(`${this.api}/settings/${setting}`, {
         headers: await this.defaultHeaders()
       });
 
-      return await this.handleResponse(res, this.get.panelSetting, setting) as PanelSettingResponse;
+      return (await this.handleResponse(
+        res,
+        this.get.panelSetting,
+        setting
+      )) as PanelSettingResponse;
     },
 
     // The documentation states that this endpoint must send a request body,
@@ -607,6 +614,22 @@ export default class Panel {
           this.get.userPerms,
           id
         )) as ModelsPermissionView;
+      } catch (err) {
+        console.warn("An unexpected error occured:", err);
+        throw err;
+      }
+    },
+
+    config: async (): Promise<ConfigResponse> => {
+      try {
+        const res = await fetch(`${this.api}/config`, {
+          headers: await this.defaultHeaders()
+        });
+
+        return (await this.handleResponse(
+          res,
+          this.get.config
+        )) as ConfigResponse;
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -731,7 +754,18 @@ export type AuthScope =
   | "panel.settings"
   | "servers.view";
 
-export type PanelSetting = "panel.settings.masterUrl" | "panel.settings.companyName" | "panel.settings.defaultTheme" | "panel.registrationEnabled" | "panel.email.provider" | "panel.email.from" | "panel.email.domain" | "panel.email.key" | "panel.email.host" | "panel.email.username" | "panel.email.password";
+export type PanelSetting =
+  | "panel.settings.masterUrl"
+  | "panel.settings.companyName"
+  | "panel.settings.defaultTheme"
+  | "panel.registrationEnabled"
+  | "panel.email.provider"
+  | "panel.email.from"
+  | "panel.email.domain"
+  | "panel.email.key"
+  | "panel.email.host"
+  | "panel.email.username"
+  | "panel.email.password";
 
 export interface AuthPacket {
   session: string;
