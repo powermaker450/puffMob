@@ -29,7 +29,10 @@ export default function ServerScreen() {
   const navigation = useNavigation();
   const [serverName, setServerName] = useState("");
   const [newName, setNewName] = useState("");
-  const [consolePerms, setConsolePerms] = useState(false);
+  const [editServerPerms, setEditServerPerms] = useState(false);
+  const [startPerms, setStartPerms] = useState(false);
+  const [stopPerms, setStopPerms] = useState(false);
+  const [sendConsolePerms, setSendConsolePerms] = useState(false);
 
   const serverSocket = control.getSocket(id as string);
 
@@ -40,57 +43,6 @@ export default function ServerScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    control.get.server(id as string).then(({ server, permissions }) => {
-      setServerName(server.name);
-      setNewName(server.name);
-
-      switch (true) {
-        case permissions.sendServerConsole:
-          setConsolePerms(true);
-        default:
-          {}
-      }
-    });
-
-    serverSocket.onopen = () => {
-      console.log("Connected to server websocket");
-      serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
-      serverSocket.send(JSON.stringify({ type: "status" }));
-
-      const interval = setInterval(() => {
-        serverSocket.send(JSON.stringify({ type: "status" }));
-        console.log("Sent keepalive");
-      }, 45_000);
-
-      serverSocket.onclose = m => {
-        console.log("Socket closed:", m.code, m.reason);
-        clearInterval(interval);
-        console.log("Killed keepalive");
-      };
-    };
-
-    serverSocket.addEventListener("message", e => {
-      const packet = JSON.parse(e.data);
-
-      if (packet.type !== "console" || !packet.data) {
-        return;
-      }
-
-      let newLogs = "";
-      for (const line of Object.values(packet.data.logs)) {
-        newLogs += line;
-      }
-
-      setLogs(
-        logs =>
-          logs +
-          newLogs.replace(
-            /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-            ""
-          )
-      );
-    });
-
     serverSocket.addEventListener("message", e => {
       const packet = JSON.parse(e.data);
 
@@ -100,16 +52,73 @@ export default function ServerScreen() {
 
       setRunning(packet.data.running);
     });
+
+    control.get.server(id as string).then(({ server, permissions }) => {
+      setServerName(server.name);
+      setNewName(server.name);
+
+      setEditServerPerms(permissions.editServerData);
+      setSendConsolePerms(permissions.sendServerConsole);
+      setStartPerms(permissions.startServer);
+      setStopPerms(permissions.stopServer);
+
+      if (permissions.viewServerConsole) {
+        setLogs("");
+        serverSocket.send(JSON.stringify({ type: "status" }));
+        serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
+
+        serverSocket.onopen = () => {
+          console.log("Connected to server websocket");
+
+          const interval = setInterval(() => {
+            serverSocket.send(JSON.stringify({ type: "status" }));
+            console.log("Sent keepalive");
+          }, 45_000);
+
+          serverSocket.onclose = m => {
+            console.log("Socket closed:", m.code, m.reason);
+            clearInterval(interval);
+            console.log("Killed keepalive");
+          };
+        };
+
+        serverSocket.addEventListener("message", e => {
+          const packet = JSON.parse(e.data);
+
+          if (packet.type !== "console" || !packet.data) {
+            return;
+          }
+
+          let newLogs = "";
+          for (const line of Object.values(packet.data.logs)) {
+            newLogs += line;
+          }
+
+          setLogs(
+            logs =>
+              logs +
+              newLogs.replace(
+                /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+                ""
+              )
+          );
+        });
+      }
+    });
   }, []);
 
   const [running, setRunning] = useState<boolean | undefined>(false);
   const [loading, setLoading] = useState(false);
   const [command, setCommand] = useState("");
-  const [logs, setLogs] = useState("");
+  const [logs, setLogs] = useState("No logs :(");
   const [nameUpdating, setNameUpdating] = useState(false);
   const [notice, setNotice] = useState(false);
   const [visible, setVisible] = useState(false);
   const openNameChange = () => {
+    if (!editServerPerms) {
+      return;
+    }
+
     haptic();
     setVisible(true);
   };
@@ -199,13 +208,19 @@ export default function ServerScreen() {
         icon="play-outline"
         onPress={handleStart}
         onPressIn={handleTouch}
+        disabled={!startPerms}
       />
     </Tooltip>
   );
 
   const stopButton = (
     <Tooltip title="Stop" enterTouchDelay={300} leaveTouchDelay={150}>
-      <Appbar.Action icon="stop" onPress={handleStop} onPressIn={handleTouch} />
+      <Appbar.Action
+        icon="stop"
+        onPress={handleStop}
+        onPressIn={handleTouch}
+        disabled={!stopPerms}
+      />
     </Tooltip>
   );
 
@@ -215,6 +230,7 @@ export default function ServerScreen() {
         icon="skull-outline"
         onPress={handleKill}
         onPressIn={handleTouch}
+        disabled={!stopPerms}
       />
     </Tooltip>
   );
@@ -246,6 +262,7 @@ export default function ServerScreen() {
           style={{ marginLeft: 10 }}
           title={serverName}
           onPress={openNameChange}
+          disabled={!editServerPerms}
         />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
@@ -308,21 +325,26 @@ export default function ServerScreen() {
             <ScrollView horizontal>
               <Text
                 selectable
-                style={{ fontSize: 11, fontFamily: "NotoSansMono_400Regular" }}
+                style={{
+                  fontSize: 11,
+                  fontFamily: "NotoSansMono_400Regular"
+                }}
               >
                 {logs}
               </Text>
             </ScrollView>
           </ScrollView>
 
-          { consolePerms && <TextInput
-            label={running ?  "Enter command..." : "Server offline"}
-            mode="outlined"
-            value={command}
-            disabled={!running}
-            onChangeText={newText => setCommand(newText)}
-            right={sendButton}
-          /> }
+          {sendConsolePerms && (
+            <TextInput
+              label={running ? "Enter command..." : "Server offline"}
+              mode="outlined"
+              value={command}
+              disabled={!running}
+              onChangeText={newText => setCommand(newText)}
+              right={sendButton}
+            />
+          )}
         </Surface>
       </CustomView>
 
