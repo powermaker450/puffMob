@@ -34,25 +34,15 @@ export default function ServerScreen() {
   const [stopPerms, setStopPerms] = useState(false);
   const [sendConsolePerms, setSendConsolePerms] = useState(false);
 
-  const serverSocket = control.getSocket(id as string);
+  let serverSocket: WebSocket;
 
   useEffect(() => {
     navigation.addListener("beforeRemove", () => {
-      serverSocket.close();
+      serverSocket && serverSocket.close();
     });
   }, [navigation]);
 
   useEffect(() => {
-    serverSocket.addEventListener("message", e => {
-      const packet = JSON.parse(e.data);
-
-      if (packet.type !== "status") {
-        return;
-      }
-
-      setRunning(packet.data.running);
-    });
-
     control.get.server(id as string).then(({ server, permissions }) => {
       setServerName(server.name);
       setNewName(server.name);
@@ -64,23 +54,18 @@ export default function ServerScreen() {
 
       if (permissions.viewServerConsole) {
         setLogs("");
-        serverSocket.send(JSON.stringify({ type: "status" }));
-        serverSocket.send(JSON.stringify({ type: "replay", since: 0 }));
 
-        serverSocket.onopen = () => {
-          console.log("Connected to server websocket");
+        serverSocket = control.getSocket(id as string);
 
-          const interval = setInterval(() => {
-            serverSocket.send(JSON.stringify({ type: "status" }));
-            console.log("Sent keepalive");
-          }, 45_000);
+        serverSocket.addEventListener("message", e => {
+          const packet = JSON.parse(e.data);
 
-          serverSocket.onclose = m => {
-            console.log("Socket closed:", m.code, m.reason);
-            clearInterval(interval);
-            console.log("Killed keepalive");
-          };
-        };
+          if (packet.type !== "status") {
+            return;
+          }
+
+          setRunning(packet.data.running);
+        });
 
         serverSocket.addEventListener("message", e => {
           const packet = JSON.parse(e.data);
@@ -103,6 +88,8 @@ export default function ServerScreen() {
               )
           );
         });
+      } else {
+        setLogs("No logs :(");
       }
     });
   }, []);
@@ -110,7 +97,7 @@ export default function ServerScreen() {
   const [running, setRunning] = useState<boolean | undefined>(false);
   const [loading, setLoading] = useState(false);
   const [command, setCommand] = useState("");
-  const [logs, setLogs] = useState("No logs :(");
+  const [logs, setLogs] = useState("");
   const [nameUpdating, setNameUpdating] = useState(false);
   const [notice, setNotice] = useState(false);
   const [visible, setVisible] = useState(false);
