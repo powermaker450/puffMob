@@ -1,8 +1,6 @@
-import haptic from "@/util/haptic";
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Card, Icon, Modal, Portal, Text, useTheme } from "react-native-paper";
+import { Card, Icon, useTheme } from "react-native-paper";
 
 interface ServerProps {
   name: string;
@@ -50,7 +48,12 @@ export default function Server({
 
   return (
     <Card
-      style={{ marginTop: 7, marginBottom: 7, width: "90%", alignSelf: "center" }}
+      style={{
+        marginTop: 7,
+        marginBottom: 7,
+        width: "90%",
+        alignSelf: "center"
+      }}
       onPress={() => router.navigate(`/server/${id}`)}
     >
       <Card.Title title={name} subtitle={getDescription()} left={serverIcon} />
