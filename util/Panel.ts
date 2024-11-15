@@ -721,8 +721,8 @@ export default class Panel {
 
 
   public readonly delete = {
-    node: async (serverId: string): Promise<void> => {
-      await fetch(`${this.api}/node/${serverId}`, {
+    node: async (nodeId: string): Promise<void> => {
+      await fetch(`${this.api}/node/${nodeId}`, {
         method: MethodOpts.delete,
         headers: await this.defaultHeaders()
       });
@@ -770,7 +770,7 @@ export default class Panel {
       });
     },
 
-    serverByDaemon: async (serverId: string): Promise<void> => {
+    serverByAdmin: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}`, {
         method: MethodOpts.delete,
         headers: await this.defaultHeaders()

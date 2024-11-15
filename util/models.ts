@@ -342,7 +342,6 @@ export interface Variable {
   display: string;
   required: boolean;
   internal?: boolean;
-  options?: PufferpanelVariableOption[];
   userEdit?: boolean;
 }
 
@@ -361,7 +360,12 @@ export interface BooleanVariable extends Variable {
   value: boolean;
 }
 
-export type PufferpanelVariable = StringVariable | NumberVariable | BooleanVariable;
+export interface OptionVariable extends Variable {
+  type: "option";
+  options: PufferpanelVariableOption[];
+}
+
+export type PufferpanelVariable = Variable | StringVariable | NumberVariable | BooleanVariable | OptionVariable;
 
 export interface PufferpanelVariableOption {
   display: string;
