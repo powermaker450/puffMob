@@ -15,6 +15,6 @@ const Notice = ({ condition, setCondition, text }: NoticeProps) => {
       </Snackbar>
     </View>
   );
-}
+};
 
 export default Notice;

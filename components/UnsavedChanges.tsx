@@ -1,6 +1,6 @@
 import { handleTouch } from "@/util/haptic";
-import { View } from "react-native"
-import { Snackbar } from "react-native-paper"
+import { View } from "react-native";
+import { Snackbar } from "react-native-paper";
 
 interface UnsavedChangesProps {
   condition: boolean;
@@ -23,7 +23,7 @@ const UnsavedChanges = ({ condition, reset }: UnsavedChangesProps) => {
         You have unsaved changes.
       </Snackbar>
     </View>
-  )
-}
+  );
+};
 
 export default UnsavedChanges;

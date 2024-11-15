@@ -71,7 +71,7 @@ export default function account() {
     setNewUsername(username);
     setNewEmail(email);
     setPassword("");
-  }
+  };
 
   useEffect(() => {
     const settings = JSON.parse(storage.getString("settings")!);
@@ -256,11 +256,7 @@ export default function account() {
         </ButtonContainer>
       </CustomView>
 
-      <Notice 
-        condition={notice}
-        setCondition={setNotice}
-        text={noticeText}
-      />
+      <Notice condition={notice} setCondition={setNotice} text={noticeText} />
 
       <UnsavedChanges
         condition={username !== newUsername || email !== newEmail}

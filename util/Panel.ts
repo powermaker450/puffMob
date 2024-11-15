@@ -140,7 +140,7 @@ export default class Panel {
     ...args: string[] // :skull:
   ): Promise<unknown> {
     if (res.status === 400 || res.status === 500) {
-      throw await res.json() as PufferpanelError;
+      throw (await res.json()) as PufferpanelError;
     }
 
     if (res.status === 401) {
@@ -261,25 +261,42 @@ export default class Panel {
               .then(({ running }) => running);
 
             server.actions = {
-              execute: async (command: string): Promise<void> => await this.actions.execute(server.id, command),
-              kill: async (): Promise<void> => await this.actions.kill(server.id),
-              start: async (): Promise<void> => await this.actions.start(server.id),
-              stop: async (): Promise<void> => await this.actions.stop(server.id),
-              extract: async (filename: string): Promise<void> => await this.get.extract(server.id, filename)
+              execute: async (command: string): Promise<void> =>
+                await this.actions.execute(server.id, command),
+              kill: async (): Promise<void> =>
+                await this.actions.kill(server.id),
+              start: async (): Promise<void> =>
+                await this.actions.start(server.id),
+              stop: async (): Promise<void> =>
+                await this.actions.stop(server.id),
+              extract: async (filename: string): Promise<void> =>
+                await this.get.extract(server.id, filename)
             };
 
             server.edit = {
-              name: async (newName: string): Promise<void> => await this.edit.serverName(server.id, newName)
+              name: async (newName: string): Promise<void> =>
+                await this.edit.serverName(server.id, newName)
             };
 
             server.get = {
               // TODO: Until I find a way to use the color codes, they will be killed
               // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-              console: async (): Promise<string> => await this.get.console(server.id).then(({ logs }) => logs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "")),
+              console: async (): Promise<string> =>
+                await this.get
+                  .console(server.id)
+                  .then(({ logs }) =>
+                    logs.replace(
+                      /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+                      ""
+                    )
+                  ),
 
-              data: async (): Promise<ServerDataResponse> => await this.get.data(server.id),
-              file: async (filename?: string): Promise<MessagesFileDesc[]> => await this.get.file(server.id, filename),
-              stats: async (): Promise<PufferpanelServerStats> => await this.get.stats(server.id)
+              data: async (): Promise<ServerDataResponse> =>
+                await this.get.data(server.id),
+              file: async (filename?: string): Promise<MessagesFileDesc[]> =>
+                await this.get.file(server.id, filename),
+              stats: async (): Promise<PufferpanelServerStats> =>
+                await this.get.stats(server.id)
             };
           }
 
@@ -308,25 +325,42 @@ export default class Panel {
           .then(({ running }) => running);
 
         data.server.actions = {
-          execute: async (command: string): Promise<void> => await this.actions.execute(data.server.id, command),
-          kill: async (): Promise<void> => await this.actions.kill(data.server.id),
-          start: async (): Promise<void> => await this.actions.start(data.server.id),
-          stop: async (): Promise<void> => await this.actions.stop(data.server.id),
-          extract: async (filename: string): Promise<void> => await this.get.extract(data.server.id, filename)
+          execute: async (command: string): Promise<void> =>
+            await this.actions.execute(data.server.id, command),
+          kill: async (): Promise<void> =>
+            await this.actions.kill(data.server.id),
+          start: async (): Promise<void> =>
+            await this.actions.start(data.server.id),
+          stop: async (): Promise<void> =>
+            await this.actions.stop(data.server.id),
+          extract: async (filename: string): Promise<void> =>
+            await this.get.extract(data.server.id, filename)
         };
 
         data.server.get = {
           // TODO: Until I find a way to use the color codes, they will be killed
           // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-          console: async (): Promise<string> => await this.get.console(data.server.id).then(({ logs }) => logs.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "")),
+          console: async (): Promise<string> =>
+            await this.get
+              .console(data.server.id)
+              .then(({ logs }) =>
+                logs.replace(
+                  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+                  ""
+                )
+              ),
 
-          data: async (): Promise<ServerDataResponse> => await this.get.data(data.server.id),
-          file: async (filename?: string): Promise<MessagesFileDesc[]> => await this.get.file(data.server.id, filename),
-          stats: async (): Promise<PufferpanelServerStats> => await this.get.stats(data.server.id),
+          data: async (): Promise<ServerDataResponse> =>
+            await this.get.data(data.server.id),
+          file: async (filename?: string): Promise<MessagesFileDesc[]> =>
+            await this.get.file(data.server.id, filename),
+          stats: async (): Promise<PufferpanelServerStats> =>
+            await this.get.stats(data.server.id)
         };
 
         data.server.edit = {
-          name: async (newName: string): Promise<void> => await this.edit.serverName(data.server.id, newName)
+          name: async (newName: string): Promise<void> =>
+            await this.edit.serverName(data.server.id, newName)
         };
 
         return data;
@@ -506,7 +540,10 @@ export default class Panel {
         headers: await this.defaultHeaders()
       });
 
-      return await this.handleResponse(res, this.get.daemon) as PufferpanelDaemonRunning;
+      return (await this.handleResponse(
+        res,
+        this.get.daemon
+      )) as PufferpanelDaemonRunning;
     },
 
     config: async (): Promise<ConfigResponse> => {
@@ -530,7 +567,11 @@ export default class Panel {
         headers: await this.defaultHeaders()
       });
 
-      return await this.handleResponse(res, this.get.console, serverId) as PufferpanelServerLogs;
+      return (await this.handleResponse(
+        res,
+        this.get.console,
+        serverId
+      )) as PufferpanelServerLogs;
     },
 
     data: async (serverId: string): Promise<ServerDataResponse> => {
@@ -538,7 +579,11 @@ export default class Panel {
         headers: await this.defaultHeaders()
       });
 
-      return await this.handleResponse(res, this.get.data, serverId) as ServerDataResponse;
+      return (await this.handleResponse(
+        res,
+        this.get.data,
+        serverId
+      )) as ServerDataResponse;
     },
 
     extract: async (serverId: string, filename: string): Promise<void> => {
@@ -547,12 +592,23 @@ export default class Panel {
       });
     },
 
-    file: async (serverId: string, filename = ""): Promise<MessagesFileDesc[]> => {
-      const res = await fetch(`${this.daemon}/server/${serverId}/file/${filename}`, {
-        headers: await this.defaultHeaders()
-      });
+    file: async (
+      serverId: string,
+      filename = ""
+    ): Promise<MessagesFileDesc[]> => {
+      const res = await fetch(
+        `${this.daemon}/server/${serverId}/file/${filename}`,
+        {
+          headers: await this.defaultHeaders()
+        }
+      );
 
-      return await this.handleResponse(res, this.get.file, serverId, filename) as MessagesFileDesc[];
+      return (await this.handleResponse(
+        res,
+        this.get.file,
+        serverId,
+        filename
+      )) as MessagesFileDesc[];
     },
 
     stats: async (serverId: string): Promise<PufferpanelServerStats> => {
@@ -560,7 +616,11 @@ export default class Panel {
         headers: await this.defaultHeaders()
       });
 
-      return await this.handleResponse(res, this.get.stats, serverId) as PufferpanelServerStats;
+      return (await this.handleResponse(
+        res,
+        this.get.stats,
+        serverId
+      )) as PufferpanelServerStats;
     }
   };
 
@@ -613,10 +673,13 @@ export default class Panel {
 
   public readonly edit = {
     serverName: async (serverId: string, newName: string): Promise<void> => {
-      await fetch(`${this.api}/servers/${serverId}/name/${encodeURIComponent(newName)}`, {
-        method: MethodOpts.put,
-        headers: await this.defaultHeaders()
-      });
+      await fetch(
+        `${this.api}/servers/${serverId}/name/${encodeURIComponent(newName)}`,
+        {
+          method: MethodOpts.put,
+          headers: await this.defaultHeaders()
+        }
+      );
     },
 
     user: async (params: UpdateUserParams): Promise<void> => {
@@ -636,7 +699,7 @@ export default class Panel {
         method: MethodOpts.post,
         headers: await this.defaultHeaders(),
         body: JSON.stringify(params)
-      })
+      });
 
       if (!res.ok) {
         throw "Invalid server response";
@@ -672,7 +735,7 @@ export default class Panel {
         headers: await this.defaultHeaders()
       });
     }
-  }
+  };
 
   public getSocket(id: string): WebSocket {
     const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";

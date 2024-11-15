@@ -7,7 +7,17 @@ import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { ActivityIndicator, Appbar, Button, List, RadioButton, Snackbar, Surface, Switch, Text, TextInput } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Appbar,
+  Button,
+  List,
+  RadioButton,
+  Surface,
+  Switch,
+  Text,
+  TextInput
+} from "react-native-paper";
 
 export default function panel_settings() {
   const settings = JSON.parse(storage.getString("settings")!);
@@ -42,7 +52,7 @@ export default function panel_settings() {
   const [newDefaultTheme, setNewDefaultTheme] = useState("");
   const [themeList, setThemeList] = useState<string[]>([]);
   const changeReg = () => {
-    newAllowReg ? haptic() : haptic("soft")
+    newAllowReg ? haptic() : haptic("soft");
     setNewAllowReg(!newAllowReg);
   };
 
@@ -52,7 +62,7 @@ export default function panel_settings() {
     setNewAllowReg(allowReg);
     setNewDefaultTheme(defaultTheme);
     setExpanded(false);
-  }
+  };
 
   const textInputMargin = {
     marginTop: 5,
@@ -112,7 +122,11 @@ export default function panel_settings() {
       "panel.settings.defaultTheme": defaultTheme
     };
 
-    if (masterUrl !== newMasterUrl && companyName !== newCompanyName && allowReg !== newAllowReg) {
+    if (
+      masterUrl !== newMasterUrl &&
+      companyName !== newCompanyName &&
+      allowReg !== newAllowReg
+    ) {
       obj["panel.settings.masterUrl"] = newMasterUrl;
       obj["panel.settings.companyName"] = newCompanyName;
       obj["panel.registrationEnabled"] = newAllowReg;
@@ -134,7 +148,8 @@ export default function panel_settings() {
       obj["panel.settings.defaultTheme"] = newDefaultTheme;
     }
 
-    panel.edit.settings(obj)
+    panel.edit
+      .settings(obj)
       .then(() => {
         showNotice();
         haptic("notificationSuccess");
@@ -152,7 +167,7 @@ export default function panel_settings() {
         }
 
         if (defaultTheme !== newDefaultTheme) {
-            setDefaultTheme(newDefaultTheme);
+          setDefaultTheme(newDefaultTheme);
         }
       })
       .catch(() => {
@@ -163,7 +178,7 @@ export default function panel_settings() {
         setLoading(false);
         setExpanded(false);
       });
-  }
+  };
 
   const loadingIcon = (
     <ActivityIndicator
@@ -177,7 +192,12 @@ export default function panel_settings() {
     <>
       <Appbar.Header>
         <Appbar.BackAction
-          disabled={masterUrl !== newMasterUrl || companyName !== newCompanyName || allowReg !== newAllowReg || defaultTheme !== newDefaultTheme}
+          disabled={
+            masterUrl !== newMasterUrl ||
+            companyName !== newCompanyName ||
+            allowReg !== newAllowReg ||
+            defaultTheme !== newDefaultTheme
+          }
           onPressIn={handleTouch}
           onPress={() => router.back()}
         />
@@ -217,11 +237,14 @@ export default function panel_settings() {
               expanded={expanded}
               onPress={() => setExpanded(!expanded)}
             >
-              <ScrollView style={{maxHeight: 100}}>
-                <RadioButton.Group value={newDefaultTheme} onValueChange={val => {
-                  haptic();
-                  setNewDefaultTheme(val);
-                }}>
+              <ScrollView style={{ maxHeight: 100 }}>
+                <RadioButton.Group
+                  value={newDefaultTheme}
+                  onValueChange={val => {
+                    haptic();
+                    setNewDefaultTheme(val);
+                  }}
+                >
                   {themeList.map((theme, index) => {
                     return (
                       <RadioButton.Item
@@ -246,31 +269,41 @@ export default function panel_settings() {
             />
           </View>
 
-          { loading ? loadingIcon : <Button
-            mode="contained"
-            onPressIn={handleTouch}
-            onPress={handleChange}
-            style={{
-              marginTop: 15,
-              marginBottom: 15,
-              width: "50%",
-              alignSelf: "center"
-            }}
-            disabled={masterUrl === newMasterUrl && companyName === newCompanyName && allowReg === newAllowReg && defaultTheme === newDefaultTheme}
-          >
-            Save
-          </Button> }
+          {loading ? (
+            loadingIcon
+          ) : (
+            <Button
+              mode="contained"
+              onPressIn={handleTouch}
+              onPress={handleChange}
+              style={{
+                marginTop: 15,
+                marginBottom: 15,
+                width: "50%",
+                alignSelf: "center"
+              }}
+              disabled={
+                masterUrl === newMasterUrl &&
+                companyName === newCompanyName &&
+                allowReg === newAllowReg &&
+                defaultTheme === newDefaultTheme
+              }
+            >
+              Save
+            </Button>
+          )}
         </Surface>
       </CustomView>
 
-      <Notice
-        condition={notice}
-        setCondition={setNotice}
-        text={noticeText}
-      />
+      <Notice condition={notice} setCondition={setNotice} text={noticeText} />
 
       <UnsavedChanges
-        condition={masterUrl !== newMasterUrl || companyName !== newCompanyName || allowReg !== newAllowReg || defaultTheme !== newDefaultTheme}
+        condition={
+          masterUrl !== newMasterUrl ||
+          companyName !== newCompanyName ||
+          allowReg !== newAllowReg ||
+          defaultTheme !== newDefaultTheme
+        }
         reset={reset}
       />
     </>

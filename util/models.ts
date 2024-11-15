@@ -139,7 +139,7 @@ export interface ModelsServerView {
     data: () => Promise<ServerDataResponse>;
     file: (filename?: string) => Promise<MessagesFileDesc[]>;
     stats: () => Promise<PufferpanelServerStats>;
-  },
+  };
   actions: {
     kill: () => Promise<void>;
     start: () => Promise<void>;
