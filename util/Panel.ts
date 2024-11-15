@@ -24,6 +24,9 @@ import {
 } from "./models";
 import { storage } from "./storage";
 
+/**
+ * A class that wraps most if not all callable methods for Pufferpanel.
+ */
 export default class Panel {
   private readonly serverUrl: string;
   private readonly email: string;
@@ -42,8 +45,18 @@ export default class Panel {
     ? JSON.parse(storage.getString("cachedScopes")!)
     : [];
 
+  /**
+   * Gets the currently cached scopes. Keep in mind the only time this cache is automatically refreshed is when the app is reopened.
+   *
+   * @returns An array of scopes.
+   */
   public static getCachedScopes = (): AuthScope[] => this.cachedScopes;
 
+  /**
+   * Updates the scope cache.
+   *
+   * @param scopes - An array of scopes
+   */
   public static setCachedScopes = (scopes: AuthScope[]) => {
     storage.set("cachedScopes", JSON.stringify(scopes));
     Panel.cachedScopes = scopes;
@@ -58,6 +71,11 @@ export default class Panel {
     this.daemon = this.serverUrl + "/proxy/daemon";
   }
 
+  /**
+   * Requests a new session token from the server.
+   *
+   * @returns A session token
+   */
   public static async getToken({
     serverUrl,
     email,
@@ -84,6 +102,11 @@ export default class Panel {
     }
   }
 
+  /**
+   * Requests a new authentication packet from the server.
+   *
+   * @returns An auth packet containing user scopes and a session token.
+   */
   public async getAuth(): Promise<AuthPacket> {
     try {
       const res = await fetch(`${this.serverUrl}/auth/login`, {
@@ -111,6 +134,11 @@ export default class Panel {
     }
   }
 
+  /**
+   * Requests the user scopes from the server.
+   *
+   * @returns An array of user scopes
+   */
   public async getScopes(): Promise<AuthScope[]> {
     // It's possible for the user to have no scopes if the server admin is really mean
     return await this.getAuth().then(packet => packet.scopes || []);
@@ -159,7 +187,15 @@ export default class Panel {
     return await res.json();
   }
 
+  /**
+   * Houses authentication-protected methods that obtain data from the server.
+   */
   public readonly get = {
+    /**
+     * Request an array of nodes from the server.
+     *
+     * @returns An array of nodes
+     */
     nodes: async (): Promise<ModelsNodeView[]> => {
       try {
         const res = await fetch(`${this.api}/nodes`, {
@@ -176,6 +212,12 @@ export default class Panel {
       }
     },
 
+    /**
+     * Request the data of a single node from the server.
+     *
+     * @param id - The node ID to request
+     * @return The requested node associated with the node ID
+     */
     node: async (id: string): Promise<ModelsNodeView> => {
       try {
         const res = await fetch(`${this.api}/nodes/${id}`, {
@@ -210,6 +252,11 @@ export default class Panel {
       }
     },
 
+    /**
+     * Sends a request for data about the current user.
+     *
+     * @returns The email, ID, and username of the current user.
+     */
     self: async (): Promise<ModelsUserView> => {
       try {
         const res = await fetch(`${this.api}/self`, {
@@ -226,6 +273,11 @@ export default class Panel {
       }
     },
 
+    /**
+     * Get the OAUTH2 clients of the current user.
+     *
+     * @returns An array of OAUTH2 clients, with id, name and description
+     */
     selfOauth2: async (): Promise<ModelsClient[]> => {
       try {
         const res = await fetch(`${this.api}/self/oauth2`, {
@@ -243,6 +295,11 @@ export default class Panel {
     },
 
     // TODO: Implement optional search parameters
+    /**
+     * Get the list of servers the current user is allowed to view.
+     *
+     * @returns An object with the paging value and an array of servers
+     */
     servers:
       async (/*{ username, node, name, limit, page }: ServerSearchParams*/): Promise<ModelsServerSearchResponse> => {
         try {
@@ -313,6 +370,12 @@ export default class Panel {
         }
       },
 
+    /**
+    * Gets a server given that the user has permissions to view it.
+    *
+    * @param id - The server ID to query
+    * @return The server associated with the ID
+    */
     server: async (id: string): Promise<ModelsGetServerResponse> => {
       try {
         // Perms is a constant parameter because without it `permissions` is null
@@ -382,6 +445,12 @@ export default class Panel {
       }
     },
 
+    /**
+    * Gets the list of OAuth2 clients for a given server.
+    *
+    * @param id - The server ID to query
+    * @return An array of OAuth2 clients
+    */
     serverOauth2: async (id: string): Promise<ModelsClient[]> => {
       try {
         const res = await fetch(`${this.api}/servers/${id}/oauth2`, {
@@ -399,6 +468,12 @@ export default class Panel {
       }
     },
 
+    /**
+    * Gets the users that have permissions on a given server.
+    *
+    * @param id - The server ID to query
+    * @return An array of users and their permissions for this server
+    */
     serverUsers: async (id: string): Promise<ModelsPermissionView[]> => {
       try {
         const res = await fetch(`${this.api}/servers/${id}/user`, {
@@ -416,6 +491,13 @@ export default class Panel {
       }
     },
 
+    /**
+    * Check if a server is running.
+    * If you want to represent real-time server status, use a websocket instead.
+    *
+    * @param id - The server ID to query
+    * @returns An object with `running` as boolean
+    */
     serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
       try {
         const res = await fetch(`${this.daemon}/server/${id}/status`, {
@@ -432,9 +514,15 @@ export default class Panel {
       }
     },
 
+    /**
+    * Gets the value of a user setting 
+    *
+    * @param key - The setting to check
+    * @returns The value of the given setting
+    */
     setting: async (key: string): Promise<ModelsChangeUserSetting> => {
       try {
-        const res = await fetch(`${this.api}/settings${key}`, {
+        const res = await fetch(`${this.api}/settings/${key}`, {
           headers: await this.defaultHeaders()
         });
 
@@ -449,7 +537,12 @@ export default class Panel {
       }
     },
 
-    templates: async (): Promise<ModelsTemplate> => {
+    /**
+    * Get all the templates the server offers.
+    *
+    * @returns An array of available templates
+    */
+    templates: async (): Promise<ModelsTemplate[]> => {
       try {
         const res = await fetch(`${this.api}/templates`, {
           headers: await this.defaultHeaders()
@@ -458,13 +551,18 @@ export default class Panel {
         return (await this.handleResponse(
           res,
           this.get.templates
-        )) as ModelsTemplate;
+        )) as ModelsTemplate[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
       }
     },
 
+    /**
+    * Gets the settings of the current user.
+    *
+    * @returns An array of settings associated with the current user
+    */
     settings: async (): Promise<ModelsUserSettingView[]> => {
       try {
         const res = await fetch(`${this.api}/userSettings`, {
@@ -481,6 +579,12 @@ export default class Panel {
       }
     },
 
+    /**
+    * Gets a setting of the Pufferpanel Instance. Requires admin privledges.
+    *
+    * @param setting - The setting to query
+    * @returns The value of the given setting
+    */
     panelSetting: async (
       setting: PanelSetting
     ): Promise<PanelSettingResponse> => {
@@ -497,22 +601,28 @@ export default class Panel {
 
     // The documentation states that this endpoint must send a request body,
     // but you cannot send a request body in a GET request, so this is kind of broken? :P
-    users: async (): Promise<ModelsUserSearchResponse> => {
-      try {
-        const res = await fetch(`${this.api}/users`, {
-          headers: await this.defaultHeaders()
-        });
+    // users: async (): Promise<ModelsUserSearchResponse> => {
+    //   try {
+    //     const res = await fetch(`${this.api}/users`, {
+    //       headers: await this.defaultHeaders()
+    //     });
+    //
+    //     return (await this.handleResponse(
+    //       res,
+    //       this.get.users
+    //     )) as ModelsUserSearchResponse;
+    //   } catch (err) {
+    //     console.warn("An unexpected error occured", err);
+    //     throw err;
+    //   }
+    // },
 
-        return (await this.handleResponse(
-          res,
-          this.get.users
-        )) as ModelsUserSearchResponse;
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
-    },
-
+    /**
+    * Gets the details of a given user. Requires admin privledges.
+    *
+    * @id - The user ID to query
+    * @returns Details associated with the given user ID
+    */
     user: async (id: string): Promise<ModelsUserView> => {
       try {
         const res = await fetch(`${this.api}/users/${id}`, {
@@ -530,6 +640,12 @@ export default class Panel {
       }
     },
 
+    /**
+    * Gets the global permissions of a given user. Requires admin privledges.
+    *
+    * @param id - The user ID to query
+    * @returns An object containing the permissions the given user has
+    */
     userPerms: async (id: string): Promise<ModelsPermissionView> => {
       try {
         const res = await fetch(`${this.api}/users/${id}/perms`, {
@@ -547,6 +663,11 @@ export default class Panel {
       }
     },
 
+    /**
+    * Check if the daemon is running.
+    *
+    * @returns An object, where `running` is boolean
+    */
     daemon: async (): Promise<PufferpanelDaemonRunning> => {
       const res = await fetch(this.daemon, {
         headers: await this.defaultHeaders()
@@ -558,6 +679,11 @@ export default class Panel {
       )) as PufferpanelDaemonRunning;
     },
 
+    /**
+    * Gets the settings of the Pufferpanel Instance set by the server admin, like instance name, theme, etc.
+    *
+    * @returns An object containing the settings of the Pufferpanel Instance
+    */
     config: async (): Promise<ConfigResponse> => {
       try {
         const res = await fetch(`${this.api}/config`, {
@@ -574,6 +700,12 @@ export default class Panel {
       }
     },
 
+    /**
+    * Gets the logs of a given server.
+    *
+    * @param serverId - The server ID to query
+    * @returns An object containing how far back the log data goes and the logs themselves
+    */
     console: async (serverId: string): Promise<PufferpanelServerLogs> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/console`, {
         headers: await this.defaultHeaders()
@@ -586,6 +718,12 @@ export default class Panel {
       )) as PufferpanelServerLogs;
     },
 
+    /**
+    * Gets the config data of a given server.
+    *
+    * @param serverId - The server to query
+    * @returns An object containing `data`, which contains the config variables for the given server.
+    */
     data: async (serverId: string): Promise<ServerDataResponse> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/data`, {
         headers: await this.defaultHeaders()
@@ -598,12 +736,24 @@ export default class Panel {
       )) as ServerDataResponse;
     },
 
+    /**
+    * Extract a file on a given server.
+    *
+    * @param serverId - The server to extract on
+    * @param filename - The file to extract
+    */
     extract: async (serverId: string, filename: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/extract/${filename}`, {
         headers: await this.defaultHeaders()
       });
     },
 
+    /**
+    * Gets the file listing on a given server.
+    *
+    * @param serverId - The server to query
+    * @param [filename=""] The folder to index
+    */
     file: async (
       serverId: string,
       filename = ""
@@ -623,6 +773,13 @@ export default class Panel {
       )) as MessagesFileDesc[];
     },
 
+    /**
+    * Get the performance stats of a server.
+    * If you want continuous performance stats, use a websocket.
+    *
+    * @param serverId - The server to query
+    * @returns An object with cpu and memory usage
+    */
     stats: async (serverId: string): Promise<PufferpanelServerStats> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/stats`, {
         headers: await this.defaultHeaders()
@@ -636,7 +793,13 @@ export default class Panel {
     }
   };
 
+  /**
+  * Houses authentication-protected methods that create new data on the server.
+  */
   public readonly create = {
+    /**
+     * Creates a new node.
+     */
     node: async (): Promise<ModelsNodeView> => {
       try {
         const res = await fetch(`${this.api}/nodes`, {
@@ -654,6 +817,9 @@ export default class Panel {
       }
     },
 
+    /**
+     * Creates a new user-scoped oauth2 client.
+     */
     oauth2: async (): Promise<ModelsCreatedClient> => {
       try {
         const res = await fetch(`${this.api}/self/oauth2`, {
@@ -671,6 +837,9 @@ export default class Panel {
       }
     },
 
+    /**
+     * Creates a new server.
+     */
     server: async (): Promise<PufferpanelServer> => {
       throw new Error("Not implemented");
 
@@ -683,7 +852,16 @@ export default class Panel {
     }
   };
 
+  /**
+   * Houses all authentication-protected methods that modify data on the server.
+   */
   public readonly edit = {
+    /**
+     * Edits the name of a given server.
+     *
+     * @param serverId - The server to edit
+     * @param newName - The new name for the server
+     */
     serverName: async (serverId: string, newName: string): Promise<void> => {
       await fetch(
         `${this.api}/servers/${serverId}/name/${encodeURIComponent(newName)}`,
@@ -694,6 +872,11 @@ export default class Panel {
       );
     },
 
+    /**
+     * Updates settings for the current user.
+     *
+     * @param params - An object containing the new user settings as well as the correct password
+     */
     user: async (params: UpdateUserParams): Promise<void> => {
       const res = await fetch(`${this.api}/self`, {
         method: MethodOpts.put,
@@ -706,6 +889,11 @@ export default class Panel {
       }
     },
 
+    /**
+     * Update this Pufferpanel Instance's settings.
+     *
+     * @param params - The new settings for this Pufferpanel Instance
+     */
     settings: async (params: UpdateServerParams): Promise<void> => {
       const res = await fetch(`${this.api}/settings`, {
         method: MethodOpts.post,
@@ -720,7 +908,15 @@ export default class Panel {
   };
 
 
+  /**
+   * Houses authentication-protected methods that delete data on the server.
+   */
   public readonly delete = {
+    /**
+     * Delete a node.
+     *
+     * @param nodeId - The node to delete
+     */
     node: async (nodeId: string): Promise<void> => {
       await fetch(`${this.api}/node/${nodeId}`, {
         method: MethodOpts.delete,
@@ -728,6 +924,11 @@ export default class Panel {
       });
     },
 
+    /**
+    * Delete a user-scoped oauth2 client.
+    * 
+    * @param clientId - The OAuth2 client to delete
+    */
     oauth2: async (clientId: string): Promise<void> => {
       await fetch(`${this.api}/self/oauth2/${clientId}`, {
         method: MethodOpts.delete,
@@ -735,6 +936,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Delete a server
+     *
+     * @param serverId - The server to delete
+     */
     server: async (serverId: string): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}`, {
         method: MethodOpts.delete,
@@ -742,6 +948,12 @@ export default class Panel {
       });
     },
 
+    /**
+     * Delete a server-scoped OAuth2 client.
+     *
+     * @param serverId - The server to use
+     * @param clientId - The OAuth2 client to delete
+     */
     serverOauth2: async (serverId: string, clientId: string): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}/oauth2/${clientId}`, {
         method: MethodOpts.delete,
@@ -749,6 +961,12 @@ export default class Panel {
       });
     },
 
+    /**
+     * Revoke a users' permission to access a server
+     *
+     * @param serverId - The server to reference
+     * @param userEmail - The email address of the user to revoke access from
+     */
     serverUser: async (serverId: string, userEmail: string): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}/users/${userEmail}`, {
         method: MethodOpts.delete,
@@ -756,6 +974,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Delete a server template.
+     *
+     * @param name - The name of the server template to delete
+     */
     template: async (name: string): Promise<void> => {
       await fetch(`${this.api}/templates/${name}`, {
         method: MethodOpts.delete,
@@ -763,6 +986,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Delete a user account. Requires admin privledges.
+     *
+     * @param userId - The user account to delete
+     */
     user: async (userId: string): Promise<void> => {
       await fetch(`${this.api}/users/${userId}`, {
         method: MethodOpts.delete,
@@ -770,6 +998,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Delete a server as an administrator. Requires admin privledges.
+     *
+     * @param serverId - The server to delete
+     */
     serverByAdmin: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}`, {
         method: MethodOpts.delete,
@@ -777,6 +1010,12 @@ export default class Panel {
       });
     },
 
+    /**
+     * Remove a file from a server.
+     *
+     * @param serverId - The server to reference
+     * @param filename - The file/folder to delete
+     */
     file: async (serverId: string, filename: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/file/${filename}`, {
         method: MethodOpts.delete,
@@ -785,7 +1024,16 @@ export default class Panel {
     }
   }
 
+  /**
+   * Miscellaneous authentication-protected methods that execute real-time actions on the server.
+   */
   public readonly actions = {
+    /**
+     * Send a command to a server.
+     *
+     * @param serverId - The server to reference
+     * @param command - The command to execute.
+     */
     execute: async (serverId: string, command: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/console`, {
         headers: await this.defaultHeaders(),
@@ -793,6 +1041,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Forcibly stop a server.
+     *
+     * @param serverId - The server to force stop
+     */
     kill: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/kill`, {
         method: MethodOpts.post,
@@ -800,6 +1053,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Start a server.
+     *
+     * @param serverId - The server to start
+     */
     start: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/start`, {
         method: MethodOpts.post,
@@ -807,6 +1065,11 @@ export default class Panel {
       });
     },
 
+    /**
+     * Stop a server gracefully.
+     *
+     * @param serverId - The server to stop
+     */
     stop: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/stop`, {
         method: MethodOpts.post,
@@ -815,6 +1078,12 @@ export default class Panel {
     }
   };
 
+  /**
+   * Obtain a websocket connected to a given server.
+   *
+   * @param id - The server to connect to
+   * @returns A server websocket that can listen for server logs, start/stop status and performance stats.
+   */
   public getSocket(id: string): WebSocket {
     const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";
     const address = this.daemon.replace("https://", "").replace("http://", "");

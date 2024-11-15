@@ -55,6 +55,15 @@ export interface ModelsGetServerResponse {
   server: ModelsServerView;
 }
 
+export interface ModelsCreateNode {
+  name: string;
+  privateHost: string;
+  privatePort: number;
+  publicHost: string;
+  publicPort: number;
+  sftpPort: number;
+}
+
 export interface ModelsNodeView {
   id: number;
   isLocal: boolean;
