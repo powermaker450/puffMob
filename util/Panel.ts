@@ -298,6 +298,12 @@ export default class Panel {
               stats: async (): Promise<PufferpanelServerStats> =>
                 await this.get.stats(server.id)
             };
+
+            server.delete = {
+              oauth2: async (clientId: string): Promise<void> => await this.delete.serverOauth2(server.id, clientId),
+              user: async (userId: string): Promise<void> => await this.delete.serverUser(server.id, userId),
+              file: async (filename: string): Promise<void> => await this.delete.file(server.id, filename)
+            }
           }
 
           return data;
@@ -362,6 +368,12 @@ export default class Panel {
           name: async (newName: string): Promise<void> =>
             await this.edit.serverName(data.server.id, newName)
         };
+
+        data.server.delete = {
+          oauth2: async (clientId: string): Promise<void> => await this.delete.serverOauth2(data.server.id, clientId),
+          user: async (userId: string): Promise<void> => await this.delete.serverUser(data.server.id, userId),
+          file: async (filename: string): Promise<void> => await this.delete.file(data.server.id, filename)
+        }
 
         return data;
       } catch (err) {
@@ -706,6 +718,72 @@ export default class Panel {
       }
     }
   };
+
+
+  public readonly delete = {
+    node: async (serverId: string): Promise<void> => {
+      await fetch(`${this.api}/node/${serverId}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    oauth2: async (clientId: string): Promise<void> => {
+      await fetch(`${this.api}/self/oauth2/${clientId}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    server: async (serverId: string): Promise<void> => {
+      await fetch(`${this.api}/servers/${serverId}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    serverOauth2: async (serverId: string, clientId: string): Promise<void> => {
+      await fetch(`${this.api}/servers/${serverId}/oauth2/${clientId}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    serverUser: async (serverId: string, userEmail: string): Promise<void> => {
+      await fetch(`${this.api}/servers/${serverId}/users/${userEmail}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    template: async (name: string): Promise<void> => {
+      await fetch(`${this.api}/templates/${name}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    user: async (userId: string): Promise<void> => {
+      await fetch(`${this.api}/users/${userId}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    serverByDaemon: async (serverId: string): Promise<void> => {
+      await fetch(`${this.daemon}/server/${serverId}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    file: async (serverId: string, filename: string): Promise<void> => {
+      await fetch(`${this.daemon}/server/${serverId}/file/${filename}`, {
+        method: MethodOpts.delete,
+        headers: await this.defaultHeaders()
+      });
+    }
+  }
 
   public readonly actions = {
     execute: async (serverId: string, command: string): Promise<void> => {
