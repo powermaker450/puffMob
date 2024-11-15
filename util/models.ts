@@ -96,20 +96,48 @@ export interface ModelsPermissionView {
   viewUsers: boolean;
 }
 
+export interface Install {
+  type: string;
+}
+
+export interface JavaDLCommandData extends Install {
+  type: "javadl";
+  version: string;
+}
+
+export interface ForgeDLCommandData extends Install {
+  type: "forgedl";
+  version: string;
+  target: string;
+}
+
+export interface InstallCommandData extends Install {
+  type: "command";
+  commands: string[];
+}
+
+export interface WriteFileCommandData extends Install {
+  type: "writefile";
+  target: string;
+  text: string;
+}
+
+export type InstallCommand = Install | JavaDLCommandData | ForgeDLCommandData | InstallCommandData | WriteFileCommandData;
+
 export interface ModelsServerCreation {
   data: { [key: string]: PufferpanelVariable };
   display: string;
-  environment: object;
+  environment: SupportedEnv;
   id: string;
-  install: object[];
+  install: InstallCommand[];
   name: string;
   node: number;
   requirements: PufferpanelRequirements;
   run: PufferpanelExecution;
-  supportedEnvironments: object[];
+  supportedEnvironments: SupportedEnv[];
   tasks: PufferpanelTask;
   type: string;
-  uninstall: object[];
+  uninstall?: object[];
   users: string[];
 }
 
@@ -150,6 +178,11 @@ export interface ModelsServerView {
   edit: {
     name: (newName: string) => Promise<void>;
   };
+  delete: {
+    oauth2: (clientId: string) => Promise<void>;
+    user: (userId: string) => Promise<void>;
+    file: (filename: string) => Promise<void>;
+  }
 }
 
 export interface ModelsSettingResponse {
@@ -158,23 +191,33 @@ export interface ModelsSettingResponse {
 
 export interface ModelsSupportedEnv {
   type: string;
-  image?: string;
 }
+
+export interface StandardSupportedEnv extends ModelsSupportedEnv {
+  type: "standard";
+}
+
+export interface DockerSupportedEnv extends ModelsSupportedEnv {
+  type: "docker";
+  image: string;
+}
+
+export type SupportedEnv = ModelsSupportedEnv | StandardSupportedEnv | DockerSupportedEnv;
 
 export interface ModelsTemplate {
   data: { [key: string]: PufferpanelVariable };
   display: string;
-  environment: ModelsSupportedEnv;
+  environment: SupportedEnv;
   id: string;
-  install: object[];
+  install: InstallCommand[];
   name: string;
   readme: string;
   requirements: PufferpanelRequirements;
   run: PufferpanelExecution;
-  supportedEnvironments: ModelsSupportedEnv[];
+  supportedEnvironments: SupportedEnv[];
   tasks: PufferpanelTask;
   type: string;
-  uninstall: object[];
+  uninstall?: object[];
 }
 
 export interface ModelsUser {
@@ -241,15 +284,15 @@ export interface PufferpanelRequirements {
 export interface PufferpanelServer {
   data: { [key: string]: PufferpanelVariable };
   display: string;
-  environment: object;
+  environment: SupportedEnv;
   id: string;
-  install: object[];
+  install: InstallCommand[];
   requirements: PufferpanelRequirements;
   run: PufferpanelExecution;
-  supportedEnvironments: object[];
+  supportedEnvironments: SupportedEnv[];
   tasks: { [key: string]: PufferpanelTask };
   type: string;
-  uninstall: object[];
+  uninstall?: object[];
 }
 
 export interface PufferpanelServerData {
@@ -259,15 +302,15 @@ export interface PufferpanelServerData {
 export interface PufferpanelServerDataAdmin {
   data: { [key: string]: PufferpanelVariable };
   display: string;
-  environment: object;
+  environment: SupportedEnv;
   id: string;
-  install: object[];
+  install: InstallCommand[];
   requirements: PufferpanelRequirements;
   run: PufferpanelExecution;
-  supportedEnvironments: object[];
+  supportedEnvironments: SupportedEnv[];
   tasks: { [key: string]: PufferpanelTask };
   type: string;
-  uninstall: object[];
+  uninstall?: object[];
 }
 
 export interface PufferpanelServerIdResponse {
@@ -294,16 +337,31 @@ export interface PufferpanelTask {
   operations: object[];
 }
 
-export interface PufferpanelVariable {
+export interface Variable {
   desc: string;
   display: string;
-  internal: boolean;
-  options: PufferpanelVariableOption[];
   required: boolean;
-  type: string;
-  userEdit: boolean;
-  value: object;
+  internal?: boolean;
+  options?: PufferpanelVariableOption[];
+  userEdit?: boolean;
 }
+
+export interface StringVariable extends Variable {
+  type: "string" | "";
+  value: string;
+}
+
+export interface NumberVariable extends Variable {
+  type: "integer";
+  value: number;
+}
+
+export interface BooleanVariable extends Variable {
+  type: "boolean";
+  value: boolean;
+}
+
+export type PufferpanelVariable = StringVariable | NumberVariable | BooleanVariable;
 
 export interface PufferpanelVariableOption {
   display: string;
