@@ -2,13 +2,20 @@ export interface DaemonFeatures {
   features: string[];
 }
 
-export interface MessagesFileDesc {
-  extension: string;
-  isFile: boolean;
-  modifyTime: number;
+export interface FolderDesc {
+  isFile: false;
+  name: string;
+}
+
+export interface FileDesc {
+  isFile: true;
   name: string;
   size: number;
+  extension: string;
+  modifyTime: number;
 }
+
+export type MessagesFileDesc = FolderDesc | FileDesc;
 
 export interface ModelsChangeSetting {
   value: object;
@@ -129,15 +136,19 @@ export interface ModelsServerView {
   running?: boolean;
   get: {
     console: () => Promise<string>;
-  };
+    data: () => Promise<ServerDataResponse>;
+    file: (filename?: string) => Promise<MessagesFileDesc[]>;
+    stats: () => Promise<PufferpanelServerStats>;
+  },
   actions: {
-    kill: () => Promise<boolean>;
-    start: () => Promise<boolean>;
-    stop: () => Promise<boolean>;
-    execute: (command: string) => Promise<boolean>;
+    kill: () => Promise<void>;
+    start: () => Promise<void>;
+    stop: () => Promise<void>;
+    execute: (command: string) => Promise<void>;
+    extract: (filename: string) => Promise<void>;
   };
   edit: {
-    name: (newName: string) => Promise<boolean>;
+    name: (newName: string) => Promise<void>;
   };
 }
 
@@ -319,4 +330,8 @@ export interface ConfigResponse {
     active: string;
     available: string[];
   };
+}
+
+export interface ServerDataResponse {
+  data: { [key: string]: PufferpanelVariable };
 }
