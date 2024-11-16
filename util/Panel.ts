@@ -1,3 +1,4 @@
+import PufferpanelSocket from "./PufferpanelSocket";
 import {
   ModelsChangeUserSetting,
   ModelsClient,
@@ -1084,37 +1085,11 @@ export default class Panel {
    * @param id - The server to connect to
    * @returns A server websocket that can listen for server logs, start/stop status and performance stats.
    */
-  public getSocket(id: string): WebSocket {
+  public getSocket(id: string): PufferpanelSocket {
     const protocol = this.serverUrl.startsWith("https://") ? "wss://" : "ws://";
     const address = this.daemon.replace("https://", "").replace("http://", "");
 
-    // Sending Authorization through the websocket is possible, but tsc won't like it
-    // https://stackoverflow.com/a/69366089
-    // @ts-ignore
-    const socket = new WebSocket(`${protocol}${address}/socket/${id}`, null, {
-      headers: {
-        ["Authorization"]: `Bearer ${Panel.cachedToken}`
-      }
-    });
-
-    socket.onopen = () => {
-      console.log("Connected to server websocket");
-      socket.send(JSON.stringify({ type: "status" }));
-      socket.send(JSON.stringify({ type: "replay", since: 0 }));
-
-      const interval = setInterval(() => {
-        socket.send(JSON.stringify({ type: "status" }));
-        console.log("Sent keepalive");
-      }, 45_000);
-
-      socket.onclose = m => {
-        clearInterval(interval);
-        console.log("Killed keepalive");
-        console.log("socket closed:", m.code, m.reason);
-      };
-    };
-
-    return socket;
+    return new PufferpanelSocket(protocol + address + "/socket/" + id, Panel.cachedToken!);
   }
 }
 

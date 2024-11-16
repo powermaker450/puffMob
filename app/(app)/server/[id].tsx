@@ -15,10 +15,11 @@ import {
   Dialog,
   Portal,
   Button,
-  Snackbar
+  Snackbar,
 } from "react-native-paper";
 import { ScrollView, View } from "react-native";
 import haptic, { handleTouch } from "@/util/haptic";
+import PufferpanelSocket from "@/util/PufferpanelSocket";
 
 export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
@@ -34,7 +35,7 @@ export default function ServerScreen() {
   const [stopPerms, setStopPerms] = useState(false);
   const [sendConsolePerms, setSendConsolePerms] = useState(false);
 
-  let serverSocket: WebSocket;
+  let serverSocket: PufferpanelSocket;
 
   useEffect(() => {
     navigation.addListener("beforeRemove", () => {
@@ -53,29 +54,15 @@ export default function ServerScreen() {
       setStopPerms(permissions.stopServer);
 
       if (permissions.viewServerConsole) {
-        setLogs("");
-
         serverSocket = control.getSocket(id as string);
 
-        serverSocket.addEventListener("message", e => {
-          const packet = JSON.parse(e.data);
-
-          if (packet.type !== "status") {
-            return;
-          }
-
-          setRunning(packet.data.running);
+        serverSocket.on("status", r => {
+          setRunning(r.running);
         });
 
-        serverSocket.addEventListener("message", e => {
-          const packet = JSON.parse(e.data);
-
-          if (packet.type !== "console" || !packet.data) {
-            return;
-          }
-
+        serverSocket.on("console", l => {
           let newLogs = "";
-          for (const line of Object.values(packet.data.logs)) {
+          for (const line of l.logs) {
             newLogs += line;
           }
 
@@ -87,7 +74,7 @@ export default function ServerScreen() {
                 ""
               )
           );
-        });
+        })
       } else {
         setLogs("No logs :(");
       }
