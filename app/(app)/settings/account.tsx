@@ -22,7 +22,6 @@ import {
   Button,
   Dialog,
   Portal,
-  Snackbar,
   Surface,
   Text,
   TextInput,
@@ -34,7 +33,6 @@ import { router } from "expo-router";
 import ButtonContainer from "@/components/ButtonContainer";
 import { useEffect, useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
-import { View } from "react-native";
 import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
 import UnsavedChanges from "@/components/UnsavedChanges";
 import Notice from "@/components/Notice";
