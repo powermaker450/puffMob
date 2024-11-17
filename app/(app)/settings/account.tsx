@@ -267,7 +267,7 @@ export default function account() {
             mode="contained"
             onPressIn={handleTouch}
             onPress={() => setLogoutSplash(true)}
-            style={{ ...buttonMargin }}
+            style={buttonMargin}
           >
             Log out
           </Button>
