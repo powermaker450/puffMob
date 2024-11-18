@@ -1065,6 +1065,7 @@ export default class Panel {
      */
     execute: async (serverId: string, command: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/console`, {
+        method: MethodOpts.post,
         headers: await this.defaultHeaders(),
         body: command
       });
