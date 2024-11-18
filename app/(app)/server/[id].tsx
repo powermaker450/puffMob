@@ -30,11 +30,14 @@ import {
   Dialog,
   Portal,
   Button,
+  BottomNavigationRoute,
+  BottomNavigation,
 } from "react-native-paper";
 import haptic, { handleTouch } from "@/util/haptic";
 import PufferpanelSocket from "@/util/PufferpanelSocket";
 import ConsoleView from "@/components/ConsoleView";
 import Notice from "@/components/Notice";
+import NavBar from "@/components/NavBar";
 
 export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
@@ -206,6 +209,25 @@ export default function ServerScreen() {
     </Tooltip>
   );
 
+  const consoleView = () => (
+    <ConsoleView
+      serverId={id as string}
+      logs={logs}
+      running={running}
+      sendConsolePerms={sendConsolePerms}
+    />
+  );
+
+  const mainRoute: BottomNavigationRoute = {
+    key: "console",
+    title: "Console",
+    focusedIcon: "console-line"
+  };
+  const [routes, setRoutes] = useState<BottomNavigationRoute[]>([mainRoute]);
+  const renderScene = BottomNavigation.SceneMap({
+    console: consoleView
+  });
+  
   return (
     <>
       <Appbar.Header>
@@ -263,11 +285,9 @@ export default function ServerScreen() {
         </Dialog>
       </Portal>
 
-      <ConsoleView
-        serverId={id as string}
-        logs={logs}
-        running={running}
-        sendConsolePerms={sendConsolePerms}
+      <NavBar
+        routes={routes}
+        renderScene={renderScene}
       />
 
       <Notice

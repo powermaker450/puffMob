@@ -21,7 +21,6 @@ import NavBar from "@/components/NavBar";
 import ServerPage from "@/components/ServerPage";
 import SettingsPage from "@/components/SettingsPage";
 import Panel, { PanelParams } from "@/util/Panel";
-import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, BottomNavigation, Text } from "react-native-paper";
@@ -50,7 +49,6 @@ export default function home() {
     </CustomView>
   );
 
-  const [index, setIndex] = useState(0);
   const [routes, setRoutes] = useState<NavigationRoute[]>([mainRoute]);
 
   useEffect(() => {
@@ -91,8 +89,7 @@ export default function home() {
         loadingScreen
       ) : (
         <NavBar
-          state={{ index, routes }}
-          onIndexChange={setIndex}
+          routes={routes}
           renderScene={renderScene}
         />
       )}
