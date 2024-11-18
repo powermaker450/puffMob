@@ -17,6 +17,7 @@
  */
 
 import CustomView from "@/components/CustomView";
+import NavBar from "@/components/NavBar";
 import ServerPage from "@/components/ServerPage";
 import SettingsPage from "@/components/SettingsPage";
 import Panel, { PanelParams } from "@/util/Panel";
@@ -89,12 +90,9 @@ export default function home() {
       {loading ? (
         loadingScreen
       ) : (
-        <BottomNavigation
-          navigationState={{ index, routes }}
+        <NavBar
+          state={{ index, routes }}
           onIndexChange={setIndex}
-          onTabPress={handleTouch}
-          sceneAnimationType="shifting"
-          sceneAnimationEnabled
           renderScene={renderScene}
         />
       )}
