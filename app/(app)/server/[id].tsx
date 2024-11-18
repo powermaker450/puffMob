@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel, { PanelParams } from "@/util/Panel";
-import { storage } from "@/util/storage";
+import Panel from "@/util/Panel";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -41,11 +40,9 @@ import Notice from "@/components/Notice";
 import NavBar from "@/components/NavBar";
 import CustomView from "@/components/CustomView";
 import ServerManagePage from "@/components/ServerManagePage";
-import Server from "@/components/Server";
 
 export default function ServerScreen() {
-  const settings: PanelParams = JSON.parse(storage.getString("settings")!);
-  const control = new Panel(settings);
+  const control = Panel.getPanel();
   const theme = useTheme();
 
   const { id } = useLocalSearchParams();

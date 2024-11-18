@@ -38,8 +38,7 @@ import {
 } from "react-native-paper";
 
 export default function panel_settings() {
-  const settings = JSON.parse(storage.getString("settings")!);
-  const panel = new Panel(settings);
+  const panel = Panel.getPanel();
 
   const [urlLoad, setUrlLoad] = useState(true);
   const [nameLoad, setNameLoad] = useState(true);

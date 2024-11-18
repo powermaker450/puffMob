@@ -38,6 +38,8 @@ import UnsavedChanges from "@/components/UnsavedChanges";
 import Notice from "@/components/Notice";
 
 export default function account() {
+  const panel = Panel.getPanel();
+
   const theme = useTheme();
 
   const buttonMargin = {
@@ -90,9 +92,6 @@ export default function account() {
   };
 
   useEffect(() => {
-    const settings = JSON.parse(storage.getString("settings")!);
-    const panel = new Panel(settings);
-
     panel.get.self().then(({ username, email }) => {
       setUsername(username!);
       setNewUsername(username!);
@@ -106,9 +105,7 @@ export default function account() {
 
   const handleDetailsChange = () => {
     setLoading(true);
-
     const settings: PanelParams = JSON.parse(storage.getString("settings")!);
-    const panel = new Panel(settings);
     let obj: UpdateUserParams;
 
     if (newUsername !== username && newEmail !== email) {

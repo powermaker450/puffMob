@@ -63,14 +63,16 @@ export default class Panel {
     ? JSON.parse(storage.getString("cachedScopes")!)
     : [];
 
-  /**
-   * Gets the stored settings of the current user.
-   *
-   * @returns An object containing the stored serverUrl, email, and password of the current user.
-   */
-  public static getSettings = (): PanelParams => storage.getString("settings")
+  private static getSettings = (): PanelParams => storage.getString("settings")
     ? JSON.parse(storage.getString("settings")!)
     : { serverUrl: "", email: "", password: "" };
+
+  /**
+   * Preconfigures a panel object with the currently stored user settings.
+   *
+   * @returns A panel object preconfigured with the stored user settings.
+   */
+  public static getPanel = (): Panel => new Panel(Panel.getSettings()); 
  
   /**
    * Gets the currently cached scopes. Keep in mind the only time this cache is automatically refreshed is when the app is reopened.

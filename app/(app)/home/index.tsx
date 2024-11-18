@@ -52,11 +52,7 @@ export default function home() {
   const [routes, setRoutes] = useState<NavigationRoute[]>([mainRoute]);
 
   useEffect(() => {
-    const settings: PanelParams = storage.getString("settings")
-      ? JSON.parse(storage.getString("settings")!)
-      : null;
-
-    const panel = new Panel(settings);
+    const panel = Panel.getPanel();
     panel.getScopes().then(scopes => {
       let newRoutes: NavigationRoute[] = [mainRoute];
 
