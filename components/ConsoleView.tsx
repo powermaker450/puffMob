@@ -15,7 +15,7 @@ interface ConsoleViewProps {
 const ConsoleView = ({ serverId, logs, running, sendConsolePerms }: ConsoleViewProps) => {
   const theme = useTheme();
   const scrollViewRef = useRef<ScrollView>(null);
-  const control = new Panel(Panel.getSettings());
+  const control = Panel.getPanel();
 
   const [command, setCommand] = useState("");
 

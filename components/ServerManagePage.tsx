@@ -8,7 +8,7 @@ interface ServerManagePageProps {
 }
 
 const ServerManagePage = ({ id }: ServerManagePageProps) => {
-  const panel = new Panel(Panel.getSettings());
+  const panel = Panel.getPanel();
   const [userPerms, setUserPerms] = useState(false);
 
   useEffect(() => {
