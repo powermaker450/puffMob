@@ -32,12 +32,16 @@ import {
   Button,
   BottomNavigationRoute,
   BottomNavigation,
+  Text
 } from "react-native-paper";
 import haptic, { handleTouch } from "@/util/haptic";
 import PufferpanelSocket from "@/util/PufferpanelSocket";
 import ConsoleView from "@/components/ConsoleView";
 import Notice from "@/components/Notice";
 import NavBar from "@/components/NavBar";
+import CustomView from "@/components/CustomView";
+import ServerManagePage from "@/components/ServerManagePage";
+import Server from "@/components/Server";
 
 export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
@@ -61,8 +65,34 @@ export default function ServerScreen() {
     });
   }, [navigation]);
 
+  const consoleView = () => (
+    <ConsoleView
+      serverId={id as string}
+      logs={logs}
+      running={running}
+      sendConsolePerms={sendConsolePerms}
+    />
+  );
+
+  const managementPage = () => (
+    <ServerManagePage id={id as string} />
+  );
+
+  const mainRoute: BottomNavigationRoute = {
+    key: "console",
+    title: "Console",
+    focusedIcon: "console-line"
+  };
+  const [routes, setRoutes] = useState<BottomNavigationRoute[]>([mainRoute]);
+  const renderScene = BottomNavigation.SceneMap({
+    console: consoleView,
+    files: () => <CustomView><Text>Files Page</Text></CustomView>,
+    settings: managementPage
+  });
+
   useEffect(() => {
     control.get.server(id as string).then(({ server, permissions }) => {
+      // First view stuff
       setServerName(server.name);
       setNewName(server.name);
 
@@ -96,6 +126,22 @@ export default function ServerScreen() {
       } else {
         setLogs("No logs :(");
       }
+
+      // Getting and setting the rest of the user permissions
+      let newRoutes: BottomNavigationRoute[] = [mainRoute];
+      permissions.viewServerFiles && newRoutes.push({
+        key: "files",
+        title: "Files",
+        focusedIcon: "folder"
+      });
+
+      permissions.editServerData && newRoutes.push({
+        key: "settings",
+        title: "Settings",
+        focusedIcon: "cog"
+      });
+
+      setRoutes(newRoutes);
     });
   }, []);
 
@@ -208,25 +254,6 @@ export default function ServerScreen() {
       />
     </Tooltip>
   );
-
-  const consoleView = () => (
-    <ConsoleView
-      serverId={id as string}
-      logs={logs}
-      running={running}
-      sendConsolePerms={sendConsolePerms}
-    />
-  );
-
-  const mainRoute: BottomNavigationRoute = {
-    key: "console",
-    title: "Console",
-    focusedIcon: "console-line"
-  };
-  const [routes, setRoutes] = useState<BottomNavigationRoute[]>([mainRoute]);
-  const renderScene = BottomNavigation.SceneMap({
-    console: consoleView
-  });
   
   return (
     <>
