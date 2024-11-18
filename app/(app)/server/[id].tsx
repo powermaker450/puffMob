@@ -30,12 +30,11 @@ import {
   Dialog,
   Portal,
   Button,
-  Snackbar,
 } from "react-native-paper";
-import { View } from "react-native";
 import haptic, { handleTouch } from "@/util/haptic";
 import PufferpanelSocket from "@/util/PufferpanelSocket";
 import ConsoleView from "@/components/ConsoleView";
+import Notice from "@/components/Notice";
 
 export default function ServerScreen() {
   const settings: PanelParams = JSON.parse(storage.getString("settings")!);
@@ -271,15 +270,11 @@ export default function ServerScreen() {
         sendConsolePerms={sendConsolePerms}
       />
 
-      <View style={{ width: "90%", alignSelf: "center" }}>
-        <Snackbar
-          visible={notice}
-          onDismiss={() => setNotice(false)}
-          style={{ bottom: 20 }}
-        >
-          Name saved!
-        </Snackbar>
-      </View>
+      <Notice
+        condition={notice}
+        setCondition={setNotice}
+        text="Name saved!"
+      />
     </>
   );
 }
