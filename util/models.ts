@@ -117,7 +117,7 @@ export interface ModelsPermissionView {
   viewNodes: string;
   viewServerConsole: boolean;
   viewServerFiles: boolean;
-  viewServerStats: string;
+  viewServerStats: boolean;
   viewServers: boolean;
   viewTemplates: boolean;
   viewUsers: boolean;
