@@ -134,7 +134,7 @@ export default function ServerScreen() {
 
       permissions.editServerData && newRoutes.push({
         key: "settings",
-        title: "Settings",
+        title: "Manage",
         focusedIcon: "cog"
       });
 
