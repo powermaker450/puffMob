@@ -38,7 +38,8 @@ import {
   PufferpanelServerStats,
   MessagesFileDesc,
   PufferpanelError,
-  PufferpanelDaemonRunning
+  PufferpanelDaemonRunning,
+  PermissionsUpdate
 } from "./models";
 import { storage } from "./storage";
 
@@ -362,7 +363,8 @@ export default class Panel {
 
             server.edit = {
               name: async (newName: string): Promise<void> =>
-                await this.edit.serverName(server.id, newName)
+                await this.edit.serverName(server.id, newName),
+              user: async (email: string, perms: ModelsPermissionView): Promise<void> => await this.edit.serverUser(server.id, email, perms)
             };
 
             server.get = {
@@ -462,7 +464,8 @@ export default class Panel {
 
         data.server.edit = {
           name: async (newName: string): Promise<void> =>
-            await this.edit.serverName(data.server.id, newName)
+            await this.edit.serverName(data.server.id, newName),
+          user: async (email: string, perms: ModelsPermissionView): Promise<void> => await this.edit.serverUser(data.server.id, email, perms)
         };
 
         data.server.delete = {
@@ -940,6 +943,15 @@ export default class Panel {
       if (!res.ok) {
         throw "Invalid server response";
       }
+    },
+
+    serverUser: async (serverId: string, email: string, perms: PermissionsUpdate): Promise<void> => {
+      console.log("Perms:", perms);
+      await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
+        method: MethodOpts.put,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(perms)
+      });
     }
   };
 

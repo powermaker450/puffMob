@@ -15,10 +15,7 @@ export default function users() {
   const [userList, setUserList] = useState<ModelsPermissionView[]>([]);
 
   useEffect(() => {
-    panel.get.serverUsers(id as string).then(users => {
-      users.forEach(user => console.log(user));
-      setUserList(users);
-    });
+    panel.get.serverUsers(id as string).then(users => setUserList(users));
   }, []);
 
   const noUsers = (

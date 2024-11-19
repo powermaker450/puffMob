@@ -123,6 +123,23 @@ export interface ModelsPermissionView {
   viewUsers: boolean;
 }
 
+export interface PermissionsUpdate {
+  username: string;
+  email: string;
+  serverIdentifier: string;
+  editServerData: boolean;
+  editServerUsers: boolean;
+  installServer: boolean;
+  putServerFiles: boolean;
+  sendServerConsole: boolean;
+  sftpServer: boolean;
+  startServer: boolean;
+  stopServer: boolean;
+  viewServerConsole: boolean;
+  viewServerFiles: boolean;
+  viewServerStats: boolean;
+}
+
 export interface Install {
   type: string;
 }
@@ -209,6 +226,7 @@ export interface ModelsServerView {
   };
   edit: {
     name: (newName: string) => Promise<void>;
+    user: (email: string, perms: PermissionsUpdate) => Promise<void>;
   };
   delete: {
     oauth2: (clientId: string) => Promise<void>;

@@ -18,18 +18,21 @@
 
 import Panel from "@/util/Panel";
 import haptic from "@/util/haptic";
-import { ModelsPermissionView } from "@/util/models";
+import { PermissionsUpdate } from "@/util/models";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Checkbox, List, useTheme } from "react-native-paper";
 
 interface ManageUserProps {
-  user: ModelsPermissionView;
+  user: PermissionsUpdate;
 }
 
 // Lets not destructure the user because then I'd have to destructure all their permissions
 const ManageUser = ({ user }: ManageUserProps) => {
+  const { id } = useLocalSearchParams();
   const theme = useTheme();
   const panel = Panel.getPanel();
+  let updatedUser = user;
 
   const [editServer, setEditServer] = useState(false);
   const [installServer, setInstallServer] = useState(false);
@@ -42,6 +45,8 @@ const ManageUser = ({ user }: ManageUserProps) => {
   const [viewFiles, setViewFiles] = useState(false);
   const [editFiles, setEditFiles] = useState(false);
   const [editUsers, setEditUsers] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setEditServer(user.editServerData);
@@ -63,7 +68,10 @@ const ManageUser = ({ user }: ManageUserProps) => {
   };
 
   const editPerms = () => {
-    console.log("Edited permissions");
+    setLoading(true);
+    const { email } = user;
+
+    panel.edit.serverUser(id as string, email, updatedUser).finally(() => setLoading(false));
   };
 
   return (
@@ -78,24 +86,28 @@ const ManageUser = ({ user }: ManageUserProps) => {
             title="Edit server config"
             onPress={() => {
               haptic(editServer ? "contextClick" : "soft");
+              updatedUser.editServerData = !updatedUser.editServerData;
               setEditServer(!editServer);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={editServer ? "checked" : "unchecked"} />
+              <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
 
           <List.Item
             title="Install server"
             onPress={() => {
               haptic(installServer ? "contextClick" : "soft");
+              updatedUser.installServer = !updatedUser.installServer;
               setInstallServer(!installServer);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={installServer ? "checked" : "unchecked"} />
+              <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
         </List.Accordion>
 
@@ -108,44 +120,52 @@ const ManageUser = ({ user }: ManageUserProps) => {
             title="View console"
             onPress={() => {
               haptic(viewConsole ? "contextClick" : "soft");
+              updatedUser.viewServerConsole = !updatedUser.viewServerConsole;
               setViewConsole(!viewConsole);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={viewConsole ? "checked" : "unchecked"} />
+              <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
 
           <List.Item
             title="Send commands"
             onPress={() => {
               haptic(sendConsole ? "contextClick" : "soft");
+              updatedUser.sendServerConsole = !updatedUser.sendServerConsole;
               setSendConsole(!sendConsole);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={sendConsole ? "checked" : "unchecked"} />
+              <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
 
           <List.Item
             title="Start"
             onPress={() => {
               haptic(start ? "contextClick" : "soft");
+              updatedUser.startServer = !updatedUser.startServer;
               setStart(!start);
               editPerms();
             }}
-            right={() => <Checkbox status={start ? "checked" : "unchecked"} />}
+            right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
+            disabled={loading}
           />
 
           <List.Item
             title="Stop & kill"
             onPress={() => {
               haptic(stop ? "contextClick" : "soft");
+              updatedUser.stopServer = !updatedUser.stopServer;
               setStop(!stop);
               editPerms();
             }}
-            right={() => <Checkbox status={stop ? "checked" : "unchecked"} />}
+            right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
+            disabled={loading}
           />
         </List.Accordion>
 
@@ -158,34 +178,40 @@ const ManageUser = ({ user }: ManageUserProps) => {
             title="SFTP Access"
             onPress={() => {
               haptic(sftp ? "contextClick" : "soft");
+              updatedUser.sftpServer = !updatedUser.sftpServer;
               setSftp(!sftp);
               editPerms();
             }}
-            right={() => <Checkbox status={sftp ? "checked" : "unchecked"} />}
+            right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
+            disabled={loading}
           />
 
           <List.Item
             title="View and Download Files"
             onPress={() => {
               haptic(viewFiles ? "contextClick" : "soft");
+              updatedUser.viewServerFiles = !updatedUser.viewServerFiles;
               setViewFiles(!viewFiles);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={viewFiles ? "checked" : "unchecked"} />
+              <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
 
           <List.Item
             title="Edit and Upload Files"
             onPress={() => {
               haptic(editFiles ? "contextClick" : "soft");
+              updatedUser.putServerFiles = !updatedUser.putServerFiles;
               setEditFiles(!editFiles);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={editFiles ? "checked" : "unchecked"} />
+              <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
         </List.Accordion>
 
@@ -198,22 +224,26 @@ const ManageUser = ({ user }: ManageUserProps) => {
             title="View CPU/RAM Stats"
             onPress={() => {
               haptic(stats ? "contextClick" : "soft");
+              updatedUser.viewServerStats = !updatedUser.viewServerStats;
               setStats(!stats);
               editPerms();
             }}
-            right={() => <Checkbox status={stats ? "checked" : "unchecked"} />}
+            right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
+            disabled={loading}
           />
 
           <List.Item
             title="Edit Users"
             onPress={() => {
               haptic(editUsers ? "contextClick" : "soft");
+              updatedUser.editServerUsers = !updatedUser.editServerUsers;
               setEditUsers(!editUsers);
               editPerms();
             }}
             right={() => (
-              <Checkbox status={editFiles ? "checked" : "unchecked"} />
+              <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
             )}
+            disabled={loading}
           />
         </List.Accordion>
       </List.Accordion>
