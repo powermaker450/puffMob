@@ -61,11 +61,14 @@ const ManageUser = ({ user }: ManageUserProps) => {
     setEditFiles(user.putServerFiles);
   }, []);
 
+  const centeredMargin: any = { width: "95%", margin: "auto" };
   const iconMargin = { marginLeft: 15 };
   const accordionStyle = {
     backgroundColor: theme.colors.surfaceVariant,
     borderRadius: 20
   };
+
+  const innerAccordionStyle = { ...accordionStyle, ...centeredMargin, marginTop: 7, marginBottom: 7 };
 
   const editPerms = () => {
     setLoading(true);
@@ -75,12 +78,17 @@ const ManageUser = ({ user }: ManageUserProps) => {
   };
 
   return (
-    <List.Section style={{ width: "95%", margin: "auto" }}>
-      <List.Accordion title={user.username} style={accordionStyle}>
+    <List.Section style={centeredMargin}>
+      <List.Accordion
+        title={user.username}
+        style={accordionStyle}
+        left={() => <List.Icon icon="account" style={iconMargin} />}
+      >
         <List.Accordion
           title="Server"
           description="General server configuration"
           left={() => <List.Icon icon="cog" style={iconMargin} />}
+          style={{ marginTop: 14, marginBottom: 7, ...accordionStyle, ...centeredMargin}}
         >
           <List.Item
             title="Edit server config"
@@ -94,6 +102,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -108,6 +117,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
         </List.Accordion>
 
@@ -115,6 +125,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
           title="Console"
           description="Server logs and command execution"
           left={() => <List.Icon icon="console-line" style={iconMargin} />}
+          style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
         >
           <List.Item
             title="View console"
@@ -128,6 +139,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -142,6 +154,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -154,6 +167,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
             }}
             right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -166,6 +180,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
             }}
             right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
             disabled={loading}
+            style={centeredMargin}
           />
         </List.Accordion>
 
@@ -173,6 +188,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
           title="File system"
           description="Manipulation of the files on the server"
           left={() => <List.Icon icon="folder-cog" style={iconMargin} />}
+          style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
         >
           <List.Item
             title="SFTP Access"
@@ -184,6 +200,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
             }}
             right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -198,6 +215,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -212,6 +230,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
         </List.Accordion>
 
@@ -219,6 +238,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
           title="Administrative"
           description="Administrative permissions"
           left={() => <List.Icon icon="server-security" style={iconMargin} />}
+          style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
         >
           <List.Item
             title="View CPU/RAM Stats"
@@ -230,6 +250,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
             }}
             right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
             disabled={loading}
+            style={centeredMargin}
           />
 
           <List.Item
@@ -244,6 +265,7 @@ const ManageUser = ({ user }: ManageUserProps) => {
               <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
             )}
             disabled={loading}
+            style={centeredMargin}
           />
         </List.Accordion>
       </List.Accordion>
