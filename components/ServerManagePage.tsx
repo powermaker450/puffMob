@@ -44,7 +44,13 @@ const ServerManagePage = () => {
         description="Edit the config for your server"
         style={{ display: editPerms ? "flex" : "none" }}
         disabled
-        left={() => <List.Icon icon="file-code" style={{ marginLeft: 15 }} color={theme.colors.onSurfaceDisabled} />}
+        left={() => (
+          <List.Icon
+            icon="file-code"
+            style={{ marginLeft: 15 }}
+            color={theme.colors.onSurfaceDisabled}
+          />
+        )}
       />
 
       <List.Item
@@ -52,18 +58,25 @@ const ServerManagePage = () => {
         description="Manage users access to the server"
         onPress={() => router.navigate(`/server/${id}/users`)}
         style={{ display: userPerms ? "flex" : "none" }}
-        left={() => <List.Icon icon="account-multiple-plus" style={{ marginLeft: 15 }} />}
+        left={() => (
+          <List.Icon icon="account-multiple-plus" style={{ marginLeft: 15 }} />
+        )}
       />
 
       <List.Item
         title="OAuth2 Clients"
         description="Manage all your OAuth2 clients for this server"
         disabled
-        left={() => <List.Icon icon="server-security" style={{ marginLeft: 15 }} color={theme.colors.onSurfaceDisabled} />}
-      >
-      </List.Item>
+        left={() => (
+          <List.Icon
+            icon="server-security"
+            style={{ marginLeft: 15 }}
+            color={theme.colors.onSurfaceDisabled}
+          />
+        )}
+      ></List.Item>
     </ScrollView>
-  )
-}
+  );
+};
 
 export default ServerManagePage;

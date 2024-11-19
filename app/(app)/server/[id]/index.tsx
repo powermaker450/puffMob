@@ -78,7 +78,11 @@ export default function ServerScreen() {
   const [routes, setRoutes] = useState<BottomNavigationRoute[]>([mainRoute]);
   const renderScene = BottomNavigation.SceneMap({
     console: consoleView,
-    files: () => <CustomView><Text>Files Page</Text></CustomView>,
+    files: () => (
+      <CustomView>
+        <Text>Files Page</Text>
+      </CustomView>
+    ),
     settings: ServerManagePage
   });
 
@@ -114,24 +118,26 @@ export default function ServerScreen() {
                 ""
               )
           );
-        })
+        });
       } else {
         setLogs("No logs :(");
       }
 
       // Getting and setting the rest of the user permissions
       let newRoutes: BottomNavigationRoute[] = [mainRoute];
-      permissions.viewServerFiles && newRoutes.push({
-        key: "files",
-        title: "Files",
-        focusedIcon: "folder"
-      });
+      permissions.viewServerFiles &&
+        newRoutes.push({
+          key: "files",
+          title: "Files",
+          focusedIcon: "folder"
+        });
 
-      permissions.editServerData && newRoutes.push({
-        key: "settings",
-        title: "Manage",
-        focusedIcon: "cog"
-      });
+      permissions.editServerData &&
+        newRoutes.push({
+          key: "settings",
+          title: "Manage",
+          focusedIcon: "cog"
+        });
 
       setRoutes(newRoutes);
     });
@@ -246,7 +252,7 @@ export default function ServerScreen() {
       />
     </Tooltip>
   );
-  
+
   return (
     <>
       <Appbar.Header>
@@ -304,16 +310,9 @@ export default function ServerScreen() {
         </Dialog>
       </Portal>
 
-      <NavBar
-        routes={routes}
-        renderScene={renderScene}
-      />
+      <NavBar routes={routes} renderScene={renderScene} />
 
-      <Notice
-        condition={notice}
-        setCondition={setNotice}
-        text="Name saved!"
-      />
+      <Notice condition={notice} setCondition={setNotice} text="Name saved!" />
     </>
   );
 }

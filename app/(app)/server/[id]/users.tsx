@@ -15,27 +15,37 @@ export default function users() {
   const [userList, setUserList] = useState<ModelsPermissionView[]>([]);
 
   useEffect(() => {
-    panel.get.serverUsers(id as string)
-      .then(users => {
-        users.forEach(user => console.log(user));
-        setUserList(users);
-      });
+    panel.get.serverUsers(id as string).then(users => {
+      users.forEach(user => console.log(user));
+      setUserList(users);
+    });
   }, []);
 
-  const noUsers = <CustomView><Text>You are all alone...</Text></CustomView>;
+  const noUsers = (
+    <CustomView>
+      <Text>You are all alone...</Text>
+    </CustomView>
+  );
 
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPressIn={handleTouch} onPress={() => router.back()} />
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => router.back()}
+        />
         <Appbar.Content title="Users" />
       </Appbar.Header>
 
-      {!userList.length ? noUsers : <ScrollView style={{ width: "100%" }}>
-        {userList.map((user, index) => {
-          return <ManageUser user={user} key={index} />
-        })}
-      </ScrollView> }
+      {!userList.length ? (
+        noUsers
+      ) : (
+        <ScrollView style={{ width: "100%" }}>
+          {userList.map((user, index) => {
+            return <ManageUser user={user} key={index} />;
+          })}
+        </ScrollView>
+      )}
     </>
   );
 }

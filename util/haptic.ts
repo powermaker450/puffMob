@@ -36,6 +36,6 @@ export default function haptic(
   type: keyof typeof HapticFeedbackTypes | HapticFeedbackTypes = "contextClick"
 ) {
   trigger(type, options);
-};
+}
 
 export const handleTouch = () => haptic();

@@ -18,7 +18,7 @@
 
 import { handleTouch } from "@/util/haptic";
 import { useState } from "react";
-import { BottomNavigation, BottomNavigationRoute } from "react-native-paper"
+import { BottomNavigation, BottomNavigationRoute } from "react-native-paper";
 
 const exampleScene = BottomNavigation.SceneMap({});
 
@@ -39,7 +39,7 @@ const NavBar = ({ routes, renderScene }: NavBarProps) => {
       sceneAnimationEnabled
       renderScene={renderScene}
     />
-  )
-}
+  );
+};
 
 export default NavBar;

@@ -37,7 +37,6 @@ const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
       });
   };
 
-
   const sendButton = (
     <TextInput.Icon
       icon="send-outline"

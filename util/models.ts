@@ -149,7 +149,12 @@ export interface WriteFileCommandData extends Install {
   text: string;
 }
 
-export type InstallCommand = Install | JavaDLCommandData | ForgeDLCommandData | InstallCommandData | WriteFileCommandData;
+export type InstallCommand =
+  | Install
+  | JavaDLCommandData
+  | ForgeDLCommandData
+  | InstallCommandData
+  | WriteFileCommandData;
 
 export interface ModelsServerCreation {
   data: { [key: string]: PufferpanelVariable };
@@ -209,7 +214,7 @@ export interface ModelsServerView {
     oauth2: (clientId: string) => Promise<void>;
     user: (userId: string) => Promise<void>;
     file: (filename: string) => Promise<void>;
-  }
+  };
 }
 
 export interface ModelsSettingResponse {
@@ -229,7 +234,10 @@ export interface DockerSupportedEnv extends ModelsSupportedEnv {
   image: string;
 }
 
-export type SupportedEnv = ModelsSupportedEnv | StandardSupportedEnv | DockerSupportedEnv;
+export type SupportedEnv =
+  | ModelsSupportedEnv
+  | StandardSupportedEnv
+  | DockerSupportedEnv;
 
 export interface ModelsTemplate {
   data: { [key: string]: PufferpanelVariable };
@@ -392,7 +400,12 @@ export interface OptionVariable extends Variable {
   options: PufferpanelVariableOption[];
 }
 
-export type PufferpanelVariable = Variable | StringVariable | NumberVariable | BooleanVariable | OptionVariable;
+export type PufferpanelVariable =
+  | Variable
+  | StringVariable
+  | NumberVariable
+  | BooleanVariable
+  | OptionVariable;
 
 export interface PufferpanelVariableOption {
   display: string;

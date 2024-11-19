@@ -18,9 +18,9 @@
 
 import Panel from "@/util/Panel";
 import haptic from "@/util/haptic";
-import { ModelsPermissionView } from "@/util/models"
+import { ModelsPermissionView } from "@/util/models";
 import { useEffect, useState } from "react";
-import { Checkbox, List, useTheme } from "react-native-paper"
+import { Checkbox, List, useTheme } from "react-native-paper";
 
 interface ManageUserProps {
   user: ModelsPermissionView;
@@ -57,18 +57,18 @@ const ManageUser = ({ user }: ManageUserProps) => {
   }, []);
 
   const iconMargin = { marginLeft: 15 };
-  const accordionStyle = { backgroundColor: theme.colors.surfaceVariant, borderRadius: 20 };
+  const accordionStyle = {
+    backgroundColor: theme.colors.surfaceVariant,
+    borderRadius: 20
+  };
 
   const editPerms = () => {
     console.log("Edited permissions");
-  }
+  };
 
   return (
     <List.Section style={{ width: "95%", margin: "auto" }}>
-      <List.Accordion
-        title={user.username}
-        style={accordionStyle}
-      >
+      <List.Accordion title={user.username} style={accordionStyle}>
         <List.Accordion
           title="Server"
           description="General server configuration"
@@ -81,9 +81,9 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setEditServer(!editServer);
               editPerms();
             }}
-            right={() => <Checkbox
-              status={editServer ? "checked" : "unchecked"}
-            />}
+            right={() => (
+              <Checkbox status={editServer ? "checked" : "unchecked"} />
+            )}
           />
 
           <List.Item
@@ -93,7 +93,9 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setInstallServer(!installServer);
               editPerms();
             }}
-            right={() => <Checkbox status={installServer ? "checked" : "unchecked"} />}
+            right={() => (
+              <Checkbox status={installServer ? "checked" : "unchecked"} />
+            )}
           />
         </List.Accordion>
 
@@ -109,7 +111,9 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setViewConsole(!viewConsole);
               editPerms();
             }}
-            right={() => <Checkbox status={viewConsole ? "checked" : "unchecked"} />}
+            right={() => (
+              <Checkbox status={viewConsole ? "checked" : "unchecked"} />
+            )}
           />
 
           <List.Item
@@ -119,7 +123,9 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setSendConsole(!sendConsole);
               editPerms();
             }}
-            right={() => <Checkbox status={sendConsole ? "checked" : "unchecked"} />}
+            right={() => (
+              <Checkbox status={sendConsole ? "checked" : "unchecked"} />
+            )}
           />
 
           <List.Item
@@ -165,7 +171,9 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setViewFiles(!viewFiles);
               editPerms();
             }}
-            right={() => <Checkbox status={viewFiles ? "checked" : "unchecked"} />}
+            right={() => (
+              <Checkbox status={viewFiles ? "checked" : "unchecked"} />
+            )}
           />
 
           <List.Item
@@ -175,7 +183,9 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setEditFiles(!editFiles);
               editPerms();
             }}
-            right={() => <Checkbox status={editFiles ? "checked" : "unchecked"} />}
+            right={() => (
+              <Checkbox status={editFiles ? "checked" : "unchecked"} />
+            )}
           />
         </List.Accordion>
 
@@ -201,12 +211,14 @@ const ManageUser = ({ user }: ManageUserProps) => {
               setEditUsers(!editUsers);
               editPerms();
             }}
-            right={() => <Checkbox status={editFiles ? "checked" : "unchecked"} />}
+            right={() => (
+              <Checkbox status={editFiles ? "checked" : "unchecked"} />
+            )}
           />
         </List.Accordion>
       </List.Accordion>
     </List.Section>
-  )
-}
+  );
+};
 
-export default ManageUser
+export default ManageUser;

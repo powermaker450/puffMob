@@ -84,10 +84,7 @@ export default function home() {
       {loading ? (
         loadingScreen
       ) : (
-        <NavBar
-          routes={routes}
-          renderScene={renderScene}
-        />
+        <NavBar routes={routes} renderScene={renderScene} />
       )}
     </>
   );
