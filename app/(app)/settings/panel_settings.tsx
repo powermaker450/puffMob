@@ -21,20 +21,20 @@ import Notice from "@/components/Notice";
 import UnsavedChanges from "@/components/UnsavedChanges";
 import Panel, { UpdateServerParams } from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
-import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import {
   ActivityIndicator,
   Appbar,
   Button,
+  Checkbox,
   List,
   RadioButton,
   Surface,
-  Switch,
   Text,
-  TextInput
+  TextInput,
+  useTheme
 } from "react-native-paper";
 
 export default function panel_settings() {
@@ -254,7 +254,10 @@ export default function panel_settings() {
               expanded={expanded}
               onPress={() => setExpanded(!expanded)}
             >
-              <ScrollView style={{ maxHeight: 100 }}>
+              <ScrollView
+                style={{ maxHeight: 100 }}
+                contentContainerStyle={{ width: "95%" }}
+              >
                 <RadioButton.Group
                   value={newDefaultTheme}
                   onValueChange={val => {
@@ -275,16 +278,19 @@ export default function panel_settings() {
                 </RadioButton.Group>
               </ScrollView>
             </List.Accordion>
-          </List.Section>
 
-          <View style={{ marginTop: 10, alignItems: "center" }}>
-            <Text style={{ marginBottom: 5 }}>Allow public registration</Text>
-            <Switch
-              value={newAllowReg}
-              onValueChange={changeReg}
-              disabled={loading || regLoad}
+            <List.Item
+              title="Allow public registration"
+              disabled={regLoad}
+              onPress={changeReg}
+              right={() => (
+                <Checkbox
+                  status={newAllowReg ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
+              )}
             />
-          </View>
+          </List.Section>
 
           {loading ? (
             loadingIcon
