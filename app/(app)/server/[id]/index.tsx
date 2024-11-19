@@ -64,15 +64,10 @@ export default function ServerScreen() {
 
   const consoleView = () => (
     <ConsoleView
-      serverId={id as string}
       logs={logs}
       running={running}
       sendConsolePerms={sendConsolePerms}
     />
-  );
-
-  const managementPage = () => (
-    <ServerManagePage id={id as string} />
   );
 
   const mainRoute: BottomNavigationRoute = {
@@ -84,7 +79,7 @@ export default function ServerScreen() {
   const renderScene = BottomNavigation.SceneMap({
     console: consoleView,
     files: () => <CustomView><Text>Files Page</Text></CustomView>,
-    settings: managementPage
+    settings: ServerManagePage
   });
 
   useEffect(() => {

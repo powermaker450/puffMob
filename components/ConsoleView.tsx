@@ -4,18 +4,19 @@ import { ScrollView } from "react-native";
 import { useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";
 import Panel from "@/util/Panel";
+import { useLocalSearchParams } from "expo-router";
 
 interface ConsoleViewProps {
-  serverId: string;
   logs: string;
   running?: boolean;
   sendConsolePerms?: boolean;
 }
 
-const ConsoleView = ({ serverId, logs, running, sendConsolePerms }: ConsoleViewProps) => {
+const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
   const theme = useTheme();
   const scrollViewRef = useRef<ScrollView>(null);
   const control = Panel.getPanel();
+  const { id } = useLocalSearchParams();
 
   const [command, setCommand] = useState("");
 
@@ -25,7 +26,7 @@ const ConsoleView = ({ serverId, logs, running, sendConsolePerms }: ConsoleViewP
     }
 
     control.get
-      .server(serverId)
+      .server(id as string)
       .then(({ server }) => {
         server.actions.execute(command);
         setCommand("");
