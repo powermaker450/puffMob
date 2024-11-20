@@ -17,18 +17,19 @@
  */
 
 import Panel from "@/util/Panel";
-import haptic from "@/util/haptic";
+import haptic, { handleTouch } from "@/util/haptic";
 import { PermissionsUpdate } from "@/util/models";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Checkbox, List, useTheme } from "react-native-paper";
+import { Button, Checkbox, Dialog, List, Portal, Text, useTheme } from "react-native-paper";
 
 interface ManageUserProps {
   user: PermissionsUpdate;
+  setRemoved: React.Dispatch<React.SetStateAction<number>>;
 }
 
 // Lets not destructure the user because then I'd have to destructure all their permissions
-const ManageUser = ({ user }: ManageUserProps) => {
+const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
   const panel = Panel.getPanel();
@@ -77,199 +78,237 @@ const ManageUser = ({ user }: ManageUserProps) => {
     panel.edit.serverUser(id as string, email, updatedUser).finally(() => setLoading(false));
   };
 
+  const [dialog, setDialog] = useState(false);
+  const openDialog = () => {
+    haptic();
+    setDialog(true);
+  }
+
+  const deleteUser = () => {
+    setLoading(true);
+    setDialog(false);
+    panel.delete.serverUser(user.serverIdentifier, user.email)
+      .then(() => {
+        setRemoved(Math.random());
+        haptic("notificationSuccess");
+      })
+      .catch(() => haptic("notificationError"))
+      .finally(() => setLoading(false));
+  }
+
   return (
-    <List.Section style={centeredMargin}>
-      <List.Accordion
-        title={user.username}
-        style={accordionStyle}
-        left={() => <List.Icon icon="account" style={iconMargin} />}
-      >
+    <>
+      <List.Section style={centeredMargin}>
         <List.Accordion
-          title="Server"
-          description="General server configuration"
-          left={() => <List.Icon icon="cog" style={iconMargin} />}
-          style={{ marginTop: 14, marginBottom: 7, ...accordionStyle, ...centeredMargin}}
+          title={user.username}
+          style={accordionStyle}
+          onLongPress={openDialog}
+          delayLongPress={300}
+          left={() => <List.Icon icon="account" style={iconMargin} />}
         >
-          <List.Item
-            title="Edit server config"
-            onPress={() => {
-              haptic(editServer ? "contextClick" : "soft");
-              updatedUser.editServerData = !updatedUser.editServerData;
-              setEditServer(!editServer);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
+          <List.Accordion
+            title="Server"
+            description="General server configuration"
+            left={() => <List.Icon icon="cog" style={iconMargin} />}
+            style={{ marginTop: 14, marginBottom: 7, ...accordionStyle, ...centeredMargin}}
+          >
+            <List.Item
+              title="Edit server config"
+              onPress={() => {
+                haptic(editServer ? "contextClick" : "soft");
+                updatedUser.editServerData = !updatedUser.editServerData;
+                setEditServer(!editServer);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
 
-          <List.Item
-            title="Install server"
-            onPress={() => {
-              haptic(installServer ? "contextClick" : "soft");
-              updatedUser.installServer = !updatedUser.installServer;
-              setInstallServer(!installServer);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
+            <List.Item
+              title="Install server"
+              onPress={() => {
+                haptic(installServer ? "contextClick" : "soft");
+                updatedUser.installServer = !updatedUser.installServer;
+                setInstallServer(!installServer);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
+          </List.Accordion>
+
+          <List.Accordion
+            title="Console"
+            description="Server logs and command execution"
+            left={() => <List.Icon icon="console-line" style={iconMargin} />}
+            style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
+          >
+            <List.Item
+              title="View console"
+              onPress={() => {
+                haptic(viewConsole ? "contextClick" : "soft");
+                updatedUser.viewServerConsole = !updatedUser.viewServerConsole;
+                setViewConsole(!viewConsole);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
+
+            <List.Item
+              title="Send commands"
+              onPress={() => {
+                haptic(sendConsole ? "contextClick" : "soft");
+                updatedUser.sendServerConsole = !updatedUser.sendServerConsole;
+                setSendConsole(!sendConsole);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
+
+            <List.Item
+              title="Start"
+              onPress={() => {
+                haptic(start ? "contextClick" : "soft");
+                updatedUser.startServer = !updatedUser.startServer;
+                setStart(!start);
+                editPerms();
+              }}
+              right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
+              disabled={loading}
+              style={centeredMargin}
+            />
+
+            <List.Item
+              title="Stop & kill"
+              onPress={() => {
+                haptic(stop ? "contextClick" : "soft");
+                updatedUser.stopServer = !updatedUser.stopServer;
+                setStop(!stop);
+                editPerms();
+              }}
+              right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
+              disabled={loading}
+              style={centeredMargin}
+            />
+          </List.Accordion>
+
+          <List.Accordion
+            title="File system"
+            description="Manipulation of the files on the server"
+            left={() => <List.Icon icon="folder-cog" style={iconMargin} />}
+            style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
+          >
+            <List.Item
+              title="SFTP Access"
+              onPress={() => {
+                haptic(sftp ? "contextClick" : "soft");
+                updatedUser.sftpServer = !updatedUser.sftpServer;
+                setSftp(!sftp);
+                editPerms();
+              }}
+              right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
+              disabled={loading}
+              style={centeredMargin}
+            />
+
+            <List.Item
+              title="View and Download Files"
+              onPress={() => {
+                haptic(viewFiles ? "contextClick" : "soft");
+                updatedUser.viewServerFiles = !updatedUser.viewServerFiles;
+                setViewFiles(!viewFiles);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
+
+            <List.Item
+              title="Edit and Upload Files"
+              onPress={() => {
+                haptic(editFiles ? "contextClick" : "soft");
+                updatedUser.putServerFiles = !updatedUser.putServerFiles;
+                setEditFiles(!editFiles);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
+          </List.Accordion>
+
+          <List.Accordion
+            title="Administrative"
+            description="Administrative permissions"
+            left={() => <List.Icon icon="server-security" style={iconMargin} />}
+            style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
+          >
+            <List.Item
+              title="View CPU/RAM Stats"
+              onPress={() => {
+                haptic(stats ? "contextClick" : "soft");
+                updatedUser.viewServerStats = !updatedUser.viewServerStats;
+                setStats(!stats);
+                editPerms();
+              }}
+              right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
+              disabled={loading}
+              style={centeredMargin}
+            />
+
+            <List.Item
+              title="Edit Users"
+              onPress={() => {
+                haptic(editUsers ? "contextClick" : "soft");
+                updatedUser.editServerUsers = !updatedUser.editServerUsers;
+                setEditUsers(!editUsers);
+                editPerms();
+              }}
+              right={() => (
+                <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
+              )}
+              disabled={loading}
+              style={centeredMargin}
+            />
+          </List.Accordion>
         </List.Accordion>
+      </List.Section>
 
-        <List.Accordion
-          title="Console"
-          description="Server logs and command execution"
-          left={() => <List.Icon icon="console-line" style={iconMargin} />}
-          style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
-        >
-          <List.Item
-            title="View console"
-            onPress={() => {
-              haptic(viewConsole ? "contextClick" : "soft");
-              updatedUser.viewServerConsole = !updatedUser.viewServerConsole;
-              setViewConsole(!viewConsole);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
-
-          <List.Item
-            title="Send commands"
-            onPress={() => {
-              haptic(sendConsole ? "contextClick" : "soft");
-              updatedUser.sendServerConsole = !updatedUser.sendServerConsole;
-              setSendConsole(!sendConsole);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
-
-          <List.Item
-            title="Start"
-            onPress={() => {
-              haptic(start ? "contextClick" : "soft");
-              updatedUser.startServer = !updatedUser.startServer;
-              setStart(!start);
-              editPerms();
-            }}
-            right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
-            disabled={loading}
-            style={centeredMargin}
-          />
-
-          <List.Item
-            title="Stop & kill"
-            onPress={() => {
-              haptic(stop ? "contextClick" : "soft");
-              updatedUser.stopServer = !updatedUser.stopServer;
-              setStop(!stop);
-              editPerms();
-            }}
-            right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
-            disabled={loading}
-            style={centeredMargin}
-          />
-        </List.Accordion>
-
-        <List.Accordion
-          title="File system"
-          description="Manipulation of the files on the server"
-          left={() => <List.Icon icon="folder-cog" style={iconMargin} />}
-          style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
-        >
-          <List.Item
-            title="SFTP Access"
-            onPress={() => {
-              haptic(sftp ? "contextClick" : "soft");
-              updatedUser.sftpServer = !updatedUser.sftpServer;
-              setSftp(!sftp);
-              editPerms();
-            }}
-            right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
-            disabled={loading}
-            style={centeredMargin}
-          />
-
-          <List.Item
-            title="View and Download Files"
-            onPress={() => {
-              haptic(viewFiles ? "contextClick" : "soft");
-              updatedUser.viewServerFiles = !updatedUser.viewServerFiles;
-              setViewFiles(!viewFiles);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
-
-          <List.Item
-            title="Edit and Upload Files"
-            onPress={() => {
-              haptic(editFiles ? "contextClick" : "soft");
-              updatedUser.putServerFiles = !updatedUser.putServerFiles;
-              setEditFiles(!editFiles);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
-        </List.Accordion>
-
-        <List.Accordion
-          title="Administrative"
-          description="Administrative permissions"
-          left={() => <List.Icon icon="server-security" style={iconMargin} />}
-          style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
-        >
-          <List.Item
-            title="View CPU/RAM Stats"
-            onPress={() => {
-              haptic(stats ? "contextClick" : "soft");
-              updatedUser.viewServerStats = !updatedUser.viewServerStats;
-              setStats(!stats);
-              editPerms();
-            }}
-            right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
-            disabled={loading}
-            style={centeredMargin}
-          />
-
-          <List.Item
-            title="Edit Users"
-            onPress={() => {
-              haptic(editUsers ? "contextClick" : "soft");
-              updatedUser.editServerUsers = !updatedUser.editServerUsers;
-              setEditUsers(!editUsers);
-              editPerms();
-            }}
-            right={() => (
-              <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
-            )}
-            disabled={loading}
-            style={centeredMargin}
-          />
-        </List.Accordion>
-      </List.Accordion>
-    </List.Section>
+      <Portal>
+        <Dialog visible={dialog} onDismiss={() => setDialog(false)}>
+          <Dialog.Title>Remove this user?</Dialog.Title>
+          <Dialog.Actions>
+            <Button onPress={() => setDialog(false)} >Cancel</Button>
+            <Button
+              onPress={deleteUser}
+              onPressIn={handleTouch}
+              style={{ backgroundColor: theme.colors.tertiary }}
+            >
+              <Text style={{ color: theme.colors.onTertiary }} >Remove</Text>
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </>
   );
 };
 

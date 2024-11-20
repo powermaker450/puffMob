@@ -123,6 +123,23 @@ export interface ModelsPermissionView {
   viewUsers: boolean;
 }
 
+export interface NewServerUser {
+  email: string;
+  new: true;
+  serverIdentifier: string;
+  editServerData: boolean;
+  editServerUsers: boolean;
+  installServer: boolean;
+  putServerFiles: boolean;
+  sendServerConsole: boolean;
+  sftpServer: boolean;
+  startServer: boolean;
+  stopServer: boolean;
+  viewServerConsole: boolean;
+  viewServerFiles: boolean;
+  viewServerStats: boolean;
+}
+
 export interface PermissionsUpdate {
   username: string;
   email: string;
@@ -217,6 +234,9 @@ export interface ModelsServerView {
     file: (filename?: string) => Promise<MessagesFileDesc[]>;
     stats: () => Promise<PufferpanelServerStats>;
   };
+  create: {
+    serverUser: (email: string, perms: PermissionsUpdate) => Promise<void>;
+  };
   actions: {
     kill: () => Promise<void>;
     start: () => Promise<void>;
@@ -232,6 +252,7 @@ export interface ModelsServerView {
     oauth2: (clientId: string) => Promise<void>;
     user: (userId: string) => Promise<void>;
     file: (filename: string) => Promise<void>;
+    serverUser: (email: string) => Promise<void>;
   };
 }
 

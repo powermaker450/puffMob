@@ -39,7 +39,8 @@ import {
   MessagesFileDesc,
   PufferpanelError,
   PufferpanelDaemonRunning,
-  PermissionsUpdate
+  PermissionsUpdate,
+  NewServerUser
 } from "./models";
 import { storage } from "./storage";
 
@@ -348,6 +349,10 @@ export default class Panel {
               .serverStatus(server.id)
               .then(({ running }) => running);
 
+            server.create = {
+              serverUser: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.create.serverUser(server.id, email, perms)
+            };
+
             server.actions = {
               execute: async (command: string): Promise<void> =>
                 await this.actions.execute(server.id, command),
@@ -364,7 +369,7 @@ export default class Panel {
             server.edit = {
               name: async (newName: string): Promise<void> =>
                 await this.edit.serverName(server.id, newName),
-              user: async (email: string, perms: ModelsPermissionView): Promise<void> => await this.edit.serverUser(server.id, email, perms)
+              user: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.edit.serverUser(server.id, email, perms)
             };
 
             server.get = {
@@ -394,7 +399,8 @@ export default class Panel {
               user: async (userId: string): Promise<void> =>
                 await this.delete.serverUser(server.id, userId),
               file: async (filename: string): Promise<void> =>
-                await this.delete.file(server.id, filename)
+                await this.delete.file(server.id, filename),
+              serverUser: async (email: string): Promise<void> => await this.delete.serverUser(server.id, email)
             };
           }
 
@@ -462,10 +468,14 @@ export default class Panel {
             await this.get.stats(data.server.id)
         };
 
+        data.server.create = {
+          serverUser: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.create.serverUser(data.server.id, email, perms)
+        };
+
         data.server.edit = {
           name: async (newName: string): Promise<void> =>
             await this.edit.serverName(data.server.id, newName),
-          user: async (email: string, perms: ModelsPermissionView): Promise<void> => await this.edit.serverUser(data.server.id, email, perms)
+          user: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.edit.serverUser(data.server.id, email, perms)
         };
 
         data.server.delete = {
@@ -474,7 +484,8 @@ export default class Panel {
           user: async (userId: string): Promise<void> =>
             await this.delete.serverUser(data.server.id, userId),
           file: async (filename: string): Promise<void> =>
-            await this.delete.file(data.server.id, filename)
+            await this.delete.file(data.server.id, filename),
+          serverUser: async (email: string): Promise<void> => await this.delete.serverUser(data.server.id, email)
         };
 
         return data;
@@ -513,7 +524,7 @@ export default class Panel {
      * @param id - The server ID to query
      * @return An array of users and their permissions for this server
      */
-    serverUsers: async (id: string): Promise<ModelsPermissionView[]> => {
+    serverUsers: async (id: string): Promise<PermissionsUpdate[]> => {
       try {
         const res = await fetch(`${this.api}/servers/${id}/user`, {
           headers: await this.defaultHeaders()
@@ -888,6 +899,14 @@ export default class Panel {
       //   console.warn("An unexpected error occured", err);
       //   throw err;
       // }
+    },
+
+    serverUser: async (serverId: string, email: string, perms: NewServerUser): Promise<void> => {
+      await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
+        method: MethodOpts.put,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(perms)
+      });
     }
   };
 
@@ -1015,7 +1034,7 @@ export default class Panel {
      * @param userEmail - The email address of the user to revoke access from
      */
     serverUser: async (serverId: string, userEmail: string): Promise<void> => {
-      await fetch(`${this.api}/servers/${serverId}/users/${userEmail}`, {
+      await fetch(`${this.api}/servers/${serverId}/user/${userEmail}`, {
         method: MethodOpts.delete,
         headers: await this.defaultHeaders()
       });
