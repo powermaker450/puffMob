@@ -924,7 +924,6 @@ export default class Panel {
       email: string,
       perms: NewServerUser
     ): Promise<void> => {
-      console.log("Perms:", perms);
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,
         headers: await this.defaultHeaders(),
@@ -992,7 +991,6 @@ export default class Panel {
       email: string,
       perms: PermissionsUpdate
     ): Promise<void> => {
-      console.log("Perms:", perms);
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,
         headers: await this.defaultHeaders(),
