@@ -6,7 +6,15 @@ import { NewServerUser } from "@/util/models";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { Appbar, Button, Checkbox, List, Text, TextInput, useTheme } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Checkbox,
+  List,
+  Text,
+  TextInput,
+  useTheme
+} from "react-native-paper";
 
 export default function addUser() {
   const { id } = useLocalSearchParams();
@@ -48,21 +56,33 @@ export default function addUser() {
       viewServerFiles: viewFiles,
       putServerFiles: editFiles,
       editServerUsers: editUsers
-    }
-  }, [email, editServer, installServer, viewConsole, sendConsole, stop, start, stats, sftp, viewFiles, editFiles, editUsers])
+    };
+  }, [
+    email,
+    editServer,
+    installServer,
+    viewConsole,
+    sendConsole,
+    stop,
+    start,
+    stats,
+    sftp,
+    viewFiles,
+    editFiles,
+    editUsers
+  ]);
 
   const addUser = () => {
     setLoading(true);
 
     if (!email) {
-
     }
 
     panel.get.serverUsers(id as string).then(users => {
       for (const user of users) {
         if (user.email === email) {
           haptic("notificationError");
-          
+
           setNotice(true);
           !notice && setTimeout(() => setNotice(false), 2000);
 
@@ -71,7 +91,8 @@ export default function addUser() {
         }
       }
 
-      panel.create.serverUser(id as string, email, newUser)
+      panel.create
+        .serverUser(id as string, email, newUser)
         .then(() => {
           haptic("notificationSuccess");
           router.back();
@@ -79,7 +100,7 @@ export default function addUser() {
         .catch(() => haptic("notificationError"))
         .finally(() => setLoading(false));
     });
-  }
+  };
 
   const centeredMargin: any = { width: "95%", margin: "auto" };
   const iconMargin = { marginLeft: 15 };
@@ -88,12 +109,20 @@ export default function addUser() {
     borderRadius: 20
   };
 
-  const innerAccordionStyle = { ...accordionStyle, ...centeredMargin, marginTop: 7, marginBottom: 7 };
+  const innerAccordionStyle = {
+    ...accordionStyle,
+    ...centeredMargin,
+    marginTop: 7,
+    marginBottom: 7
+  };
 
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPressIn={handleTouch} onPress={() => router.back()} />
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => router.back()}
+        />
         <Appbar.Content title="Add User" />
       </Appbar.Header>
 
@@ -108,20 +137,31 @@ export default function addUser() {
           <List.Section
             style={{ alignSelf: "center", width: "95%", marginBottom: 20 }}
           >
-            <Text style={{ alignSelf: "center", marginBottom: 10 }} >Email</Text>
-            <TextInput disabled={loading} style={{ width: "95%", margin: "auto" }} value={email} onChangeText={newText => {
+            <Text style={{ alignSelf: "center", marginBottom: 10 }}>Email</Text>
+            <TextInput
+              disabled={loading}
+              style={{ width: "95%", margin: "auto" }}
+              value={email}
+              onChangeText={newText => {
                 setEmail(newText);
               }}
             />
           </List.Section>
 
-          <ScrollView style={{ maxHeight: "65%", width: "95%", alignSelf: "center" }}>
+          <ScrollView
+            style={{ maxHeight: "65%", width: "95%", alignSelf: "center" }}
+          >
             <List.Section>
               <List.Accordion
                 title="Server"
                 description="General server configuration"
                 left={() => <List.Icon icon="cog" style={iconMargin} />}
-                style={{ marginTop: 14, marginBottom: 7, ...accordionStyle, ...centeredMargin}}
+                style={{
+                  marginTop: 14,
+                  marginBottom: 7,
+                  ...accordionStyle,
+                  ...centeredMargin
+                }}
               >
                 <List.Item
                   title="Edit server config"
@@ -130,7 +170,10 @@ export default function addUser() {
                     setEditServer(!editServer);
                   }}
                   right={() => (
-                    <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={editServer ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -143,7 +186,10 @@ export default function addUser() {
                     setInstallServer(!installServer);
                   }}
                   right={() => (
-                    <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={installServer ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -153,7 +199,9 @@ export default function addUser() {
               <List.Accordion
                 title="Console"
                 description="Server logs and command execution"
-                left={() => <List.Icon icon="console-line" style={iconMargin} />}
+                left={() => (
+                  <List.Icon icon="console-line" style={iconMargin} />
+                )}
                 style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
               >
                 <List.Item
@@ -163,7 +211,10 @@ export default function addUser() {
                     setViewConsole(!viewConsole);
                   }}
                   right={() => (
-                    <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={viewConsole ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -176,7 +227,10 @@ export default function addUser() {
                     setSendConsole(!sendConsole);
                   }}
                   right={() => (
-                    <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={sendConsole ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -188,7 +242,12 @@ export default function addUser() {
                     haptic(start ? "contextClick" : "soft");
                     setStart(!start);
                   }}
-                  right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
+                  right={() => (
+                    <Checkbox
+                      status={start ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
+                  )}
                   disabled={loading}
                   style={centeredMargin}
                 />
@@ -199,7 +258,12 @@ export default function addUser() {
                     haptic(stop ? "contextClick" : "soft");
                     setStop(!stop);
                   }}
-                  right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
+                  right={() => (
+                    <Checkbox
+                      status={stop ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
+                  )}
                   disabled={loading}
                   style={centeredMargin}
                 />
@@ -217,7 +281,12 @@ export default function addUser() {
                     haptic(sftp ? "contextClick" : "soft");
                     setSftp(!sftp);
                   }}
-                  right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
+                  right={() => (
+                    <Checkbox
+                      status={sftp ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
+                  )}
                   disabled={loading}
                   style={centeredMargin}
                 />
@@ -229,7 +298,10 @@ export default function addUser() {
                     setViewFiles(!viewFiles);
                   }}
                   right={() => (
-                    <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={viewFiles ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -242,7 +314,10 @@ export default function addUser() {
                     setEditFiles(!editFiles);
                   }}
                   right={() => (
-                    <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={editFiles ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -252,7 +327,9 @@ export default function addUser() {
               <List.Accordion
                 title="Administrative"
                 description="Administrative permissions"
-                left={() => <List.Icon icon="server-security" style={iconMargin} />}
+                left={() => (
+                  <List.Icon icon="server-security" style={iconMargin} />
+                )}
                 style={{ width: "95%", margin: "auto", ...innerAccordionStyle }}
               >
                 <List.Item
@@ -261,7 +338,12 @@ export default function addUser() {
                     haptic(stats ? "contextClick" : "soft");
                     setStats(!stats);
                   }}
-                  right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
+                  right={() => (
+                    <Checkbox
+                      status={stats ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
+                  )}
                   disabled={loading}
                   style={centeredMargin}
                 />
@@ -273,7 +355,10 @@ export default function addUser() {
                     setEditUsers(!editUsers);
                   }}
                   right={() => (
-                    <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
+                    <Checkbox
+                      status={editFiles ? "checked" : "unchecked"}
+                      disabled={loading}
+                    />
                   )}
                   disabled={loading}
                   style={centeredMargin}
@@ -296,7 +381,10 @@ export default function addUser() {
             <Button
               style={{ margin: 5 }}
               mode="contained"
-              disabled={!email.match(/[a-zA-Z0-9]*@[A-Za-z0-9]*\.[a-zA-Z0-9]*/) || loading}
+              disabled={
+                !email.match(/[a-zA-Z0-9]*@[A-Za-z0-9]*\.[a-zA-Z0-9]*/) ||
+                loading
+              }
               onPressIn={handleTouch}
               onPress={addUser}
             >
@@ -306,7 +394,11 @@ export default function addUser() {
         </View>
       </CustomView>
 
-      <Notice condition={notice} setCondition={setNotice} text="That user already exists!" />
+      <Notice
+        condition={notice}
+        setCondition={setNotice}
+        text="That user already exists!"
+      />
     </>
   );
 }

@@ -16,11 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel from '@/util/Panel';
-import haptic, { handleTouch } from '@/util/haptic';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Appbar, Button, Dialog, Icon, Portal, TextInput, Tooltip, useTheme } from 'react-native-paper';
+import Panel from "@/util/Panel";
+import haptic, { handleTouch } from "@/util/haptic";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Appbar,
+  Button,
+  Dialog,
+  Icon,
+  Portal,
+  TextInput,
+  Tooltip,
+  useTheme
+} from "react-native-paper";
 
 interface NameTabProps {
   running: boolean;
@@ -148,7 +158,7 @@ const NameTab = ({ running }: NameTabProps) => {
       setEditServer(permissions.editServerData);
       setStartPerms(permissions.startServer);
       setStopPerms(permissions.stopServer);
-    })
+    });
   }, []);
 
   return (
@@ -209,6 +219,6 @@ const NameTab = ({ running }: NameTabProps) => {
       </Portal>
     </>
   );
-}
+};
 
 export default NameTab;

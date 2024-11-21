@@ -21,7 +21,15 @@ import haptic, { handleTouch } from "@/util/haptic";
 import { PermissionsUpdate } from "@/util/models";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button, Checkbox, Dialog, List, Portal, Text, useTheme } from "react-native-paper";
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  List,
+  Portal,
+  Text,
+  useTheme
+} from "react-native-paper";
 
 interface ManageUserProps {
   user: PermissionsUpdate;
@@ -69,32 +77,40 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
     borderRadius: 20
   };
 
-  const innerAccordionStyle = { ...accordionStyle, ...centeredMargin, marginTop: 7, marginBottom: 7 };
+  const innerAccordionStyle = {
+    ...accordionStyle,
+    ...centeredMargin,
+    marginTop: 7,
+    marginBottom: 7
+  };
 
   const editPerms = () => {
     setLoading(true);
     const { email } = user;
 
-    panel.edit.serverUser(id as string, email, updatedUser).finally(() => setLoading(false));
+    panel.edit
+      .serverUser(id as string, email, updatedUser)
+      .finally(() => setLoading(false));
   };
 
   const [dialog, setDialog] = useState(false);
   const openDialog = () => {
     haptic();
     setDialog(true);
-  }
+  };
 
   const deleteUser = () => {
     setLoading(true);
     setDialog(false);
-    panel.delete.serverUser(user.serverIdentifier, user.email)
+    panel.delete
+      .serverUser(user.serverIdentifier, user.email)
       .then(() => {
         setRemoved(Math.random());
         haptic("notificationSuccess");
       })
       .catch(() => haptic("notificationError"))
       .finally(() => setLoading(false));
-  }
+  };
 
   return (
     <>
@@ -110,7 +126,12 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
             title="Server"
             description="General server configuration"
             left={() => <List.Icon icon="cog" style={iconMargin} />}
-            style={{ marginTop: 14, marginBottom: 7, ...accordionStyle, ...centeredMargin}}
+            style={{
+              marginTop: 14,
+              marginBottom: 7,
+              ...accordionStyle,
+              ...centeredMargin
+            }}
           >
             <List.Item
               title="Edit server config"
@@ -121,7 +142,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={editServer ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -136,7 +160,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={installServer ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -158,7 +185,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={viewConsole ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -173,7 +203,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={sendConsole ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -187,7 +220,12 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 setStart(!start);
                 editPerms();
               }}
-              right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
+              right={() => (
+                <Checkbox
+                  status={start ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
+              )}
               disabled={loading}
               style={centeredMargin}
             />
@@ -200,7 +238,12 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 setStop(!stop);
                 editPerms();
               }}
-              right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
+              right={() => (
+                <Checkbox
+                  status={stop ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
+              )}
               disabled={loading}
               style={centeredMargin}
             />
@@ -220,7 +263,12 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 setSftp(!sftp);
                 editPerms();
               }}
-              right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
+              right={() => (
+                <Checkbox
+                  status={sftp ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
+              )}
               disabled={loading}
               style={centeredMargin}
             />
@@ -234,7 +282,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={viewFiles ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -249,7 +300,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={editFiles ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -270,7 +324,12 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 setStats(!stats);
                 editPerms();
               }}
-              right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
+              right={() => (
+                <Checkbox
+                  status={stats ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
+              )}
               disabled={loading}
               style={centeredMargin}
             />
@@ -284,7 +343,10 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
                 editPerms();
               }}
               right={() => (
-                <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
+                <Checkbox
+                  status={editFiles ? "checked" : "unchecked"}
+                  disabled={loading}
+                />
               )}
               disabled={loading}
               style={centeredMargin}
@@ -297,13 +359,13 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
         <Dialog visible={dialog} onDismiss={() => setDialog(false)}>
           <Dialog.Title>Remove this user?</Dialog.Title>
           <Dialog.Actions>
-            <Button onPress={() => setDialog(false)} >Cancel</Button>
+            <Button onPress={() => setDialog(false)}>Cancel</Button>
             <Button
               onPress={deleteUser}
               onPressIn={handleTouch}
               style={{ backgroundColor: theme.colors.tertiary }}
             >
-              <Text style={{ color: theme.colors.onTertiary }} >Remove</Text>
+              <Text style={{ color: theme.colors.onTertiary }}>Remove</Text>
             </Button>
           </Dialog.Actions>
         </Dialog>

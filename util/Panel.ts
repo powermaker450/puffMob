@@ -350,7 +350,11 @@ export default class Panel {
               .then(({ running }) => running);
 
             server.create = {
-              serverUser: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.create.serverUser(server.id, email, perms)
+              serverUser: async (
+                email: string,
+                perms: PermissionsUpdate
+              ): Promise<void> =>
+                await this.create.serverUser(server.id, email, perms)
             };
 
             server.actions = {
@@ -369,7 +373,11 @@ export default class Panel {
             server.edit = {
               name: async (newName: string): Promise<void> =>
                 await this.edit.serverName(server.id, newName),
-              user: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.edit.serverUser(server.id, email, perms)
+              user: async (
+                email: string,
+                perms: PermissionsUpdate
+              ): Promise<void> =>
+                await this.edit.serverUser(server.id, email, perms)
             };
 
             server.get = {
@@ -400,7 +408,8 @@ export default class Panel {
                 await this.delete.serverUser(server.id, userId),
               file: async (filename: string): Promise<void> =>
                 await this.delete.file(server.id, filename),
-              serverUser: async (email: string): Promise<void> => await this.delete.serverUser(server.id, email)
+              serverUser: async (email: string): Promise<void> =>
+                await this.delete.serverUser(server.id, email)
             };
           }
 
@@ -469,13 +478,21 @@ export default class Panel {
         };
 
         data.server.create = {
-          serverUser: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.create.serverUser(data.server.id, email, perms)
+          serverUser: async (
+            email: string,
+            perms: PermissionsUpdate
+          ): Promise<void> =>
+            await this.create.serverUser(data.server.id, email, perms)
         };
 
         data.server.edit = {
           name: async (newName: string): Promise<void> =>
             await this.edit.serverName(data.server.id, newName),
-          user: async (email: string, perms: PermissionsUpdate): Promise<void> => await this.edit.serverUser(data.server.id, email, perms)
+          user: async (
+            email: string,
+            perms: PermissionsUpdate
+          ): Promise<void> =>
+            await this.edit.serverUser(data.server.id, email, perms)
         };
 
         data.server.delete = {
@@ -485,7 +502,8 @@ export default class Panel {
             await this.delete.serverUser(data.server.id, userId),
           file: async (filename: string): Promise<void> =>
             await this.delete.file(data.server.id, filename),
-          serverUser: async (email: string): Promise<void> => await this.delete.serverUser(data.server.id, email)
+          serverUser: async (email: string): Promise<void> =>
+            await this.delete.serverUser(data.server.id, email)
         };
 
         return data;
@@ -901,7 +919,11 @@ export default class Panel {
       // }
     },
 
-    serverUser: async (serverId: string, email: string, perms: NewServerUser): Promise<void> => {
+    serverUser: async (
+      serverId: string,
+      email: string,
+      perms: NewServerUser
+    ): Promise<void> => {
       console.log("Perms:", perms);
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,
@@ -965,7 +987,11 @@ export default class Panel {
       }
     },
 
-    serverUser: async (serverId: string, email: string, perms: PermissionsUpdate): Promise<void> => {
+    serverUser: async (
+      serverId: string,
+      email: string,
+      perms: PermissionsUpdate
+    ): Promise<void> => {
       console.log("Perms:", perms);
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,

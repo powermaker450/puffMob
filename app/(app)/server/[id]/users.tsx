@@ -23,7 +23,7 @@ export default function users() {
   useEffect(() => {
     navigation.addListener("focus", () => {
       panel.get.serverUsers(id as string).then(users => setUserList(users));
-    })
+    });
   }, [navigation]);
 
   const noUsers = (
@@ -35,7 +35,7 @@ export default function users() {
   const addUser = () => {
     haptic();
     router.navigate(`/server/${id}/add_user`);
-  }
+  };
 
   return (
     <>
@@ -52,7 +52,9 @@ export default function users() {
       ) : (
         <ScrollView style={{ width: "100%" }}>
           {userList.map((user, index) => {
-            return <ManageUser user={user} setRemoved={setRemoved} key={index} />;
+            return (
+              <ManageUser user={user} setRemoved={setRemoved} key={index} />
+            );
           })}
         </ScrollView>
       )}

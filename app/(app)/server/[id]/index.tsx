@@ -126,7 +126,7 @@ export default function ServerScreen() {
 
   return (
     <>
-      <NameTab running={running} />  
+      <NameTab running={running} />
 
       <NavBar routes={routes} renderScene={renderScene} />
     </>
