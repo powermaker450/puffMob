@@ -902,6 +902,7 @@ export default class Panel {
     },
 
     serverUser: async (serverId: string, email: string, perms: NewServerUser): Promise<void> => {
+      console.log("Perms:", perms);
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,
         headers: await this.defaultHeaders(),

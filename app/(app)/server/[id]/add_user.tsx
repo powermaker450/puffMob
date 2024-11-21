@@ -1,11 +1,12 @@
 import CustomView from "@/components/CustomView";
+import Notice from "@/components/Notice";
 import Panel from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import { NewServerUser } from "@/util/models";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { ScrollView } from "react-native";
-import { Appbar, Button, Card, Checkbox, Icon, List, Text, TextInput, useTheme } from "react-native-paper";
+import { useEffect, useState } from "react";
+import { ScrollView, View } from "react-native";
+import { Appbar, Button, Checkbox, List, Text, TextInput, useTheme } from "react-native-paper";
 
 export default function addUser() {
   const { id } = useLocalSearchParams();
@@ -27,32 +28,57 @@ export default function addUser() {
 
   const [loading, setLoading] = useState(false);
 
-  let newUser: NewServerUser = {
-    email: "",
-    new: true,
-    serverIdentifier: id as string,
-    editServerData: false,
-    editServerUsers: false,
-    installServer: false,
-    putServerFiles: false,
-    sendServerConsole: false,
-    sftpServer: false,
-    startServer: false,
-    stopServer: false,
-    viewServerConsole: false,
-    viewServerFiles: false,
-    viewServerStats: false
-  };
+  const [notice, setNotice] = useState(false);
+
+  let newUser: NewServerUser;
+
+  useEffect(() => {
+    newUser = {
+      new: true,
+      serverIdentifier: id as string,
+      email: email,
+      editServerData: editServer,
+      installServer,
+      viewServerConsole: viewConsole,
+      sendServerConsole: sendConsole,
+      stopServer: stop,
+      startServer: start,
+      viewServerStats: stats,
+      sftpServer: sftp,
+      viewServerFiles: viewFiles,
+      putServerFiles: editFiles,
+      editServerUsers: editUsers
+    }
+  }, [email, editServer, installServer, viewConsole, sendConsole, stop, start, stats, sftp, viewFiles, editFiles, editUsers])
 
   const addUser = () => {
     setLoading(true);
-    panel.create.serverUser(id as string, email, newUser)
-      .then(() => {
-        haptic("notificationSuccess");
-        router.back();
-      })
-      .catch(() => haptic("notificationError"))
-      .finally(() => setLoading(false));
+
+    if (!email) {
+
+    }
+
+    panel.get.serverUsers(id as string).then(users => {
+      for (const user of users) {
+        if (user.email === email) {
+          haptic("notificationError");
+          
+          setNotice(true);
+          !notice && setTimeout(() => setNotice(false), 2000);
+
+          setLoading(false);
+          return;
+        }
+      }
+
+      panel.create.serverUser(id as string, email, newUser)
+        .then(() => {
+          haptic("notificationSuccess");
+          router.back();
+        })
+        .catch(() => haptic("notificationError"))
+        .finally(() => setLoading(false));
+    });
   }
 
   const centeredMargin: any = { width: "95%", margin: "auto" };
@@ -72,33 +98,19 @@ export default function addUser() {
       </Appbar.Header>
 
       <CustomView>
-        <Card
-          contentStyle={{
-            flex: 1,
-            alignContent: "center",
-            justifyContent: "center",
-          }}
+        <View
           style={{
             height: "85%",
             borderRadius: 20,
-            backgroundColor: theme.colors.surface,
             width: "85%"
           }}
         >
-          <Text
-            style={{ marginTop: 30, marginBottom: 30, alignSelf: "center" }}
-            variant="titleLarge"
-          >
-            Add a user
-          </Text>
-
           <List.Section
             style={{ alignSelf: "center", width: "95%", marginBottom: 20 }}
           >
             <Text style={{ alignSelf: "center", marginBottom: 10 }} >Email</Text>
             <TextInput disabled={loading} style={{ width: "95%", margin: "auto" }} value={email} onChangeText={newText => {
                 setEmail(newText);
-                newUser.email = email;
               }}
             />
           </List.Section>
@@ -116,7 +128,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(editServer ? "contextClick" : "soft");
                     setEditServer(!editServer);
-                    newUser.editServerData = !newUser.editServerData;
                   }}
                   right={() => (
                     <Checkbox status={editServer ? "checked" : "unchecked"} disabled={loading} />
@@ -130,7 +141,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(installServer ? "contextClick" : "soft");
                     setInstallServer(!installServer);
-                    newUser.installServer = !newUser.installServer;
                   }}
                   right={() => (
                     <Checkbox status={installServer ? "checked" : "unchecked"} disabled={loading} />
@@ -151,7 +161,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(viewConsole ? "contextClick" : "soft");
                     setViewConsole(!viewConsole);
-                    newUser.viewServerConsole = !newUser.viewServerConsole;
                   }}
                   right={() => (
                     <Checkbox status={viewConsole ? "checked" : "unchecked"} disabled={loading} />
@@ -165,7 +174,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(sendConsole ? "contextClick" : "soft");
                     setSendConsole(!sendConsole);
-                    newUser.sendServerConsole = !newUser.sendServerConsole;
                   }}
                   right={() => (
                     <Checkbox status={sendConsole ? "checked" : "unchecked"} disabled={loading} />
@@ -179,7 +187,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(start ? "contextClick" : "soft");
                     setStart(!start);
-                    newUser.startServer = !newUser.startServer;
                   }}
                   right={() => <Checkbox status={start ? "checked" : "unchecked"} disabled={loading} />}
                   disabled={loading}
@@ -191,7 +198,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(stop ? "contextClick" : "soft");
                     setStop(!stop);
-                    newUser.stopServer = !newUser.stopServer;
                   }}
                   right={() => <Checkbox status={stop ? "checked" : "unchecked"} disabled={loading} />}
                   disabled={loading}
@@ -210,7 +216,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(sftp ? "contextClick" : "soft");
                     setSftp(!sftp);
-                    newUser.sftpServer = !newUser.sftpServer;
                   }}
                   right={() => <Checkbox status={sftp ? "checked" : "unchecked"} disabled={loading} />}
                   disabled={loading}
@@ -222,7 +227,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(viewFiles ? "contextClick" : "soft");
                     setViewFiles(!viewFiles);
-                    newUser.viewServerFiles = !newUser.viewServerFiles;
                   }}
                   right={() => (
                     <Checkbox status={viewFiles ? "checked" : "unchecked"} disabled={loading} />
@@ -236,7 +240,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(editFiles ? "contextClick" : "soft");
                     setEditFiles(!editFiles);
-                    newUser.putServerFiles = !newUser.putServerFiles;
                   }}
                   right={() => (
                     <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
@@ -257,7 +260,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(stats ? "contextClick" : "soft");
                     setStats(!stats);
-                    newUser.viewServerStats = !newUser.viewServerStats;
                   }}
                   right={() => <Checkbox status={stats ? "checked" : "unchecked"} disabled={loading} />}
                   disabled={loading}
@@ -269,7 +271,6 @@ export default function addUser() {
                   onPress={() => {
                     haptic(editUsers ? "contextClick" : "soft");
                     setEditUsers(!editUsers);
-                    newUser.editServerUsers = !newUser.editServerUsers;
                   }}
                   right={() => (
                     <Checkbox status={editFiles ? "checked" : "unchecked"} disabled={loading} />
@@ -295,15 +296,17 @@ export default function addUser() {
             <Button
               style={{ margin: 5 }}
               mode="contained"
-              disabled={loading}
+              disabled={!email.match(/[a-zA-Z0-9]*@[A-Za-z0-9]*\.[a-zA-Z0-9]*/) || loading}
               onPressIn={handleTouch}
               onPress={addUser}
             >
               Save
             </Button>
           </List.Section>
-        </Card>
+        </View>
       </CustomView>
+
+      <Notice condition={notice} setCondition={setNotice} text="That user already exists!" />
     </>
   );
 }
