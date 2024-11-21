@@ -69,7 +69,7 @@ export interface ModelsDeployment {
 }
 
 export interface ModelsGetServerResponse {
-  permissions: ModelsPermissionView;
+  permissions: PermissionsUpdate;
   server: ModelsServerView;
 }
 
@@ -100,24 +100,13 @@ export interface ModelsPermissionView {
   deployNodes: boolean;
   editNodes: boolean;
   editServerAdmin: boolean;
-  editServerData: boolean;
-  editServerUsers: boolean;
   editTemplates: boolean;
   editUsers: boolean;
   email: string;
-  installServer: boolean;
   panelSettings: boolean;
-  putServerFiles: boolean;
-  sendServerConsole: boolean;
-  serverIdentifier: string;
-  sftpServer: boolean;
-  startServer: boolean;
-  stopServer: boolean;
   username: string;
   viewNodes: string;
   viewServerConsole: boolean;
-  viewServerFiles: boolean;
-  viewServerStats: boolean;
   viewServers: boolean;
   viewTemplates: boolean;
   viewUsers: boolean;
