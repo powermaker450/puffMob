@@ -75,9 +75,6 @@ export default function addUser() {
   const addUser = () => {
     setLoading(true);
 
-    if (!email) {
-    }
-
     panel.get.serverUsers(id as string).then(users => {
       for (const user of users) {
         if (user.email === email) {
