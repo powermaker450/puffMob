@@ -402,6 +402,7 @@ export interface PufferpanelTask {
 
 export interface Variable {
   desc: string;
+  type: "string" | "" | "integer" | "boolean" | "option";
   display: string;
   required: boolean;
   internal?: boolean;
@@ -429,7 +430,6 @@ export interface OptionVariable extends Variable {
 }
 
 export type PufferpanelVariable =
-  | Variable
   | StringVariable
   | NumberVariable
   | BooleanVariable

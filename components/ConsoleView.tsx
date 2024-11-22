@@ -55,8 +55,8 @@ const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
           paddingBottom: 10,
           paddingLeft: 20,
           paddingRight: 20,
-          width: "85%",
-          height: "75%",
+          width: "90%",
+          height: "85%",
           borderRadius: 20
         }}
         elevation={2}

@@ -1,0 +1,94 @@
+/*
+ * puffMob: A mobile client for Pufferpanel
+ * Copyright (C) 2024 powermaker450
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import haptic from "@/util/haptic";
+import { PufferpanelVariable } from "@/util/models";
+import { useState } from "react";
+import { Checkbox, List, Text, TextInput, useTheme } from "react-native-paper";
+
+interface VariableViewProps {
+  variable: PufferpanelVariable;
+}
+
+const VariableView = ({ variable }: VariableViewProps) => {
+  const theme = useTheme();
+
+  const sectionStyle = {
+    backgroundColor: theme.colors.surfaceVariant,
+    padding: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 20
+  };
+
+  if (variable.type === "string") {
+    const [val, setVal] = useState(variable.value);
+
+    return (
+      <List.Section style={sectionStyle}>
+        <TextInput
+          mode="outlined"
+          multiline
+          label={variable.display}
+          value={val}
+          onChangeText={text => setVal(text)}
+          style={{ marginBottom: 10 }}
+        />
+
+        <Text variant="labelSmall" style={{ marginLeft: 10 }} >{variable.desc}</Text>
+      </List.Section>
+    );
+  }
+
+  if (variable.type === "boolean") {
+    const [val, setVal] = useState(variable.value);
+
+    return (
+      <List.Item
+        title={variable.display}
+        style={sectionStyle}
+        onPress={() => {
+          haptic(val ? "contextClick" : "soft");
+          setVal(!val);
+        }}
+        description={variable.desc}
+        right={() => <Checkbox status={val ? "checked" : "unchecked"} />}
+      />
+    );
+  }
+
+  if (variable.type === "integer") {
+    const [val, setVal] = useState(variable.value.toString());
+
+    return (
+      <List.Section style={sectionStyle}>
+        <TextInput
+          mode="outlined"
+          label={variable.display}
+          value={val}
+          onChangeText={text => setVal(text.replaceAll(/\D+/g, ""))}
+          style={{ marginBottom: 10 }}
+        />
+
+        <Text variant="labelSmall" style={{ marginLeft: 10 }}>{variable.desc}</Text>
+      </List.Section>
+    )
+  }
+}
+
+export default VariableView;
