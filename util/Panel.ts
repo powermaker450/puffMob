@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Permission } from "react-native";
 import PufferpanelSocket from "./PufferpanelSocket";
 import {
   ModelsChangeUserSetting,
@@ -352,7 +353,7 @@ export default class Panel {
             server.create = {
               serverUser: async (
                 email: string,
-                perms: PermissionsUpdate
+                perms: NewServerUser
               ): Promise<void> =>
                 await this.create.serverUser(server.id, email, perms)
             };
@@ -377,7 +378,8 @@ export default class Panel {
                 email: string,
                 perms: PermissionsUpdate
               ): Promise<void> =>
-                await this.edit.serverUser(server.id, email, perms)
+                await this.edit.serverUser(server.id, email, perms),
+              data: async (serverData: ServerDataResponse): Promise<void> => await this.edit.serverData(server.id, serverData)
             };
 
             server.get = {
@@ -480,7 +482,7 @@ export default class Panel {
         data.server.create = {
           serverUser: async (
             email: string,
-            perms: PermissionsUpdate
+            perms: NewServerUser
           ): Promise<void> =>
             await this.create.serverUser(data.server.id, email, perms)
         };
@@ -492,7 +494,8 @@ export default class Panel {
             email: string,
             perms: PermissionsUpdate
           ): Promise<void> =>
-            await this.edit.serverUser(data.server.id, email, perms)
+            await this.edit.serverUser(data.server.id, email, perms),
+          data: async (serverData: ServerDataResponse): Promise<void> => await this.edit.serverData(data.server.id, serverData)
         };
 
         data.server.delete = {
@@ -552,7 +555,7 @@ export default class Panel {
           res,
           this.get.serverUsers,
           id
-        )) as ModelsPermissionView[];
+        )) as PermissionsUpdate[];
       } catch (err) {
         console.warn("An unexpected error occured:", err);
         throw err;
@@ -996,6 +999,18 @@ export default class Panel {
         headers: await this.defaultHeaders(),
         body: JSON.stringify(perms)
       });
+    },
+
+    serverData: async (serverId: string, data: ServerDataResponse): Promise<void> => {
+      const res = await fetch(`${this.daemon}/server/${serverId}/data`, {
+        method: MethodOpts.post,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) {
+        throw "Failed to update server data.";
+      }
     }
   };
 

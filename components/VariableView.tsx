@@ -17,15 +17,18 @@
  */
 
 import haptic from "@/util/haptic";
-import { PufferpanelVariable } from "@/util/models";
-import { useState } from "react";
+import { BooleanVariable, NumberVariable, PufferpanelVariable, ServerDataResponse, StringVariable } from "@/util/models";
+import { useEffect, useState } from "react";
 import { Checkbox, List, Text, TextInput, useTheme } from "react-native-paper";
 
 interface VariableViewProps {
   variable: PufferpanelVariable;
+  variableKey: string;
+  res: ServerDataResponse;
+  setData: React.Dispatch<React.SetStateAction<ServerDataResponse | undefined>>;
 }
 
-const VariableView = ({ variable }: VariableViewProps) => {
+const VariableView = ({ variable, variableKey, res, setData }: VariableViewProps) => {
   const theme = useTheme();
 
   const sectionStyle = {
@@ -38,6 +41,11 @@ const VariableView = ({ variable }: VariableViewProps) => {
 
   if (variable.type === "string") {
     const [val, setVal] = useState(variable.value);
+
+    useEffect(() => {
+      (res.data[variableKey] as StringVariable).value = val;
+      setData(res);
+    }, [val])
 
     return (
       <List.Section style={sectionStyle}>
@@ -58,6 +66,11 @@ const VariableView = ({ variable }: VariableViewProps) => {
   if (variable.type === "boolean") {
     const [val, setVal] = useState(variable.value);
 
+    useEffect(() => {
+      (res.data[variableKey] as BooleanVariable).value = val;
+      setData(res);
+    }, [val])
+
     return (
       <List.Item
         title={variable.display}
@@ -74,6 +87,11 @@ const VariableView = ({ variable }: VariableViewProps) => {
 
   if (variable.type === "integer") {
     const [val, setVal] = useState(variable.value.toString());
+
+    useEffect(() => {
+      (res.data[variableKey] as NumberVariable).value = Number(val);
+      setData(res);
+    }, [val]);
 
     return (
       <List.Section style={sectionStyle}>

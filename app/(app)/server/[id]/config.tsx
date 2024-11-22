@@ -16,21 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import UnsavedChanges from "@/components/UnsavedChanges";
+import Notice from "@/components/Notice";
 import VariableView from "@/components/VariableView";
 import Panel from "@/util/Panel";
-import { handleTouch } from "@/util/haptic";
+import haptic, { handleTouch } from "@/util/haptic";
 import { ServerDataResponse } from "@/util/models";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { ActivityIndicator, Appbar } from "react-native-paper";
+import { ActivityIndicator, Appbar, FAB } from "react-native-paper";
 
 export default function config() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const panel = Panel.getPanel();
   const [serverData, setServerData] = useState<ServerDataResponse>();
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState(false);
+  const [text, setText] = useState("");
 
   useEffect(() => {
     navigation.addListener("focus", () => {
@@ -38,9 +41,33 @@ export default function config() {
         setServerData(data);
       })
     })
-  }, [navigation])
 
-  const loading = <ActivityIndicator animating>Loading</ActivityIndicator>;
+  }, [navigation]);
+
+  const updateData = () => {
+    setLoading(true);
+    haptic();
+
+    panel.edit.serverData(id as string, serverData!)
+      .then(() => {
+        setText("Configuration saved!");
+        haptic("notificationSuccess");
+      })
+      .catch(() => {
+        setText("An error occured.");
+        haptic("notificationError")
+      })
+      .finally(() => {
+        setLoading(false);
+        setNotice(true);
+        setTimeout(() => {
+          setNotice(false);
+          setText("");
+        }, 2000);
+      })
+  }
+
+  const loadingText = <ActivityIndicator animating />;
 
   return (
     <>
@@ -51,10 +78,21 @@ export default function config() {
 
       <ScrollView style={{ width: "90%", margin: "auto" }}>
         {!serverData
-          ? loading
-          : Object.values(serverData.data).map((variable, index) => <VariableView key={index} variable={variable} />)
+          ? loadingText
+          : Object.keys(serverData.data).map(key => (
+            <VariableView variableKey={key} variable={serverData.data[key]} res={serverData} setData={setServerData} />
+          ))
         }
       </ScrollView>
+
+      <FAB
+        icon="check"
+        disabled={loading}
+        style={{ position: "absolute", bottom: 15, right: 15 }}
+        onPress={updateData}
+      />
+
+      <Notice condition={notice} setCondition={setNotice} text={text} />
     </>
   );
 }

@@ -224,7 +224,7 @@ export interface ModelsServerView {
     stats: () => Promise<PufferpanelServerStats>;
   };
   create: {
-    serverUser: (email: string, perms: PermissionsUpdate) => Promise<void>;
+    serverUser: (email: string, perms: NewServerUser) => Promise<void>;
   };
   actions: {
     kill: () => Promise<void>;
@@ -236,6 +236,7 @@ export interface ModelsServerView {
   edit: {
     name: (newName: string) => Promise<void>;
     user: (email: string, perms: PermissionsUpdate) => Promise<void>;
+    data: (serverData: ServerDataResponse) => Promise<void>;
   };
   delete: {
     oauth2: (clientId: string) => Promise<void>;
