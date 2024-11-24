@@ -379,7 +379,8 @@ export default class Panel {
                 perms: PermissionsUpdate
               ): Promise<void> =>
                 await this.edit.serverUser(server.id, email, perms),
-              data: async (serverData: ServerDataResponse): Promise<void> => await this.edit.serverData(server.id, serverData)
+              data: async (serverData: ServerDataResponse): Promise<void> =>
+                await this.edit.serverData(server.id, serverData)
             };
 
             server.get = {
@@ -495,7 +496,8 @@ export default class Panel {
             perms: PermissionsUpdate
           ): Promise<void> =>
             await this.edit.serverUser(data.server.id, email, perms),
-          data: async (serverData: ServerDataResponse): Promise<void> => await this.edit.serverData(data.server.id, serverData)
+          data: async (serverData: ServerDataResponse): Promise<void> =>
+            await this.edit.serverData(data.server.id, serverData)
         };
 
         data.server.delete = {
@@ -1001,7 +1003,10 @@ export default class Panel {
       });
     },
 
-    serverData: async (serverId: string, data: ServerDataResponse): Promise<void> => {
+    serverData: async (
+      serverId: string,
+      data: ServerDataResponse
+    ): Promise<void> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/data`, {
         method: MethodOpts.post,
         headers: await this.defaultHeaders(),

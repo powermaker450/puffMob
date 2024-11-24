@@ -17,7 +17,13 @@
  */
 
 import haptic from "@/util/haptic";
-import { BooleanVariable, NumberVariable, PufferpanelVariable, ServerDataResponse, StringVariable } from "@/util/models";
+import {
+  BooleanVariable,
+  NumberVariable,
+  PufferpanelVariable,
+  ServerDataResponse,
+  StringVariable
+} from "@/util/models";
 import { useEffect, useState } from "react";
 import { Checkbox, List, Text, TextInput, useTheme } from "react-native-paper";
 
@@ -28,7 +34,12 @@ interface VariableViewProps {
   setData: React.Dispatch<React.SetStateAction<ServerDataResponse | undefined>>;
 }
 
-const VariableView = ({ variable, variableKey, res, setData }: VariableViewProps) => {
+const VariableView = ({
+  variable,
+  variableKey,
+  res,
+  setData
+}: VariableViewProps) => {
   const theme = useTheme();
 
   const sectionStyle = {
@@ -45,7 +56,7 @@ const VariableView = ({ variable, variableKey, res, setData }: VariableViewProps
     useEffect(() => {
       (res.data[variableKey] as StringVariable).value = val;
       setData(res);
-    }, [val])
+    }, [val]);
 
     return (
       <List.Section style={sectionStyle}>
@@ -58,7 +69,9 @@ const VariableView = ({ variable, variableKey, res, setData }: VariableViewProps
           style={{ marginBottom: 10 }}
         />
 
-        <Text variant="labelSmall" style={{ marginLeft: 10 }} >{variable.desc}</Text>
+        <Text variant="labelSmall" style={{ marginLeft: 10 }}>
+          {variable.desc}
+        </Text>
       </List.Section>
     );
   }
@@ -69,7 +82,7 @@ const VariableView = ({ variable, variableKey, res, setData }: VariableViewProps
     useEffect(() => {
       (res.data[variableKey] as BooleanVariable).value = val;
       setData(res);
-    }, [val])
+    }, [val]);
 
     return (
       <List.Item
@@ -103,10 +116,12 @@ const VariableView = ({ variable, variableKey, res, setData }: VariableViewProps
           style={{ marginBottom: 10 }}
         />
 
-        <Text variant="labelSmall" style={{ marginLeft: 10 }}>{variable.desc}</Text>
+        <Text variant="labelSmall" style={{ marginLeft: 10 }}>
+          {variable.desc}
+        </Text>
       </List.Section>
-    )
+    );
   }
-}
+};
 
 export default VariableView;

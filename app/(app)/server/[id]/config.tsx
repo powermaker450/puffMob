@@ -39,23 +39,23 @@ export default function config() {
     navigation.addListener("focus", () => {
       panel.get.data(id as string).then(data => {
         setServerData(data);
-      })
-    })
-
+      });
+    });
   }, [navigation]);
 
   const updateData = () => {
     setLoading(true);
     haptic();
 
-    panel.edit.serverData(id as string, serverData!)
+    panel.edit
+      .serverData(id as string, serverData!)
       .then(() => {
         setText("Configuration saved!");
         haptic("notificationSuccess");
       })
       .catch(() => {
         setText("An error occured.");
-        haptic("notificationError")
+        haptic("notificationError");
       })
       .finally(() => {
         setLoading(false);
@@ -64,15 +64,18 @@ export default function config() {
           setNotice(false);
           setText("");
         }, 2000);
-      })
-  }
+      });
+  };
 
   const loadingText = <ActivityIndicator animating />;
 
   return (
     <>
       <Appbar.Header>
-        <Appbar.BackAction onPressIn={handleTouch} onPress={() => router.back()} />
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => router.back()}
+        />
         <Appbar.Content title="Config" />
       </Appbar.Header>
 
@@ -80,9 +83,13 @@ export default function config() {
         {!serverData
           ? loadingText
           : Object.keys(serverData.data).map(key => (
-            <VariableView variableKey={key} variable={serverData.data[key]} res={serverData} setData={setServerData} />
-          ))
-        }
+              <VariableView
+                variableKey={key}
+                variable={serverData.data[key]}
+                res={serverData}
+                setData={setServerData}
+              />
+            ))}
       </ScrollView>
 
       <FAB

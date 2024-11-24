@@ -44,12 +44,7 @@ const ServerManagePage = () => {
         description="Edit the config for your server"
         onPress={() => router.navigate(`/server/${id}/config`)}
         style={{ display: editPerms ? "flex" : "none" }}
-        left={() => (
-          <List.Icon
-            icon="file-code"
-            style={{ marginLeft: 15 }}
-          />
-        )}
+        left={() => <List.Icon icon="file-code" style={{ marginLeft: 15 }} />}
       />
 
       <List.Item
