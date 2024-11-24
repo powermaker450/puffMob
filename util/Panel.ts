@@ -66,7 +66,7 @@ export default class Panel {
     ? JSON.parse(storage.getString("cachedScopes")!)
     : [];
 
-  private static getSettings = (): PanelParams =>
+  public static getSettings = (): PanelParams =>
     storage.getString("settings")
       ? JSON.parse(storage.getString("settings")!)
       : { serverUrl: "", email: "", password: "" };

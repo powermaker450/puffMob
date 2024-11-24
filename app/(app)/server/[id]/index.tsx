@@ -30,6 +30,7 @@ import NavBar from "@/components/NavBar";
 import CustomView from "@/components/CustomView";
 import ServerManagePage from "@/components/ServerManagePage";
 import NameTab from "@/components/NameTab";
+import FilesPage from "@/components/FilesPage";
 
 export default function ServerScreen() {
   const { id } = useLocalSearchParams();
@@ -63,11 +64,7 @@ export default function ServerScreen() {
   const [routes, setRoutes] = useState<BottomNavigationRoute[]>([mainRoute]);
   const renderScene = BottomNavigation.SceneMap({
     console: consoleView,
-    files: () => (
-      <CustomView>
-        <Text>Files Page</Text>
-      </CustomView>
-    ),
+    files: FilesPage,
     settings: ServerManagePage
   });
 
