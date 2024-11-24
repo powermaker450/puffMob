@@ -57,13 +57,14 @@ export default class PufferpanelSocket {
 
     this.socket.onopen = () => {
       console.log(`(${this.socket.url}) Connected!`);
-      this.socket.send(JSON.stringify({ type: "status" }));
-      this.socket.send(JSON.stringify({ type: "replay", since: 0 }));
+      this.send("status");
+      this.send("replay");
 
       const interval = setInterval(
-        () => this.socket.send(JSON.stringify({ type: "status" })),
+        () => this.send("status"),
         45_000
       );
+
       this.socket.onclose = e => {
         clearInterval(interval);
         console.log(`(${this.socket.url}) Closed:`, `(${e.code}) ${e.reason}`);
