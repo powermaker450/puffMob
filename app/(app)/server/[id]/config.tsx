@@ -84,6 +84,7 @@ export default function config() {
           ? loadingText
           : Object.keys(serverData.data).map(key => (
               <VariableView
+                key={key}
                 variableKey={key}
                 variable={serverData.data[key]}
                 res={serverData}
