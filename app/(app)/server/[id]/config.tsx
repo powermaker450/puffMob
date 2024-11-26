@@ -24,10 +24,11 @@ import { ServerDataResponse } from "@/util/models";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { ActivityIndicator, Appbar, FAB } from "react-native-paper";
+import { ActivityIndicator, Appbar, Button, Dialog, FAB, Portal, Text, useTheme } from "react-native-paper";
 
 export default function config() {
   const { id } = useLocalSearchParams();
+  const theme = useTheme();
   const navigation = useNavigation();
   const panel = Panel.getPanel();
   const [serverData, setServerData] = useState<ServerDataResponse>();
@@ -67,6 +68,9 @@ export default function config() {
       });
   };
 
+  const [dialog, setDialog] = useState(false);
+  const [installing, setInstalling] = useState(false);
+
   const loadingText = <ActivityIndicator animating />;
 
   return (
@@ -77,7 +81,54 @@ export default function config() {
           onPress={() => router.back()}
         />
         <Appbar.Content title="Config" />
+
+        <Appbar.Action
+          icon="download"
+          onPressIn={handleTouch}
+          onPress={() => setDialog(true)}
+        />
       </Appbar.Header>
+
+      <Portal>
+        <Dialog
+          visible={dialog}
+          onDismiss={() => setDialog(false)}
+        >
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Installing the server will <Text style={{ fontWeight: "bold", color: theme.colors.error }}>overwrite</Text> config files and other data.
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions>
+            <Button
+              onPressIn={handleTouch}
+              onPress={() => setDialog(false)}
+            >
+              Cancel
+            </Button>
+
+            { installing ? loadingText : <Button
+              onPressIn={handleTouch}
+              onPress={() => {
+                setInstalling(true);
+
+                panel.actions.install(id as string)
+                  .then(() => {
+                    haptic("notificationSuccess");
+                    setText("Installed!");
+                    setNotice(true);
+                    setInstalling(false);
+                    setDialog(false);
+                    setTimeout(() => setNotice(false), 2000);
+                  })
+              }}
+            >
+              Install
+            </Button> }
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
       <ScrollView style={{ width: "90%", margin: "auto" }}>
         {!serverData

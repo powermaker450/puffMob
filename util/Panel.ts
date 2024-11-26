@@ -368,7 +368,8 @@ export default class Panel {
               stop: async (): Promise<void> =>
                 await this.actions.stop(server.id),
               extract: async (filename: string): Promise<void> =>
-                await this.get.extract(server.id, filename)
+                await this.get.extract(server.id, filename),
+              install: async (): Promise<void> => await this.actions.install(server.id)
             };
 
             server.edit = {
@@ -456,7 +457,8 @@ export default class Panel {
           stop: async (): Promise<void> =>
             await this.actions.stop(data.server.id),
           extract: async (filename: string): Promise<void> =>
-            await this.get.extract(data.server.id, filename)
+            await this.get.extract(data.server.id, filename),
+          install: async (): Promise<void> => await this.actions.install(data.server.id)
         };
 
         data.server.get = {
@@ -1184,6 +1186,13 @@ export default class Panel {
      */
     stop: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/stop`, {
+        method: MethodOpts.post,
+        headers: await this.defaultHeaders()
+      });
+    },
+
+    install: async (serverId: string): Promise<void> => {
+      await fetch(`${this.daemon}/server/${serverId}/install`, {
         method: MethodOpts.post,
         headers: await this.defaultHeaders()
       });

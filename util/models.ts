@@ -232,6 +232,7 @@ export interface ModelsServerView {
     stop: () => Promise<void>;
     execute: (command: string) => Promise<void>;
     extract: (filename: string) => Promise<void>;
+    install: () => Promise<void>;
   };
   edit: {
     name: (newName: string) => Promise<void>;
