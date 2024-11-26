@@ -11,8 +11,8 @@ const ViewFile = ({ file }: ViewFileProps) => {
     file.fileSize === 4096
       ? "Empty"
       : file.fileSize < 1_000_000
-        ? file.fileSize / 1000 + " KB"
-        : file.fileSize / 1_000_000 + " MB";
+        ? (file.fileSize / 1000).toFixed(2) + " KB"
+        : (file.fileSize / 1_000_000).toFixed(2) + " MB";
 
   const fileType = (): string => {
     if (file.isDirectory) {
