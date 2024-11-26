@@ -60,10 +60,7 @@ export default class PufferpanelSocket {
       this.send("status");
       this.send("replay");
 
-      const interval = setInterval(
-        () => this.send("status"),
-        45_000
-      );
+      const interval = setInterval(() => this.send("status"), 45_000);
 
       this.socket.onclose = e => {
         clearInterval(interval);

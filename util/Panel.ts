@@ -369,7 +369,8 @@ export default class Panel {
                 await this.actions.stop(server.id),
               extract: async (filename: string): Promise<void> =>
                 await this.get.extract(server.id, filename),
-              install: async (): Promise<void> => await this.actions.install(server.id)
+              install: async (): Promise<void> =>
+                await this.actions.install(server.id)
             };
 
             server.edit = {
@@ -458,7 +459,8 @@ export default class Panel {
             await this.actions.stop(data.server.id),
           extract: async (filename: string): Promise<void> =>
             await this.get.extract(data.server.id, filename),
-          install: async (): Promise<void> => await this.actions.install(data.server.id)
+          install: async (): Promise<void> =>
+            await this.actions.install(data.server.id)
         };
 
         data.server.get = {

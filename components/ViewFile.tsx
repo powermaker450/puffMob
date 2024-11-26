@@ -7,17 +7,18 @@ interface ViewFileProps {
 
 const ViewFile = ({ file }: ViewFileProps) => {
   const theme = useTheme();
-  const computeFileSize = () => file.fileSize === 4096 
-    ? "Empty"
-    : file.fileSize < 1_000_000
-      ? (file.fileSize / 1000) + " KB"
-      : ((file.fileSize / 1_000_000) + " MB");
+  const computeFileSize = () =>
+    file.fileSize === 4096
+      ? "Empty"
+      : file.fileSize < 1_000_000
+        ? file.fileSize / 1000 + " KB"
+        : file.fileSize / 1_000_000 + " MB";
 
   const fileType = (): string => {
     if (file.isDirectory) {
       return "folder";
     }
-    
+
     const { filename } = file;
 
     if (filename.endsWith(".properties") || filename.endsWith(".toml")) {
@@ -45,14 +46,19 @@ const ViewFile = ({ file }: ViewFileProps) => {
     }
 
     return "file-outline";
-  }
+  };
 
   return (
     <List.Item
       title={file.filename}
       description={file.isDirectory ? "Folder" : computeFileSize()}
       left={() => <List.Icon icon={fileType()} style={{ marginLeft: 15 }} />}
-      style={{ backgroundColor: theme.colors.surfaceVariant, borderRadius: 20, marginTop: 7, marginBottom: 7 }}
+      style={{
+        backgroundColor: theme.colors.surfaceVariant,
+        borderRadius: 20,
+        marginTop: 7,
+        marginBottom: 7
+      }}
     />
   );
 };

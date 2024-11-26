@@ -357,14 +357,15 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
 
       <Portal>
         <Dialog visible={dialog} onDismiss={() => setDialog(false)}>
-          <Dialog.Content><Text variant="bodyMedium">Remove this user?</Text></Dialog.Content>
+          <Dialog.Content>
+            <Text variant="bodyMedium">Remove this user?</Text>
+          </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setDialog(false)}>Cancel</Button>
-            <Button
-              onPress={deleteUser}
-              onPressIn={handleTouch}
-            >
-              <Text style={{ color: theme.colors.error, fontWeight: "bold" }}>Remove</Text>
+            <Button onPress={deleteUser} onPressIn={handleTouch}>
+              <Text style={{ color: theme.colors.error, fontWeight: "bold" }}>
+                Remove
+              </Text>
             </Button>
           </Dialog.Actions>
         </Dialog>

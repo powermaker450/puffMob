@@ -24,7 +24,16 @@ import { ServerDataResponse } from "@/util/models";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { ActivityIndicator, Appbar, Button, Dialog, FAB, Portal, Text, useTheme } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Appbar,
+  Button,
+  Dialog,
+  FAB,
+  Portal,
+  Text,
+  useTheme
+} from "react-native-paper";
 
 export default function config() {
   const { id } = useLocalSearchParams();
@@ -90,42 +99,43 @@ export default function config() {
       </Appbar.Header>
 
       <Portal>
-        <Dialog
-          visible={dialog}
-          onDismiss={() => setDialog(false)}
-        >
+        <Dialog visible={dialog} onDismiss={() => setDialog(false)}>
           <Dialog.Content>
             <Text variant="bodyMedium">
-              Installing the server will <Text style={{ fontWeight: "bold", color: theme.colors.error }}>overwrite</Text> config files and other data.
+              Installing the server will{" "}
+              <Text style={{ fontWeight: "bold", color: theme.colors.error }}>
+                overwrite
+              </Text>{" "}
+              config files and other data.
             </Text>
           </Dialog.Content>
 
           <Dialog.Actions>
-            <Button
-              onPressIn={handleTouch}
-              onPress={() => setDialog(false)}
-            >
+            <Button onPressIn={handleTouch} onPress={() => setDialog(false)}>
               Cancel
             </Button>
 
-            { installing ? loadingText : <Button
-              onPressIn={handleTouch}
-              onPress={() => {
-                setInstalling(true);
+            {installing ? (
+              loadingText
+            ) : (
+              <Button
+                onPressIn={handleTouch}
+                onPress={() => {
+                  setInstalling(true);
 
-                panel.actions.install(id as string)
-                  .then(() => {
+                  panel.actions.install(id as string).then(() => {
                     haptic("notificationSuccess");
                     setText("Installed!");
                     setNotice(true);
                     setInstalling(false);
                     setDialog(false);
                     setTimeout(() => setNotice(false), 2000);
-                  })
-              }}
-            >
-              Install
-            </Button> }
+                  });
+                }}
+              >
+                Install
+              </Button>
+            )}
           </Dialog.Actions>
         </Dialog>
       </Portal>
