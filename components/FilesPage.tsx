@@ -43,7 +43,7 @@ const FilesPage = () => {
     storage.getString(id + "_overrideUrl") || ""
   );
   const [overridePort, setOverridePort] = useState(
-    storage.getString(id + "_overridePort") || "5657"
+    storage.getString(id + "_overridePort") || ""
   );
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
@@ -114,17 +114,22 @@ const FilesPage = () => {
 
   useEffect(() => {
     panel.get.server(id as string).then(({ server }) => {
+      const url = overrideUrl || server.node.publicHost;
+      const port = overridePort ? Number(overridePort) : server.node.sftpPort;
+      const username = email + "|" + id;
+      console.log(server.node)
+
       SSHClient.connectWithPassword(
-        overrideUrl || server.node.publicHost,
-        Number(overridePort) === server.node.sftpPort
-          ? server.node.sftpPort
-          : Number(overridePort),
-        `${email}|${id}`,
+        url,
+        port,
+        username,
         password
       ).then(client => {
+
         client
           .sftpLs(".")
           .then(res => {
+            console.log(`Connected to sftp://${username}@${url}:${port}`);
             const dirs = res.filter(file => file.isDirectory);
             dirs.sort((a, b) => sortingFunction(a.filename, b.filename));
 
@@ -133,10 +138,17 @@ const FilesPage = () => {
 
             setFileList([...dirs, ...files]);
             setLoading(false);
-          })
-          .catch(() => setError(true));
 
-        navigation.addListener("beforeRemove", () => client.disconnectSFTP());
+
+            navigation.addListener("beforeRemove", () => {
+              client.disconnect();
+              console.log(`Disconnected from sftp://${username}@${url}:${port}`);
+            });
+          })
+          .catch(err => {
+            setError(true);
+            console.log(`Failed to connect to sftp://${username}@${url}:${port}`, err);
+          });
       });
     });
   }, [retry]);

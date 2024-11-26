@@ -53,7 +53,7 @@ export default function Server({
     // publicHost.example:8080
     // or
     // publicHost.example
-    return node.publicHost + (port ? ":" + port : "");
+    return node.publicHost + (port ? ":" + port : ` @ ${node.name}`);
   };
 
   const serverIcon = () => (
