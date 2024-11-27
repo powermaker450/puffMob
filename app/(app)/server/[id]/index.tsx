@@ -22,12 +22,10 @@ import { useEffect, useState } from "react";
 import {
   BottomNavigationRoute,
   BottomNavigation,
-  Text
 } from "react-native-paper";
 import PufferpanelSocket from "@/util/PufferpanelSocket";
 import ConsoleView from "@/components/ConsoleView";
 import NavBar from "@/components/NavBar";
-import CustomView from "@/components/CustomView";
 import ServerManagePage from "@/components/ServerManagePage";
 import NameTab from "@/components/NameTab";
 import FilesPage from "@/components/FilesPage";
@@ -39,6 +37,7 @@ export default function ServerScreen() {
   const navigation = useNavigation();
   const [sendConsolePerms, setSendConsolePerms] = useState(false);
   const [running, setRunning] = useState(false);
+  const [logs, setLogs] = useState<string[]>([]);
 
   let serverSocket: PufferpanelSocket;
 
@@ -76,27 +75,10 @@ export default function ServerScreen() {
       if (permissions.viewServerConsole) {
         serverSocket = control.getSocket(id as string);
 
-        serverSocket.on("status", r => {
-          setRunning(r.running);
-        });
-
-        serverSocket.on("console", l => {
-          let newLogs = "";
-          for (const line of l.logs) {
-            newLogs += line;
-          }
-
-          setLogs(
-            logs =>
-              logs +
-              newLogs.replace(
-                /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-                ""
-              )
-          );
-        });
+        serverSocket.on("status", r => setRunning(r.running));
+        serverSocket.on("console", l => setLogs(logs => logs.concat(l.logs)));
       } else {
-        setLogs("No logs :(");
+        setLogs(["No logs :("]);
       }
 
       // Getting and setting the rest of the user permissions
@@ -118,8 +100,6 @@ export default function ServerScreen() {
       setRoutes(newRoutes);
     });
   }, []);
-
-  const [logs, setLogs] = useState("");
 
   return (
     <>
