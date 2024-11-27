@@ -1,11 +1,13 @@
+import haptic from "@/util/haptic";
 import { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import { List, useTheme } from "react-native-paper";
 
 interface ViewFileProps {
   file: LsResult;
+  setPath: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const ViewFile = ({ file }: ViewFileProps) => {
+const ViewFile = ({ file, setPath }: ViewFileProps) => {
   const theme = useTheme();
   const computeFileSize = () =>
     file.fileSize === 4096
@@ -52,6 +54,7 @@ const ViewFile = ({ file }: ViewFileProps) => {
     <List.Item
       title={file.filename}
       description={file.isDirectory ? "Folder" : computeFileSize()}
+      onPress={() => file.isDirectory && setPath(path => path.concat([file.filename]))}
       left={() => <List.Icon icon={fileType()} style={{ marginLeft: 15 }} />}
       style={{
         backgroundColor: theme.colors.surfaceVariant,

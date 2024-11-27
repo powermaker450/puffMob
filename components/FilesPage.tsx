@@ -32,6 +32,7 @@ import { ScrollView, View } from "react-native";
 import ButtonContainer from "./ButtonContainer";
 import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
+import PathList from "./PathList";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();
@@ -49,6 +50,15 @@ const FilesPage = () => {
   const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fileList, setFileList] = useState<LsResult[]>([]);
+  const [pathList, setPathList] = useState<string[]>(["./"]);
+  const expandPath = (pathList: string[]) => {
+    let result = "";
+    for (const path of pathList) {
+      result += path;
+    }
+
+    return result;
+  }
   const sortingFunction = (a: string, b: string) =>
     a < b ? -1 : a > b ? 1 : 0;
 
@@ -124,6 +134,7 @@ const FilesPage = () => {
   }, [overridePort]);
 
   useEffect(() => {
+    setLoading(true);
 
     panel.get.server(id as string).then(({ server }) => {
       const url = overrideUrl || server.node.publicHost;
@@ -143,7 +154,7 @@ const FilesPage = () => {
       ).then(client => {
 
         client
-          .sftpLs(".")
+          .sftpLs(expandPath(pathList))
           .then(res => {
             console.log(`Connected to sftp://${username}@${url}:${port}`);
             const dirs = res.filter(file => file.isDirectory);
@@ -165,26 +176,30 @@ const FilesPage = () => {
       })
       .catch(err => handleError(err));
     });
-  }, [retry]);
+  }, [retry, pathList]);
 
   return (
-    <ScrollView>
-      {loading ? (
-        error ? (
-          errorText
+    <>
+      {!error && <PathList pathList={pathList} setPath={setPathList} /> }
+
+      <ScrollView>
+        {loading ? (
+          error ? (
+            errorText
+          ) : (
+            loadingText
+          )
+        ) : !fileList.length ? (
+          noFilesFound
         ) : (
-          loadingText
-        )
-      ) : !fileList.length ? (
-        noFilesFound
-      ) : (
-        <List.Section style={{ width: "95%", margin: "auto" }}>
-          {fileList.map((file, index) => {
-            return <ViewFile key={index} file={file} />;
-          })}
-        </List.Section>
-      )}
-    </ScrollView>
+          <List.Section style={{ width: "95%", margin: "auto" }}>
+            {fileList.map((file, index) => {
+              return <ViewFile key={index} file={file} setPath={setPathList} />;
+            })}
+          </List.Section>
+        )}
+      </ScrollView>
+    </>
   );
 };
 
