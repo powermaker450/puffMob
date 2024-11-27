@@ -59,7 +59,7 @@ const FilesPage = () => {
 
     return result;
   }
-  const sortingFunction = (a: string, b: string) =>
+  const alphabetize = (a: string, b: string) =>
     a < b ? -1 : a > b ? 1 : 0;
 
   const loadingText = <ActivityIndicator animating />;
@@ -158,10 +158,10 @@ const FilesPage = () => {
           .then(res => {
             console.log(`Connected to sftp://${username}@${url}:${port}`);
             const dirs = res.filter(file => file.isDirectory);
-            dirs.sort((a, b) => sortingFunction(a.filename, b.filename));
+            dirs.sort((a, b) => alphabetize(a.filename, b.filename));
 
             const files = res.filter(file => !file.isDirectory);
-            files.sort((a, b) => sortingFunction(a.filename, b.filename));
+            files.sort((a, b) => alphabetize(a.filename, b.filename));
 
             setFileList([...dirs, ...files]);
             setLoading(false);
