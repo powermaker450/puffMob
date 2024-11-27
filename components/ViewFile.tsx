@@ -1,4 +1,3 @@
-import haptic from "@/util/haptic";
 import { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import { List, useTheme } from "react-native-paper";
 
@@ -22,6 +21,7 @@ const ViewFile = ({ file, setPath }: ViewFileProps) => {
     }
 
     const { filename } = file;
+    const isArchive = filename.endsWith(".zip") || filename.endsWith(".tar") || filename.endsWith(".gz");
 
     if (filename.endsWith(".properties") || filename.endsWith(".toml")) {
       return "file-cog";
@@ -43,7 +43,7 @@ const ViewFile = ({ file, setPath }: ViewFileProps) => {
       return "code-json";
     }
 
-    if (filename.endsWith(".zip") || filename.endsWith(".tar")) {
+    if (isArchive) {
       return "zip-box";
     }
 
