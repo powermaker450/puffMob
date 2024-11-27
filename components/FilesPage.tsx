@@ -113,11 +113,17 @@ const FilesPage = () => {
   }, [overridePort]);
 
   useEffect(() => {
+
     panel.get.server(id as string).then(({ server }) => {
       const url = overrideUrl || server.node.publicHost;
       const port = overridePort ? Number(overridePort) : server.node.sftpPort;
       const username = email + "|" + id;
       console.log(server.node)
+
+      const handleError = (err: any) => {
+        setError(true);
+        console.log(`Failed to connect to sftp://${username}@${url}:${port}`, err);
+      }
 
       SSHClient.connectWithPassword(
         url,
@@ -145,11 +151,9 @@ const FilesPage = () => {
               console.log(`Disconnected from sftp://${username}@${url}:${port}`);
             });
           })
-          .catch(err => {
-            setError(true);
-            console.log(`Failed to connect to sftp://${username}@${url}:${port}`, err);
-          });
-      });
+          .catch(err => handleError(err));
+      })
+      .catch(err => handleError(err));
     });
   }, [retry]);
 
