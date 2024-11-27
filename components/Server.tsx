@@ -50,10 +50,10 @@ export default function Server({
       return ip + port ? ":" + port : "";
     }
 
-    // publicHost.example:8080
+    // publicHost.example:8080 @ nodeName
     // or
-    // publicHost.example
-    return node.publicHost + (port ? ":" + port : ` @ ${node.name}`);
+    // publicHost.example @ nodeName
+    return node.publicHost + (port ? `:${port} @ ${node.name}` : ` @ ${node.name}`);
   };
 
   const serverIcon = () => (
