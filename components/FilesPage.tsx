@@ -53,6 +53,17 @@ const FilesPage = () => {
     a < b ? -1 : a > b ? 1 : 0;
 
   const loadingText = <ActivityIndicator animating />;
+  const noFilesFound = (
+    <View
+      style={{
+        width: "85%",
+        margin: "auto",
+        flex: 1
+      }}
+    >
+      <Text variant="bodyLarge" style={{ textAlign: "center" }} >Your server feels very empty...</Text>
+    </View>
+  );
   const errorText = (
     <View style={{ maxWidth: "85%", margin: "auto", marginTop: 30 }}>
       <Text variant="displaySmall" style={{ marginBottom: 15 }}>
@@ -166,7 +177,7 @@ const FilesPage = () => {
           loadingText
         )
       ) : !fileList.length ? (
-        <Text>No files were found.</Text>
+        noFilesFound
       ) : (
         <List.Section style={{ width: "95%", margin: "auto" }}>
           {fileList.map((file, index) => {
