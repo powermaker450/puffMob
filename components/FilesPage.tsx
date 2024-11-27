@@ -129,7 +129,6 @@ const FilesPage = () => {
       const url = overrideUrl || server.node.publicHost;
       const port = overridePort ? Number(overridePort) : server.node.sftpPort;
       const username = email + "|" + id;
-      console.log(server.node)
 
       const handleError = (err: any) => {
         setError(true);
