@@ -52,8 +52,7 @@ const FilesPage = () => {
   const [loading, setLoading] = useState(true);
   const [fileList, setFileList] = useState<LsResult[]>([]);
   const [pathList, setPathList] = useState<string[]>(["./"]);
-  const alphabetize = (a: string, b: string) =>
-    a < b ? -1 : a > b ? 1 : 0;
+  const alphabetize = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
   const loadingText = <ActivityIndicator animating />;
   const noFilesFound = (
@@ -65,7 +64,9 @@ const FilesPage = () => {
         flex: 1
       }}
     >
-      <Text variant="bodyLarge" style={{ textAlign: "center" }} >Your folder feels very empty...</Text>
+      <Text variant="bodyLarge" style={{ textAlign: "center" }}>
+        Your folder feels very empty...
+      </Text>
     </View>
   );
   const errorText = (
@@ -137,44 +138,43 @@ const FilesPage = () => {
 
       const handleError = (err: any) => {
         setError(true);
-        console.log(`Failed to connect to sftp://${username}@${url}:${port}`, err);
-      }
+        console.log(
+          `Failed to connect to sftp://${username}@${url}:${port}`,
+          err
+        );
+      };
 
-      SSHClient.connectWithPassword(
-        url,
-        port,
-        username,
-        password
-      ).then(client => {
+      SSHClient.connectWithPassword(url, port, username, password)
+        .then(client => {
+          client
+            .sftpLs(expandPath(pathList))
+            .then(res => {
+              console.log(`Connected to sftp://${username}@${url}:${port}`);
+              const dirs = res.filter(file => file.isDirectory);
+              dirs.sort((a, b) => alphabetize(a.filename, b.filename));
 
-        client
-          .sftpLs(expandPath(pathList))
-          .then(res => {
-            console.log(`Connected to sftp://${username}@${url}:${port}`);
-            const dirs = res.filter(file => file.isDirectory);
-            dirs.sort((a, b) => alphabetize(a.filename, b.filename));
+              const files = res.filter(file => !file.isDirectory);
+              files.sort((a, b) => alphabetize(a.filename, b.filename));
 
-            const files = res.filter(file => !file.isDirectory);
-            files.sort((a, b) => alphabetize(a.filename, b.filename));
+              setFileList([...dirs, ...files]);
+              setLoading(false);
 
-            setFileList([...dirs, ...files]);
-            setLoading(false);
-
-
-            navigation.addListener("beforeRemove", () => {
-              client.disconnect();
-              console.log(`Disconnected from sftp://${username}@${url}:${port}`);
-            });
-          })
-          .catch(err => handleError(err));
-      })
-      .catch(err => handleError(err));
+              navigation.addListener("beforeRemove", () => {
+                client.disconnect();
+                console.log(
+                  `Disconnected from sftp://${username}@${url}:${port}`
+                );
+              });
+            })
+            .catch(err => handleError(err));
+        })
+        .catch(err => handleError(err));
     });
   }, [retry, pathList]);
 
   return (
     <>
-      {!error && <PathList pathList={pathList} setPath={setPathList} /> }
+      {!error && <PathList pathList={pathList} setPath={setPathList} />}
 
       <ScrollView>
         {loading ? (
@@ -188,7 +188,15 @@ const FilesPage = () => {
         ) : (
           <List.Section style={{ width: "95%", margin: "auto" }}>
             {fileList.map((file, index) => {
-              return <ViewFile key={index} file={file} setPath={setPathList} currentPath={pathList} setRefresh={setRetry} />;
+              return (
+                <ViewFile
+                  key={index}
+                  file={file}
+                  setPath={setPathList}
+                  currentPath={pathList}
+                  setRefresh={setRetry}
+                />
+              );
             })}
           </List.Section>
         )}

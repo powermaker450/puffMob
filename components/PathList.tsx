@@ -28,7 +28,14 @@ interface PathListProps {
 const PathList = ({ pathList, setPath }: PathListProps) => {
   return (
     <ScrollView
-      style={{ width: "95%", margin: "auto", marginTop: 10, height: 50, maxHeight: 50, marginBottom: 10 }}
+      style={{
+        width: "95%",
+        margin: "auto",
+        marginTop: 10,
+        height: 50,
+        maxHeight: 50,
+        marginBottom: 10
+      }}
       horizontal
     >
       {pathList.map((pathname, index) => {
@@ -40,7 +47,11 @@ const PathList = ({ pathList, setPath }: PathListProps) => {
             onPress={() => {
               haptic();
               // If the current path is root, or we are already at the selected path, don't refesh the file list
-              (pathList.length > 1 && (pathList.length - 1 !== index)) && setPath(pathList => pathList.slice(0, pathList.indexOf(pathname) + 1));
+              pathList.length > 1 &&
+                pathList.length - 1 !== index &&
+                setPath(pathList =>
+                  pathList.slice(0, pathList.indexOf(pathname) + 1)
+                );
             }}
           >
             {pathname === "./" ? "/" : pathname.replace("/", "")}

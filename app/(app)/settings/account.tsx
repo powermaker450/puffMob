@@ -182,7 +182,11 @@ export default function account() {
             <Dialog.Actions>
               <Button onPress={() => setLogoutSplash(false)}>Cancel</Button>
               <Button onPress={handleLogout}>
-                <Text style={{ color: theme.colors.tertiary, fontWeight: "bold" }} >Log out</Text>
+                <Text
+                  style={{ color: theme.colors.tertiary, fontWeight: "bold" }}
+                >
+                  Log out
+                </Text>
               </Button>
             </Dialog.Actions>
           </Dialog>

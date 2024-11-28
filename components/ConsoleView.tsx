@@ -74,7 +74,12 @@ const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
                 fontFamily: "NotoSansMono_400Regular"
               }}
             >
-              {logs.map(line => line.replaceAll(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ""))}
+              {logs.map(line =>
+                line.replaceAll(
+                  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+                  ""
+                )
+              )}
             </Text>
           </ScrollView>
         </ScrollView>

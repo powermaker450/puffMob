@@ -5,7 +5,15 @@ import { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
-import { ActivityIndicator, Icon, List, Modal, Portal, Text, useTheme } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Icon,
+  List,
+  Modal,
+  Portal,
+  Text,
+  useTheme
+} from "react-native-paper";
 
 interface ViewFileProps {
   file: LsResult;
@@ -14,7 +22,12 @@ interface ViewFileProps {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const ViewFile = ({ file, currentPath, setPath, setRefresh }: ViewFileProps) => {
+const ViewFile = ({
+  file,
+  currentPath,
+  setPath,
+  setRefresh
+}: ViewFileProps) => {
   const theme = useTheme();
   const computeFileSize = () =>
     file.fileSize === 4096
@@ -29,7 +42,10 @@ const ViewFile = ({ file, currentPath, setPath, setRefresh }: ViewFileProps) => 
     }
 
     const { filename } = file;
-    const isArchive = filename.endsWith(".zip") || filename.endsWith(".tar") || filename.endsWith(".gz");
+    const isArchive =
+      filename.endsWith(".zip") ||
+      filename.endsWith(".tar") ||
+      filename.endsWith(".gz");
 
     if (filename.endsWith(".properties") || filename.endsWith(".toml")) {
       return "file-cog";
@@ -66,7 +82,8 @@ const ViewFile = ({ file, currentPath, setPath, setRefresh }: ViewFileProps) => 
   const handleDelete = () => {
     const fullPath = expandPath(currentPath) + file.filename;
 
-    panel.delete.file(id as string, fullPath)
+    panel.delete
+      .file(id as string, fullPath)
       .then(() => {
         haptic("notificationSuccess");
         setRefresh(Math.random());
@@ -76,15 +93,16 @@ const ViewFile = ({ file, currentPath, setPath, setRefresh }: ViewFileProps) => 
         console.log("File delete error:", err);
       })
       .finally(() => setDeleting(false));
-  }
-
+  };
 
   return (
     <>
       <List.Item
         title={file.filename}
         description={file.isDirectory ? "Folder" : computeFileSize()}
-        onPress={() => file.isDirectory && setPath(path => path.concat([file.filename]))}
+        onPress={() =>
+          file.isDirectory && setPath(path => path.concat([file.filename]))
+        }
         onLongPress={() => {
           haptic();
           setVisible(true);
@@ -122,23 +140,42 @@ const ViewFile = ({ file, currentPath, setPath, setRefresh }: ViewFileProps) => 
             </View>
 
             <List.Item
-              title={<Text style={{ color: theme.colors.surfaceDisabled }}>Edit Name</Text>}
-              left={() => <List.Icon color={theme.colors.surfaceDisabled} icon="pencil" />}
+              title={
+                <Text style={{ color: theme.colors.surfaceDisabled }}>
+                  Edit Name
+                </Text>
+              }
+              left={() => (
+                <List.Icon color={theme.colors.surfaceDisabled} icon="pencil" />
+              )}
             />
 
             <List.Item
-              title={<Text style={{ color: theme.colors.surfaceDisabled }}>Download</Text>}
-              left={() => <List.Icon color={theme.colors.surfaceDisabled} icon="download" />}
+              title={
+                <Text style={{ color: theme.colors.surfaceDisabled }}>
+                  Download
+                </Text>
+              }
+              left={() => (
+                <List.Icon
+                  color={theme.colors.surfaceDisabled}
+                  icon="download"
+                />
+              )}
             />
 
-            { deleting ? <ActivityIndicator animating /> : <List.Item
-              title="Delete"
-              left={() => <List.Icon icon="trash-can" />}
-              onPress={() => {
-                setDeleting(true);
-                handleDelete();
-              }}
-            /> }
+            {deleting ? (
+              <ActivityIndicator animating />
+            ) : (
+              <List.Item
+                title="Delete"
+                left={() => <List.Icon icon="trash-can" />}
+                onPress={() => {
+                  setDeleting(true);
+                  handleDelete();
+                }}
+              />
+            )}
           </List.Section>
         </Modal>
       </Portal>

@@ -19,10 +19,7 @@
 import Panel from "@/util/Panel";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  BottomNavigationRoute,
-  BottomNavigation,
-} from "react-native-paper";
+import { BottomNavigationRoute, BottomNavigation } from "react-native-paper";
 import PufferpanelSocket from "@/util/PufferpanelSocket";
 import ConsoleView from "@/components/ConsoleView";
 import NavBar from "@/components/NavBar";
