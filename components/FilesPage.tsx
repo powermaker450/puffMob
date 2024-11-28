@@ -33,6 +33,7 @@ import ButtonContainer from "./ButtonContainer";
 import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import PathList from "./PathList";
+import expandPath from "@/expandPath";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();
@@ -51,14 +52,6 @@ const FilesPage = () => {
   const [loading, setLoading] = useState(true);
   const [fileList, setFileList] = useState<LsResult[]>([]);
   const [pathList, setPathList] = useState<string[]>(["./"]);
-  const expandPath = (pathList: string[]) => {
-    let result = "";
-    for (const path of pathList) {
-      result += path;
-    }
-
-    return result;
-  }
   const alphabetize = (a: string, b: string) =>
     a < b ? -1 : a > b ? 1 : 0;
 
@@ -194,7 +187,7 @@ const FilesPage = () => {
         ) : (
           <List.Section style={{ width: "95%", margin: "auto" }}>
             {fileList.map((file, index) => {
-              return <ViewFile key={index} file={file} setPath={setPathList} />;
+              return <ViewFile key={index} file={file} setPath={setPathList} currentPath={pathList} setRefresh={setRetry} />;
             })}
           </List.Section>
         )}

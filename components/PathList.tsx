@@ -18,7 +18,7 @@
 
 import haptic from "@/util/haptic";
 import { ScrollView } from "react-native";
-import { Button, Card } from "react-native-paper";
+import { Button } from "react-native-paper";
 
 interface PathListProps {
   pathList: string[];
