@@ -39,7 +39,8 @@ const PathList = ({ pathList, setPath }: PathListProps) => {
             mode="outlined"
             onPress={() => {
               haptic();
-              (pathList.length > 1 && pathList[pathList.length - 1] !== pathname) && setPath(pathList => pathList.slice(0, pathList.indexOf(pathname) + 1));
+              // If the current path is root, or we are already at the selected path, don't refesh the file list
+              (pathList.length > 1 && (pathList.length - 1 !== index)) && setPath(pathList => pathList.slice(0, pathList.indexOf(pathname) + 1));
             }}
           >
             {pathname === "./" ? "/" : pathname.replace("/", "")}
