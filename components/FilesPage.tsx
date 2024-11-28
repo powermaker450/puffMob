@@ -61,10 +61,11 @@ const FilesPage = () => {
       style={{
         width: "85%",
         margin: "auto",
+        marginTop: 15,
         flex: 1
       }}
     >
-      <Text variant="bodyLarge" style={{ textAlign: "center" }} >Your server feels very empty...</Text>
+      <Text variant="bodyLarge" style={{ textAlign: "center" }} >Your folder feels very empty...</Text>
     </View>
   );
   const errorText = (
