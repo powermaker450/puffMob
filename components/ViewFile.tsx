@@ -1,7 +1,7 @@
 import expandPath from "@/expandPath";
 import Panel from "@/util/Panel";
 import haptic from "@/util/haptic";
-import { LsResult } from "@dylankenneally/react-native-ssh-sftp";
+import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -14,6 +14,8 @@ import {
   Text,
   useTheme
 } from "react-native-paper";
+import Notice from "./Notice";
+import { storage } from "@/util/storage";
 
 interface ViewFileProps {
   file: LsResult;
@@ -82,16 +84,45 @@ const ViewFile = ({
   const handleDelete = () => {
     const fullPath = expandPath(currentPath) + file.filename;
 
+    if (!file.isDirectory) {
+      panel.get.server(id as string).then(({ server }) => {
+        const url = storage.getString(id + "_overrideUrl") || server.node.publicHost;
+        const port = Number(storage.getString(id + "_overridePort") || server.node.sftpPort);
+        const { email, password } = Panel.getSettings();
+        const username = email + "|" + id;
+
+        SSHClient.connectWithPassword(
+          url,
+          port,
+          username,
+          password
+        )
+          .then(client => {
+            client.sftpRm(fullPath)
+              .then(() => {
+                haptic("notificationSuccess");
+                setRefresh(Math.random());
+              })
+              .catch(() => haptic("notificationError"))
+              .finally(() => setDeleting(false))
+          })
+          .catch(() => {
+            haptic("notificationError");
+            setDeleting(false);
+          });
+      })
+
+      return;
+    }
+
+
     panel.delete
       .file(id as string, fullPath)
       .then(() => {
         haptic("notificationSuccess");
         setRefresh(Math.random());
       })
-      .catch(err => {
-        haptic("notificationError");
-        console.log("File delete error:", err);
-      })
+      .catch(() => haptic("notificationError"))
       .finally(() => setDeleting(false));
   };
 
@@ -116,6 +147,7 @@ const ViewFile = ({
           marginBottom: 7
         }}
       />
+
 
       <Portal>
         <Modal
