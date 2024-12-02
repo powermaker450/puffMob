@@ -17,6 +17,7 @@
  */
 
 import haptic from "@/util/haptic";
+import { useRef } from "react";
 import { ScrollView } from "react-native";
 import { Button } from "react-native-paper";
 
@@ -26,8 +27,11 @@ interface PathListProps {
 }
 
 const PathList = ({ pathList, setPath }: PathListProps) => {
+  const ref = useRef<ScrollView>(null);
+
   return (
     <ScrollView
+      ref={ref}
       style={{
         width: "95%",
         margin: "auto",
@@ -37,6 +41,7 @@ const PathList = ({ pathList, setPath }: PathListProps) => {
         marginBottom: 10
       }}
       horizontal
+      onContentSizeChange={() => ref.current?.scrollToEnd()}
     >
       {pathList.map((pathname, index) => {
         return (
