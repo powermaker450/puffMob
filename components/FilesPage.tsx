@@ -52,7 +52,16 @@ const FilesPage = () => {
   const [loading, setLoading] = useState(true);
   const [fileList, setFileList] = useState<LsResult[]>([]);
   const [pathList, setPathList] = useState<string[]>(["./"]);
+
+  const [client, setClient] = useState<SSHClient>();
   const alphabetize = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  const handleError = (err: any) => {
+    setError(true);
+    console.log(
+      `Failed to connect to sftp:`,
+      err
+    );
+  };
 
   const loadingText = <ActivityIndicator animating />;
   const noFilesFound = (
@@ -136,41 +145,37 @@ const FilesPage = () => {
       const port = overridePort ? Number(overridePort) : server.node.sftpPort;
       const username = email + "|" + id;
 
-      const handleError = (err: any) => {
-        setError(true);
-        console.log(
-          `Failed to connect to sftp://${username}@${url}:${port}`,
-          err
-        );
-      };
-
       SSHClient.connectWithPassword(url, port, username, password)
         .then(client => {
-          client
-            .sftpLs(expandPath(pathList))
-            .then(res => {
-              console.log(`Connected to sftp://${username}@${url}:${port}`);
-              const dirs = res.filter(file => file.isDirectory);
-              dirs.sort((a, b) => alphabetize(a.filename, b.filename));
+          console.log(`Connected to sftp://${url}:${port}@${username}`);
+          setClient(client);
 
-              const files = res.filter(file => !file.isDirectory);
-              files.sort((a, b) => alphabetize(a.filename, b.filename));
-
-              setFileList([...dirs, ...files]);
-              setLoading(false);
-
-              navigation.addListener("beforeRemove", () => {
-                client.disconnect();
-                console.log(
-                  `Disconnected from sftp://${username}@${url}:${port}`
-                );
-              });
-            })
-            .catch(err => handleError(err));
+          navigation.addListener("beforeRemove", () => {
+            client && client.disconnect();
+            console.log(`Disconnected from sftp://${url}:${port}@${username}`);
+          })
         })
         .catch(err => handleError(err));
     });
-  }, [retry, pathList]);
+  }, [retry]);
+
+  useEffect(() => {
+    if (client) {
+      client
+        .sftpLs(expandPath(pathList))
+        .then(res => {
+          const dirs = res.filter(file => file.isDirectory);
+          dirs.sort((a, b) => alphabetize(a.filename, b.filename));
+
+          const files = res.filter(file => !file.isDirectory);
+          files.sort((a, b) => alphabetize(a.filename, b.filename));
+
+          setFileList([...dirs, ...files]);
+          setLoading(false);
+        })
+        .catch(err => handleError(err));
+    }
+  }, [client, pathList]);
 
   return (
     <>
