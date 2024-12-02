@@ -57,10 +57,7 @@ const FilesPage = () => {
   const alphabetize = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
   const handleError = (err: any) => {
     setError(true);
-    console.log(
-      `Failed to connect to sftp:`,
-      err
-    );
+    console.log(`Failed to connect to sftp:`, err);
   };
 
   const loadingText = <ActivityIndicator animating />;
@@ -153,7 +150,7 @@ const FilesPage = () => {
           navigation.addListener("beforeRemove", () => {
             client && client.disconnect();
             console.log(`Disconnected from sftp://${url}:${port}@${username}`);
-          })
+          });
         })
         .catch(err => handleError(err));
     });
