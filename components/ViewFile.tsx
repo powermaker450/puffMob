@@ -25,11 +25,14 @@ import { useState } from "react";
 import { View } from "react-native";
 import {
   ActivityIndicator,
+  Button,
+  Dialog,
   Icon,
   List,
   Modal,
   Portal,
   Text,
+  TextInput,
   useTheme
 } from "react-native-paper";
 
@@ -94,8 +97,30 @@ const ViewFile = ({
     return "file-outline";
   };
 
+  const loadingIcon = <ActivityIndicator animating />;
+
   const [visible, setVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const [renameVis, setRenameVis] = useState(false);
+  
+  // Replace trailiing slash for directories 
+  const [newName, setNewName] = useState(file.filename.replace("/", ""));
+  const [nameUpdating, setNameUpdating] = useState(false);
+
+  // Matches these characters:
+  //
+  // /
+  // <
+  // >
+  // :
+  // "
+  // \
+  // |
+  // ?
+  // *
+  const invalidChars = /\/|<|>|:|\"|\\|\||\?|\*/g;
+
   const { id } = useLocalSearchParams();
   const panel = Panel.getPanel();
 
@@ -131,6 +156,118 @@ const ViewFile = ({
       .catch(() => haptic("notificationError"))
       .finally(() => setDeleting(false));
   };
+  
+  const cancelRename = () => {
+    setVisible(true);
+    setRenameVis(false);
+    setNewName(file.filename.replace("/", ""));
+  }
+
+  const handleRename = () => {
+    setNameUpdating(false);
+
+    const oldPath = expandPath(currentPath) + file.filename;
+    const newPath = expandPath(currentPath) + newName;
+
+    if (!client) {
+      setNameUpdating(false);
+      haptic("notificationError");
+      return;
+    }
+
+    client.sftpRename(oldPath, newPath)
+      .then(() => {
+        setRenameVis(false);
+        haptic("notificationSuccess");
+        setRefresh(Math.random());
+      })
+      .catch(() => haptic("notificationError"))
+      .finally(() => setNameUpdating(false));
+  }
+
+  const modalStyle = {
+    backgroundColor: theme.colors.background,
+    margin: 20,
+    padding: 20,
+    borderRadius: 20
+  };
+
+  const longPressModal = (
+    <Modal
+      visible={visible}
+      contentContainerStyle={modalStyle}
+      onDismiss={() => setVisible(false)}
+    >
+      <List.Section>
+        <View style={{ alignItems: "center", marginBottom: 30 }}>
+          <Icon source={fileType()} size={40} />
+          <Text
+            variant="titleLarge"
+            style={{ marginTop: 10, fontWeight: "bold" }}
+          >
+            {file.filename}
+          </Text>
+        </View>
+
+        { nameUpdating ? loadingIcon : <List.Item
+          title="Edit Name"
+          left={() => <List.Icon icon="pencil" />}
+          onPress={() => {
+            setVisible(false);
+            setRenameVis(true);
+          }}
+        /> }
+
+        <List.Item
+          title={
+            <Text style={{ color: theme.colors.surfaceDisabled }}>
+              Download
+            </Text>
+          }
+          left={() => (
+            <List.Icon
+              color={theme.colors.surfaceDisabled}
+              icon="download"
+            />
+          )}
+        />
+
+        {deleting ? loadingIcon : (
+          <List.Item
+            title="Delete"
+            left={() => <List.Icon icon="trash-can" />}
+            onPress={() => {
+              setDeleting(true);
+              handleDelete();
+            }}
+          />
+        )}
+      </List.Section>
+    </Modal>
+  );
+
+  const renameDialog = (
+    <Dialog
+      visible={renameVis}
+      onDismiss={cancelRename}
+      dismissable={!nameUpdating}
+    >
+      <Dialog.Title>Edit {file.isDirectory ? "Folder" : "File"} Name</Dialog.Title>
+      <Dialog.Content>
+        <TextInput 
+          mode="outlined"
+          label="File Name"
+          value={newName}
+          onChangeText={text => setNewName(text.replaceAll(invalidChars, ""))}
+        />
+      </Dialog.Content>
+
+      <Dialog.Actions>
+        {!nameUpdating && <Button onPress={cancelRename}>Cancel</Button>}
+        {nameUpdating ? loadingIcon : <Button onPress={handleRename}>Rename</Button>}
+      </Dialog.Actions>
+    </Dialog>
+  );
 
   return (
     <>
@@ -155,66 +292,11 @@ const ViewFile = ({
       />
 
       <Portal>
-        <Modal
-          visible={visible}
-          contentContainerStyle={{
-            backgroundColor: theme.colors.background,
-            margin: 20,
-            padding: 20,
-            borderRadius: 20
-          }}
-          onDismiss={() => setVisible(false)}
-        >
-          <List.Section>
-            <View style={{ alignItems: "center", marginBottom: 30 }}>
-              <Icon source={fileType()} size={40} />
-              <Text
-                variant="titleLarge"
-                style={{ marginTop: 10, fontWeight: "bold" }}
-              >
-                {file.filename}
-              </Text>
-            </View>
+        {longPressModal}
+      </Portal>
 
-            <List.Item
-              title={
-                <Text style={{ color: theme.colors.surfaceDisabled }}>
-                  Edit Name
-                </Text>
-              }
-              left={() => (
-                <List.Icon color={theme.colors.surfaceDisabled} icon="pencil" />
-              )}
-            />
-
-            <List.Item
-              title={
-                <Text style={{ color: theme.colors.surfaceDisabled }}>
-                  Download
-                </Text>
-              }
-              left={() => (
-                <List.Icon
-                  color={theme.colors.surfaceDisabled}
-                  icon="download"
-                />
-              )}
-            />
-
-            {deleting ? (
-              <ActivityIndicator animating />
-            ) : (
-              <List.Item
-                title="Delete"
-                left={() => <List.Icon icon="trash-can" />}
-                onPress={() => {
-                  setDeleting(true);
-                  handleDelete();
-                }}
-              />
-            )}
-          </List.Section>
-        </Modal>
+      <Portal>
+        {renameDialog}
       </Portal>
     </>
   );
