@@ -104,7 +104,10 @@ const ViewFile = ({
                 setRefresh(Math.random());
               })
               .catch(() => haptic("notificationError"))
-              .finally(() => setDeleting(false))
+              .finally(() => {
+                setDeleting(false);
+                client.disconnect();
+              })
           })
           .catch(() => {
             haptic("notificationError");
