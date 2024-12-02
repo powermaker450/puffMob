@@ -14,21 +14,21 @@ import {
   Text,
   useTheme
 } from "react-native-paper";
-import Notice from "./Notice";
-import { storage } from "@/util/storage";
 
 interface ViewFileProps {
   file: LsResult;
   currentPath: string[];
   setPath: React.Dispatch<React.SetStateAction<string[]>>;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  client: SSHClient | null;
 }
 
 const ViewFile = ({
   file,
   currentPath,
   setPath,
-  setRefresh
+  setRefresh,
+  client
 }: ViewFileProps) => {
   const theme = useTheme();
   const computeFileSize = () =>
@@ -85,39 +85,23 @@ const ViewFile = ({
     const fullPath = expandPath(currentPath) + file.filename;
 
     if (!file.isDirectory) {
-      panel.get.server(id as string).then(({ server }) => {
-        const url = storage.getString(id + "_overrideUrl") || server.node.publicHost;
-        const port = Number(storage.getString(id + "_overridePort") || server.node.sftpPort);
-        const { email, password } = Panel.getSettings();
-        const username = email + "|" + id;
+      if (!client) {
+        haptic("notificationError");
+        setDeleting(false);
+        return;
+      }
 
-        SSHClient.connectWithPassword(
-          url,
-          port,
-          username,
-          password
-        )
-          .then(client => {
-            client.sftpRm(fullPath)
-              .then(() => {
-                haptic("notificationSuccess");
-                setRefresh(Math.random());
-              })
-              .catch(() => haptic("notificationError"))
-              .finally(() => {
-                setDeleting(false);
-                client.disconnect();
-              })
-          })
-          .catch(() => {
-            haptic("notificationError");
-            setDeleting(false);
-          });
-      })
+      client.sftpRm(fullPath)
+        .then(() => {
+          setVisible(false);
+          haptic("notificationSuccess");
+          setRefresh(Math.random());
+        })
+        .catch(() => haptic("notificationError"))
+        .finally(() => setDeleting(false));
 
       return;
     }
-
 
     panel.delete
       .file(id as string, fullPath)

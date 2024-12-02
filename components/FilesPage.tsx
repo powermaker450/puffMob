@@ -53,7 +53,7 @@ const FilesPage = () => {
   const [fileList, setFileList] = useState<LsResult[]>([]);
   const [pathList, setPathList] = useState<string[]>(["./"]);
 
-  const [client, setClient] = useState<SSHClient>();
+  const [client, setClient] = useState<SSHClient | null>(null);
   const alphabetize = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
   const handleError = (err: any) => {
     setError(true);
@@ -157,7 +157,7 @@ const FilesPage = () => {
         })
         .catch(err => handleError(err));
     });
-  }, [retry]);
+  }, []);
 
   useEffect(() => {
     if (client) {
@@ -175,7 +175,7 @@ const FilesPage = () => {
         })
         .catch(err => handleError(err));
     }
-  }, [client, pathList]);
+  }, [client, retry, pathList]);
 
   return (
     <>
@@ -200,6 +200,7 @@ const FilesPage = () => {
                   setPath={setPathList}
                   currentPath={pathList}
                   setRefresh={setRetry}
+                  client={client}
                 />
               );
             })}
