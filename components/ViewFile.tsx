@@ -21,7 +21,7 @@ import Panel from "@/util/Panel";
 import haptic from "@/util/haptic";
 import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import {
   ActivityIndicator,
@@ -42,6 +42,7 @@ interface ViewFileProps {
   setPath: React.Dispatch<React.SetStateAction<string[]>>;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   client: SSHClient | null;
+  disableNav: boolean;
 }
 
 const ViewFile = ({
@@ -49,7 +50,8 @@ const ViewFile = ({
   currentPath,
   setPath,
   setRefresh,
-  client
+  client,
+  disableNav,
 }: ViewFileProps) => {
   const theme = useTheme();
   const computeFileSize = () =>
@@ -103,8 +105,8 @@ const ViewFile = ({
   const [deleting, setDeleting] = useState(false);
 
   const [renameVis, setRenameVis] = useState(false);
-  
-  // Replace trailiing slash for directories 
+
+  // Replace trailing slash for directories 
   const [newName, setNewName] = useState(file.filename.replace("/", ""));
   const [nameUpdating, setNameUpdating] = useState(false);
 
@@ -246,7 +248,8 @@ const ViewFile = ({
     </Modal>
   );
 
-  const renameDialog = (
+  // The newName can go rogue if this is not a function.
+  const renameDialog = () => (
     <Dialog
       visible={renameVis}
       onDismiss={cancelRename}
@@ -274,6 +277,7 @@ const ViewFile = ({
       <List.Item
         title={file.filename}
         description={file.isDirectory ? "Folder" : computeFileSize()}
+        disabled={disableNav}
         onPress={() =>
           file.isDirectory && setPath(path => path.concat([file.filename]))
         }
@@ -296,7 +300,7 @@ const ViewFile = ({
       </Portal>
 
       <Portal>
-        {renameDialog}
+        {renameDialog()}
       </Portal>
     </>
   );

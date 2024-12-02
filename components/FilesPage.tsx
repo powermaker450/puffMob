@@ -53,6 +53,8 @@ const FilesPage = () => {
   const [fileList, setFileList] = useState<LsResult[]>([]);
   const [pathList, setPathList] = useState<string[]>(["./"]);
 
+  const [disableNav, setDisableNav] = useState(false);
+
   const [client, setClient] = useState<SSHClient | null>(null);
   const alphabetize = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
   const handleError = (err: any) => {
@@ -158,9 +160,12 @@ const FilesPage = () => {
 
   useEffect(() => {
     if (client) {
+      setDisableNav(true);
+
       client
         .sftpLs(expandPath(pathList))
         .then(res => {
+
           const dirs = res.filter(file => file.isDirectory);
           dirs.sort((a, b) => alphabetize(a.filename, b.filename));
 
@@ -170,7 +175,8 @@ const FilesPage = () => {
           setFileList([...dirs, ...files]);
           setLoading(false);
         })
-        .catch(err => handleError(err));
+        .catch(err => handleError(err))
+        .finally(() => setDisableNav(false));
     }
   }, [client, retry, pathList]);
 
@@ -198,6 +204,7 @@ const FilesPage = () => {
                   currentPath={pathList}
                   setRefresh={setRetry}
                   client={client}
+                  disableNav={disableNav}
                 />
               );
             })}
