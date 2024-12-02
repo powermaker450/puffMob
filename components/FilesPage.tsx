@@ -165,7 +165,6 @@ const FilesPage = () => {
       client
         .sftpLs(expandPath(pathList))
         .then(res => {
-
           const dirs = res.filter(file => file.isDirectory);
           dirs.sort((a, b) => alphabetize(a.filename, b.filename));
 

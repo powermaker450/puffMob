@@ -51,7 +51,7 @@ const ViewFile = ({
   setPath,
   setRefresh,
   client,
-  disableNav,
+  disableNav
 }: ViewFileProps) => {
   const theme = useTheme();
   const computeFileSize = () =>
@@ -103,10 +103,11 @@ const ViewFile = ({
 
   const [visible, setVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteVis, setDeleteVis] = useState(false);
 
   const [renameVis, setRenameVis] = useState(false);
 
-  // Replace trailing slash for directories 
+  // Replace trailing slash for directories
   const [newName, setNewName] = useState(file.filename.replace("/", ""));
   const [nameUpdating, setNameUpdating] = useState(false);
 
@@ -158,12 +159,15 @@ const ViewFile = ({
       .catch(() => haptic("notificationError"))
       .finally(() => setDeleting(false));
   };
-  
+
   const cancelRename = () => {
-    setVisible(true);
     setRenameVis(false);
     setNewName(file.filename.replace("/", ""));
-  }
+  };
+
+  const cancelDelete = () => {
+    setDeleteVis(false);
+  };
 
   const handleRename = () => {
     setNameUpdating(false);
@@ -177,7 +181,8 @@ const ViewFile = ({
       return;
     }
 
-    client.sftpRename(oldPath, newPath)
+    client
+      .sftpRename(oldPath, newPath)
       .then(() => {
         setRenameVis(false);
         haptic("notificationSuccess");
@@ -185,7 +190,7 @@ const ViewFile = ({
       })
       .catch(() => haptic("notificationError"))
       .finally(() => setNameUpdating(false));
-  }
+  };
 
   const modalStyle = {
     backgroundColor: theme.colors.background,
@@ -211,14 +216,15 @@ const ViewFile = ({
           </Text>
         </View>
 
-        { nameUpdating ? loadingIcon : <List.Item
-          title="Edit Name"
-          left={() => <List.Icon icon="pencil" />}
-          onPress={() => {
-            setVisible(false);
-            setRenameVis(true);
-          }}
-        /> }
+        {nameUpdating ? (
+          loadingIcon
+        ) : (
+          <List.Item
+            title="Edit Name"
+            left={() => <List.Icon icon="pencil" />}
+            onPress={() => setRenameVis(true)}
+          />
+        )}
 
         <List.Item
           title={
@@ -227,21 +233,17 @@ const ViewFile = ({
             </Text>
           }
           left={() => (
-            <List.Icon
-              color={theme.colors.surfaceDisabled}
-              icon="download"
-            />
+            <List.Icon color={theme.colors.surfaceDisabled} icon="download" />
           )}
         />
 
-        {deleting ? loadingIcon : (
+        {deleting ? (
+          loadingIcon
+        ) : (
           <List.Item
             title="Delete"
             left={() => <List.Icon icon="trash-can" />}
-            onPress={() => {
-              setDeleting(true);
-              handleDelete();
-            }}
+            onPress={() => setDeleteVis(true)}
           />
         )}
       </List.Section>
@@ -255,9 +257,11 @@ const ViewFile = ({
       onDismiss={cancelRename}
       dismissable={!nameUpdating}
     >
-      <Dialog.Title>Edit {file.isDirectory ? "Folder" : "File"} Name</Dialog.Title>
+      <Dialog.Title>
+        Edit {file.isDirectory ? "Folder" : "File"} Name
+      </Dialog.Title>
       <Dialog.Content>
-        <TextInput 
+        <TextInput
           mode="outlined"
           label="File Name"
           value={newName}
@@ -267,7 +271,43 @@ const ViewFile = ({
 
       <Dialog.Actions>
         {!nameUpdating && <Button onPress={cancelRename}>Cancel</Button>}
-        {nameUpdating ? loadingIcon : <Button onPress={handleRename}>Rename</Button>}
+        {nameUpdating ? (
+          loadingIcon
+        ) : (
+          <Button onPress={handleRename}>Rename</Button>
+        )}
+      </Dialog.Actions>
+    </Dialog>
+  );
+
+  const deleteDialog = () => (
+    <Dialog
+      visible={deleteVis}
+      onDismiss={cancelDelete}
+      dismissable={!deleting}
+    >
+      <Dialog.Title>
+        Delete{" "}
+        {
+          <Text style={{ color: theme.colors.primary }}>
+            {file.filename.replace("/", "")}
+          </Text>
+        }
+      </Dialog.Title>
+      <Dialog.Content>
+        <Text variant="bodyMedium">
+          Are you sure you want to delete this{" "}
+          {file.isDirectory ? "folder" : "file"}?
+        </Text>
+      </Dialog.Content>
+
+      <Dialog.Actions>
+        {!deleting && <Button onPress={cancelDelete}>Cancel</Button>}
+        {deleting ? (
+          loadingIcon
+        ) : (
+          <Button onPress={handleDelete}>Delete</Button>
+        )}
       </Dialog.Actions>
     </Dialog>
   );
@@ -295,13 +335,11 @@ const ViewFile = ({
         }}
       />
 
-      <Portal>
-        {longPressModal}
-      </Portal>
+      <Portal>{longPressModal}</Portal>
 
-      <Portal>
-        {renameDialog()}
-      </Portal>
+      <Portal>{renameDialog()}</Portal>
+
+      <Portal>{deleteDialog()}</Portal>
     </>
   );
 };
