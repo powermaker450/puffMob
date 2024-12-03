@@ -18,13 +18,14 @@
 
 import expandPath from "@/expandPath";
 import Panel from "@/util/Panel";
-import haptic from "@/util/haptic";
+import haptic, { handleTouch } from "@/util/haptic";
 import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 import {
   ActivityIndicator,
+  Appbar,
   Button,
   Dialog,
   Icon,
@@ -35,6 +36,12 @@ import {
   TextInput,
   useTheme
 } from "react-native-paper";
+import CodeEditor, {
+  CodeEditorSyntaxStyles
+} from "@rivascva/react-native-code-editor";
+import { cacheDirectory, readAsStringAsync } from "expo-file-system";
+import editableFiles from "@/util/editableFiles";
+import { Languages } from "@rivascva/react-native-code-editor/lib/typescript/languages";
 
 interface ViewFileProps {
   file: LsResult;
@@ -60,6 +67,22 @@ const ViewFile = ({
       : file.fileSize < 1_000_000
         ? (file.fileSize / 1000).toFixed(2) + " KB"
         : (file.fileSize / 1_000_000).toFixed(2) + " MB";
+
+  const isEditable = (): boolean => {
+    if (file.isDirectory) {
+      return false;
+    }
+
+    const { filename } = file;
+
+    for (const filetype of editableFiles) {
+      if (filename.endsWith(filetype)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   const fileType = (): string => {
     if (file.isDirectory) {
@@ -123,6 +146,11 @@ const ViewFile = ({
   // ?
   // *
   const invalidChars = /\/|<|>|:|\"|\\|\||\?|\*/g;
+
+  const [editor, setEditor] = useState(false);
+  const [codeLanguage, setCodeLanguage] = useState<Languages>("shell");
+  const [editorText, setEditorText] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   const { id } = useLocalSearchParams();
   const panel = Panel.getPanel();
@@ -196,6 +224,48 @@ const ViewFile = ({
       .finally(() => setNameUpdating(false));
   };
 
+  const handleDownload = () => {
+    if (!cacheDirectory) {
+      haptic("notificationError");
+      console.error("File download error: documentDirectory is not defined");
+      return;
+    }
+
+    setDownloading(true);
+    const path = expandPath(currentPath) + file.filename;
+    const internalPath = cacheDirectory.replace("file://", "");
+
+    if (!client) {
+      haptic("notificationError");
+      return;
+    }
+
+    console.log(`Downloading "${path}" to "${internalPath}"`);
+
+    client
+      .sftpDownload(path, internalPath.substring(0, internalPath.length - 1))
+      .then(dlPath => {
+        readAsStringAsync("file://" + dlPath)
+          .then(content => {
+            if (file.filename.endsWith(".json")) {
+              setCodeLanguage("json");
+            }
+
+            setEditorText(content);
+            setEditor(true);
+          })
+          .catch(err => {
+            haptic("notificationError");
+            console.log(err);
+          });
+      })
+      .catch(err => {
+        haptic("notificationError");
+        console.log(err);
+      })
+      .finally(() => setDownloading(false));
+  };
+
   const modalStyle = {
     backgroundColor: theme.colors.background,
     margin: 20,
@@ -230,16 +300,15 @@ const ViewFile = ({
           />
         )}
 
-        <List.Item
-          title={
-            <Text style={{ color: theme.colors.surfaceDisabled }}>
-              Download
-            </Text>
-          }
-          left={() => (
-            <List.Icon color={theme.colors.surfaceDisabled} icon="download" />
-          )}
-        />
+        {downloading
+          ? loadingIcon
+          : isEditable() && (
+              <List.Item
+                title="Edit File"
+                left={() => <List.Icon icon="file-edit" />}
+                onPress={handleDownload}
+              />
+            )}
 
         {deleting ? (
           loadingIcon
@@ -316,6 +385,34 @@ const ViewFile = ({
     </Dialog>
   );
 
+  const codeEditor = () => (
+    <>
+      <Appbar.Header>
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => {
+            setEditor(false);
+            setEditorText("");
+            setCodeLanguage("shell");
+          }}
+        />
+        <Appbar.Content title="Editor" />
+      </Appbar.Header>
+
+      <CodeEditor
+        style={{
+          fontSize: 16,
+          inputLineHeight: 26,
+          highlighterLineHeight: 26
+        }}
+        language={codeLanguage}
+        initialValue={editorText}
+        syntaxStyle={CodeEditorSyntaxStyles.googlcode}
+        showLineNumbers
+      />
+    </>
+  );
+
   return (
     <>
       <List.Item
@@ -344,6 +441,8 @@ const ViewFile = ({
       <Portal>{renameDialog()}</Portal>
 
       <Portal>{deleteDialog()}</Portal>
+
+      <Portal>{editor && codeEditor()}</Portal>
     </>
   );
 };

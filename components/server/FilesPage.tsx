@@ -26,7 +26,10 @@ import {
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import Panel from "@/util/Panel";
-import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
+import SSHClient, {
+  LsResult,
+  PtyType
+} from "@dylankenneally/react-native-ssh-sftp";
 import ViewFile from "./ViewFile";
 import { ScrollView, View } from "react-native";
 import ButtonContainer from "../ButtonContainer";
