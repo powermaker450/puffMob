@@ -18,10 +18,9 @@
 
 import CustomView from "@/components/CustomView";
 import NavBar from "@/components/NavBar";
-import ServerPage from "@/components/ServerPage";
+import ServerPage from "@/components/server/ServerPage";
 import SettingsPage from "@/components/SettingsPage";
-import Panel, { PanelParams } from "@/util/Panel";
-import { storage } from "@/util/storage";
+import Panel from "@/util/Panel";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, BottomNavigation, Text } from "react-native-paper";
 

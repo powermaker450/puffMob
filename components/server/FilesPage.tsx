@@ -29,7 +29,7 @@ import Panel from "@/util/Panel";
 import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import ViewFile from "./ViewFile";
 import { ScrollView, View } from "react-native";
-import ButtonContainer from "./ButtonContainer";
+import ButtonContainer from "../ButtonContainer";
 import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import PathList from "./PathList";

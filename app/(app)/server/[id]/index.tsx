@@ -21,11 +21,11 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { BottomNavigationRoute, BottomNavigation } from "react-native-paper";
 import PufferpanelSocket from "@/util/PufferpanelSocket";
-import ConsoleView from "@/components/ConsoleView";
+import ConsoleView from "@/components/server/ConsoleView";
 import NavBar from "@/components/NavBar";
-import ServerManagePage from "@/components/ServerManagePage";
-import NameTab from "@/components/NameTab";
-import FilesPage from "@/components/FilesPage";
+import ServerManagePage from "@/components/server/ServerManagePage";
+import NameTab from "@/components/server/NameTab";
+import FilesPage from "@/components/server/FilesPage";
 
 export default function ServerScreen() {
   const { id } = useLocalSearchParams();

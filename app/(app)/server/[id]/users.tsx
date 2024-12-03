@@ -23,7 +23,7 @@ import haptic, { handleTouch } from "@/util/haptic";
 import { useEffect, useState } from "react";
 import Panel from "@/util/Panel";
 import { PermissionsUpdate } from "@/util/models";
-import ManageUser from "@/components/ManageUser";
+import ManageUser from "@/components/server/ManageUser";
 import { ScrollView } from "react-native";
 
 export default function users() {

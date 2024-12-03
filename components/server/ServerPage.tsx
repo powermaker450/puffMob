@@ -23,8 +23,8 @@ import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { ActivityIndicator, Appbar, Button, Text } from "react-native-paper";
-import Server from "./Server";
-import CustomView from "./CustomView";
+import Server from "../Server";
+import CustomView from "../CustomView";
 
 export default function ServerPage() {
   let settings: PanelParams = storage.getString("settings")

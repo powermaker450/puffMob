@@ -17,7 +17,7 @@
  */
 
 import { Surface, Text, TextInput, useTheme } from "react-native-paper";
-import CustomView from "./CustomView";
+import CustomView from "../CustomView";
 import { ScrollView } from "react-native";
 import { useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";

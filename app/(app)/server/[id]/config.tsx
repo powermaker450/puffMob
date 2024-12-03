@@ -17,7 +17,7 @@
  */
 
 import Notice from "@/components/Notice";
-import VariableView from "@/components/VariableView";
+import VariableView from "@/components/server/VariableView";
 import Panel from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ServerDataResponse } from "@/util/models";
