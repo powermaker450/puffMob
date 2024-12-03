@@ -141,6 +141,7 @@ const ViewFile = ({
         .sftpRm(fullPath)
         .then(() => {
           setVisible(false);
+          setDeleteVis(false);
           haptic("notificationSuccess");
           setRefresh(Math.random());
         })
@@ -154,6 +155,8 @@ const ViewFile = ({
       .file(id as string, fullPath)
       .then(() => {
         haptic("notificationSuccess");
+        setVisible(false);
+        setDeleteVis(false);
         setRefresh(Math.random());
       })
       .catch(() => haptic("notificationError"))
