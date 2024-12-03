@@ -154,6 +154,8 @@ const ViewFile = ({
     panel.delete
       .file(id as string, fullPath)
       .then(() => {
+        setVisible(false);
+        setDeleteVis(false);
         haptic("notificationSuccess");
         setVisible(false);
         setDeleteVis(false);
