@@ -128,6 +128,7 @@ const ViewFile = ({
   const panel = Panel.getPanel();
 
   const handleDelete = () => {
+    setDeleting(true);
     const fullPath = expandPath(currentPath) + file.filename;
 
     if (!file.isDirectory) {
@@ -157,8 +158,6 @@ const ViewFile = ({
         setVisible(false);
         setDeleteVis(false);
         haptic("notificationSuccess");
-        setVisible(false);
-        setDeleteVis(false);
         setRefresh(Math.random());
       })
       .catch(() => haptic("notificationError"))
