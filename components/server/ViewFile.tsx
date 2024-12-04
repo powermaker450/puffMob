@@ -37,12 +37,10 @@ import {
   useTheme
 } from "react-native-paper";
 import CodeEditor, {
-  CodeEditorSyntaxStyles
 } from "@rivascva/react-native-code-editor";
 import {
   cacheDirectory,
   readAsStringAsync,
-  readDirectoryAsync,
   writeAsStringAsync
 } from "expo-file-system";
 import editableFiles from "@/util/editableFiles";
@@ -157,6 +155,7 @@ const ViewFile = ({
 
   const [editor, setEditor] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState<Languages>("shell");
+  const [prevText, setPrevText] = useState("");
   const [editorText, setEditorText] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -257,6 +256,7 @@ const ViewFile = ({
         readAsStringAsync("file://" + dlPath)
           .then(content => {
             setCodeLanguage(determineFileType(file.filename));
+            setPrevText(content);
             setEditorText(content);
             setEditor(true);
             setDownloading(false);
@@ -293,7 +293,10 @@ const ViewFile = ({
       .then(() => {
         client
           .sftpUpload(filePath.replace("file://", ""), serverPath)
-          .then(() => haptic("notificationSuccess"))
+          .then(() => {
+            setPrevText(editorText);
+            haptic("notificationSuccess");
+          })
           .catch(err => handleErr(err))
           .finally(() => setSaving(false));
       })
@@ -427,8 +430,11 @@ const ViewFile = ({
           onPress={() => {
             setEditor(false);
             setEditorText("");
+            setPrevText("");
             setCodeLanguage("shell");
           }}
+          color={prevText !== editorText ? theme.colors.surfaceDisabled : ""}
+          disabled={prevText !== editorText}
         />
         <Appbar.Content title={file.filename} />
 
@@ -437,6 +443,8 @@ const ViewFile = ({
         ) : (
           <Appbar.Action
             icon="content-save"
+            color={prevText === editorText ? theme.colors.surfaceDisabled : ""}
+            disabled={prevText === editorText}
             onPress={handleSave}
             onPressIn={handleTouch}
           />
