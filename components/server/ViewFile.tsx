@@ -39,11 +39,15 @@ import {
 import CodeEditor, {
   CodeEditorSyntaxStyles
 } from "@rivascva/react-native-code-editor";
-import { cacheDirectory, readAsStringAsync } from "expo-file-system";
+import {
+  cacheDirectory,
+  readAsStringAsync,
+  readDirectoryAsync,
+  writeAsStringAsync
+} from "expo-file-system";
 import editableFiles from "@/util/editableFiles";
 import { Languages } from "@rivascva/react-native-code-editor/lib/typescript/languages";
 import { useKeyboard } from "@react-native-community/hooks";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ViewFileProps {
   file: LsResult;
@@ -64,7 +68,6 @@ const ViewFile = ({
 }: ViewFileProps) => {
   const theme = useTheme();
   const keyboard = useKeyboard();
-  const insets = useSafeAreaInsets();
   const computeFileSize = () =>
     file.fileSize === 4096
       ? "Empty"
@@ -155,6 +158,7 @@ const ViewFile = ({
   const [codeLanguage, setCodeLanguage] = useState<Languages>("shell");
   const [editorText, setEditorText] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const { id } = useLocalSearchParams();
   const panel = Panel.getPanel();
@@ -257,6 +261,7 @@ const ViewFile = ({
 
             setEditorText(content);
             setEditor(true);
+            setDownloading(false);
           })
           .catch(err => {
             haptic("notificationError");
@@ -266,8 +271,35 @@ const ViewFile = ({
       .catch(err => {
         haptic("notificationError");
         console.log(err);
+      });
+  };
+
+  const handleSave = () => {
+    setSaving(true);
+
+    if (!client) {
+      haptic("notificationError");
+      setSaving(false);
+      return;
+    }
+
+    const serverPath = expandPath(currentPath);
+    const filePath = cacheDirectory + file.filename;
+    const handleErr = (err: any) => {
+      haptic("notificationError");
+      setSaving(false);
+      console.error(err);
+    };
+
+    writeAsStringAsync(filePath, editorText)
+      .then(() => {
+        client
+          .sftpUpload(filePath.replace("file://", ""), serverPath)
+          .then(() => haptic("notificationSuccess"))
+          .catch(err => handleErr(err))
+          .finally(() => setSaving(false));
       })
-      .finally(() => setDownloading(false));
+      .catch(err => handleErr(err));
   };
 
   const modalStyle = {
@@ -390,40 +422,48 @@ const ViewFile = ({
   );
 
   const codeEditor = (
-      <>
-        <Appbar.Header>
-          <Appbar.BackAction
-            onPressIn={handleTouch}
-            onPress={() => {
-              setEditor(false);
-              setEditorText("");
-              setCodeLanguage("shell");
-            }}
-          />
-          <Appbar.Content title={file.filename} />
-        </Appbar.Header>
-
-        <CodeEditor
-          style={{
-            ...{
-              fontFamily: "NotoSansMono_400Regular",
-              fontSize: 14,
-              inputLineHeight: 17,
-              highlighterLineHeight: 17
-            },
-            ...(keyboard.keyboardShown
-              ? { marginBottom: keyboard.keyboardHeight / 4 }
-              : {}
-            )
+    <>
+      <Appbar.Header>
+        <Appbar.BackAction
+          onPressIn={handleTouch}
+          onPress={() => {
+            setEditor(false);
+            setEditorText("");
+            setCodeLanguage("bash");
           }}
-          language={codeLanguage}
-          initialValue={editorText}
-          onChange={newText => setEditorText(newText)}
-          syntaxStyle={CodeEditorSyntaxStyles.googlecode}
-          showLineNumbers
         />
-      </>
-    );
+        <Appbar.Content title={file.filename} />
+
+        {saving ? (
+          loadingIcon
+        ) : (
+          <Appbar.Action
+            icon="content-save"
+            onPress={handleSave}
+            onPressIn={handleTouch}
+          />
+        )}
+      </Appbar.Header>
+
+      <CodeEditor
+        style={{
+          ...{
+            fontFamily: "NotoSansMono_400Regular",
+            fontSize: 14,
+            inputLineHeight: 17,
+            highlighterLineHeight: 17
+          },
+          ...(keyboard.keyboardShown
+            ? { marginBottom: keyboard.keyboardHeight / 4 }
+            : {})
+        }}
+        language={codeLanguage}
+        initialValue={editorText}
+        onChange={newText => setEditorText(newText)}
+        showLineNumbers
+      />
+    </>
+  );
 
   return (
     <>
