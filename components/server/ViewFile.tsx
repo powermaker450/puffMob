@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import expandPath from "@/expandPath";
+import expandPath from "@/util/expandPath";
 import Panel from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
@@ -42,6 +42,8 @@ import CodeEditor, {
 import { cacheDirectory, readAsStringAsync } from "expo-file-system";
 import editableFiles from "@/util/editableFiles";
 import { Languages } from "@rivascva/react-native-code-editor/lib/typescript/languages";
+import { useKeyboard } from "@react-native-community/hooks";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ViewFileProps {
   file: LsResult;
@@ -61,6 +63,8 @@ const ViewFile = ({
   disableNav
 }: ViewFileProps) => {
   const theme = useTheme();
+  const keyboard = useKeyboard();
+  const insets = useSafeAreaInsets();
   const computeFileSize = () =>
     file.fileSize === 4096
       ? "Empty"
@@ -385,33 +389,41 @@ const ViewFile = ({
     </Dialog>
   );
 
-  const codeEditor = () => (
-    <>
-      <Appbar.Header>
-        <Appbar.BackAction
-          onPressIn={handleTouch}
-          onPress={() => {
-            setEditor(false);
-            setEditorText("");
-            setCodeLanguage("shell");
-          }}
-        />
-        <Appbar.Content title="Editor" />
-      </Appbar.Header>
+  const codeEditor = (
+      <>
+        <Appbar.Header>
+          <Appbar.BackAction
+            onPressIn={handleTouch}
+            onPress={() => {
+              setEditor(false);
+              setEditorText("");
+              setCodeLanguage("shell");
+            }}
+          />
+          <Appbar.Content title={file.filename} />
+        </Appbar.Header>
 
-      <CodeEditor
-        style={{
-          fontSize: 16,
-          inputLineHeight: 26,
-          highlighterLineHeight: 26
-        }}
-        language={codeLanguage}
-        initialValue={editorText}
-        syntaxStyle={CodeEditorSyntaxStyles.googlcode}
-        showLineNumbers
-      />
-    </>
-  );
+        <CodeEditor
+          style={{
+            ...{
+              fontFamily: "NotoSansMono_400Regular",
+              fontSize: 14,
+              inputLineHeight: 17,
+              highlighterLineHeight: 17
+            },
+            ...(keyboard.keyboardShown
+              ? { marginBottom: keyboard.keyboardHeight / 4 }
+              : {}
+            )
+          }}
+          language={codeLanguage}
+          initialValue={editorText}
+          onChange={newText => setEditorText(newText)}
+          syntaxStyle={CodeEditorSyntaxStyles.googlecode}
+          showLineNumbers
+        />
+      </>
+    );
 
   return (
     <>
@@ -442,7 +454,7 @@ const ViewFile = ({
 
       <Portal>{deleteDialog()}</Portal>
 
-      <Portal>{editor && codeEditor()}</Portal>
+      <Portal>{editor && codeEditor}</Portal>
     </>
   );
 };

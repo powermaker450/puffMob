@@ -28,7 +28,6 @@ import { useEffect, useState } from "react";
 import Panel from "@/util/Panel";
 import SSHClient, {
   LsResult,
-  PtyType
 } from "@dylankenneally/react-native-ssh-sftp";
 import ViewFile from "./ViewFile";
 import { ScrollView, View } from "react-native";
@@ -36,7 +35,7 @@ import ButtonContainer from "../ButtonContainer";
 import { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import PathList from "./PathList";
-import expandPath from "@/expandPath";
+import expandPath from "@/util/expandPath";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();

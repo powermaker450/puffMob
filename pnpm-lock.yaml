@@ -23,6 +23,9 @@ importers:
       '@pchmn/expo-material3-theme':
         specifier: github:pchmn/expo-material3-theme
         version: https://codeload.github.com/pchmn/expo-material3-theme/tar.gz/a32494e4a40b69cecd288f6dd0b87239f1fa2fbe(expo@51.0.38(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0)))(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+      '@react-native-community/hooks':
+        specifier: ^3.0.0
+        version: 3.0.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       '@react-navigation/native':
         specifier: ^6.0.2
         version: 6.1.18(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
@@ -1241,6 +1244,12 @@ packages:
     resolution: {integrity: sha512-hFJL4cgLPxncJJd/epQ4dHnMg5Jy/7Q56jFvA3MHViuKpzzfTCJCB+pGY54maZbtym53UJON9WTGpM3S81UfjQ==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@react-native-community/hooks@3.0.0':
+    resolution: {integrity: sha512-g2OyxXHfwIytXUJitBR6Z/ISoOfp0WKx5FOv+NqJ/CrWjRDcTw6zXE5I1C9axfuh30kJqzWchVfCDrkzZYTxqg==}
+    peerDependencies:
+      react: '>=17.0.2'
+      react-native: '>=0.65'
 
   '@react-native/assets-registry@0.74.87':
     resolution: {integrity: sha512-1XmRhqQchN+pXPKEKYdpJlwESxVomJOxtEnIkbo7GAlaN2sym84fHEGDXAjLilih5GVPpcpSmFzTy8jx3LtaFg==}
@@ -7023,6 +7032,11 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
+
+  '@react-native-community/hooks@3.0.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0)
 
   '@react-native/assets-registry@0.74.87': {}
 

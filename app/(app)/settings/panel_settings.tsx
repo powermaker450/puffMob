@@ -34,7 +34,6 @@ import {
   Surface,
   Text,
   TextInput,
-  useTheme
 } from "react-native-paper";
 
 export default function panel_settings() {
