@@ -48,6 +48,7 @@ import {
 import editableFiles from "@/util/editableFiles";
 import { Languages } from "@rivascva/react-native-code-editor/lib/typescript/languages";
 import { useKeyboard } from "@react-native-community/hooks";
+import determineFileType from "@/util/determineFileType";
 
 interface ViewFileProps {
   file: LsResult;
@@ -255,10 +256,7 @@ const ViewFile = ({
       .then(dlPath => {
         readAsStringAsync("file://" + dlPath)
           .then(content => {
-            if (file.filename.endsWith(".json")) {
-              setCodeLanguage("json");
-            }
-
+            setCodeLanguage(determineFileType(file.filename));
             setEditorText(content);
             setEditor(true);
             setDownloading(false);
@@ -429,7 +427,7 @@ const ViewFile = ({
           onPress={() => {
             setEditor(false);
             setEditorText("");
-            setCodeLanguage("bash");
+            setCodeLanguage("shell");
           }}
         />
         <Appbar.Content title={file.filename} />

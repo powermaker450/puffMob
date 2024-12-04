@@ -16,6 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const editableFiles = [".txt", ".json", ".properties", ".conf", ".toml"];
+const editableFiles = [
+  ".txt",
+  ".json",
+  ".properties",
+  ".conf",
+  ".toml",
+  ".bat",
+  ".sh"
+];
 
 export default editableFiles;
