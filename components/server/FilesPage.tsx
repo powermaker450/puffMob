@@ -19,7 +19,10 @@
 import {
   ActivityIndicator,
   Button,
+  Dialog,
+  FAB,
   List,
+  Portal,
   Text,
   TextInput
 } from "react-native-paper";
@@ -32,10 +35,12 @@ import SSHClient, {
 import ViewFile from "./ViewFile";
 import { ScrollView, View } from "react-native";
 import ButtonContainer from "../ButtonContainer";
-import { handleTouch } from "@/util/haptic";
+import haptic, { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import PathList from "./PathList";
 import expandPath from "@/util/expandPath";
+import { cacheDirectory, deleteAsync, writeAsStringAsync } from "expo-file-system";
+import invalidChars from "@/util/invalidChars";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();
@@ -63,6 +68,121 @@ const FilesPage = () => {
     setError(true);
     console.log(`Failed to connect to sftp:`, err);
   };
+
+  // Create file stuff
+
+  const [fabState, setFabState] = useState({ open: false });
+
+  const onFabStateChange = ({ open }: { open: boolean }) => setFabState({ open });
+  const { open } = fabState;
+  const [createDiag, setCreateDiag] = useState(false);
+  const openCreateFile = () => {
+    setFileType("file");
+    setCreateDiag(true);
+  }
+  const openCreateFolder = () => {
+    setFileType("folder");
+    setCreateDiag(true);
+  }
+  const closeCreateDiag = () => setCreateDiag(false);
+
+  const [filename, setFilename] = useState("");
+  const [fileType, setFileType] = useState<"file" | "folder">("file");
+
+  const handleCreate = () => {
+    if (!client) {
+      haptic("notificationError");
+      return;
+    }
+
+    const handleComplete = () => {
+      closeCreateDiag();
+      haptic("notificationSuccess");
+      setRetry(Math.random());
+      setFilename("");
+    }
+
+    const handleErr = (err: any) => {
+      haptic("notificationError");
+      console.error(err);
+    }
+
+    if (fileType === "file") {
+      const f = filename + ".txt";
+      const location = cacheDirectory + f;
+      const remoteLocation = expandPath(pathList);
+
+      writeAsStringAsync(location, "")
+        .then(() => client.sftpUpload(location.replace("file://", ""), remoteLocation)
+          .then(() => {
+            handleComplete();
+            deleteAsync(location)
+              .catch(err => handleErr(err));
+          })
+          .catch(err => handleErr(err))
+        )
+        .catch(err => handleErr(err));
+
+      return;
+    }
+
+    if (fileType === "folder") {
+      client.sftpMkdir(expandPath(pathList) + filename)
+        .then(handleComplete)
+        .catch(err => handleErr(err))
+
+      return;
+    }
+  }
+
+  const createFileDialog = (
+    <Dialog visible={createDiag} onDismiss={closeCreateDiag}>
+      <Dialog.Title>Create {fileType}</Dialog.Title>
+      
+      <Dialog.Content>
+        <TextInput
+          mode="outlined"
+          label={(fileType === "file" ? "File" : "Folder") + " name"}
+          value={filename}
+          onChangeText={text => setFilename(text.replace(invalidChars, ""))}
+        />
+      </Dialog.Content>
+
+      <Dialog.Actions>
+        <Button onPress={closeCreateDiag}>Cancel</Button>
+        <Button
+          onPress={handleCreate}
+          disabled={!filename}
+        >
+          Create {fileType}
+        </Button>
+      </Dialog.Actions>
+    </Dialog>
+  );
+
+  const createFileButton = (
+    <FAB.Group
+      open={open}
+      visible={!loading && !error}
+      icon={open ? "file-question" : "plus"}
+      actions={[
+        {
+          icon: "file",
+          label: "Create File",
+          onPress: openCreateFile
+        },
+        {
+          icon: "folder",
+          label: "Create Folder",
+          onPress: openCreateFolder
+        }
+      ]}
+      onStateChange={onFabStateChange}
+      onPress={() => setFabState({ open: !open })}
+    />
+  );
+
+  // End of the create file menus
 
   const loadingText = <ActivityIndicator animating />;
   const noFilesFound = (
@@ -129,6 +249,7 @@ const FilesPage = () => {
       </ButtonContainer>
     </View>
   );
+
 
   useEffect(() => {
     storage.set(id + "_overrideUrl", overrideUrl);
@@ -212,6 +333,10 @@ const FilesPage = () => {
           </List.Section>
         )}
       </ScrollView>
+
+      {(!loading && !error) && createFileButton}
+
+      <Portal>{createFileDialog}</Portal>
     </>
   );
 };

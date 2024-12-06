@@ -47,6 +47,7 @@ import editableFiles from "@/util/editableFiles";
 import { Languages } from "@rivascva/react-native-code-editor/lib/typescript/languages";
 import { useKeyboard } from "@react-native-community/hooks";
 import determineFileType from "@/util/determineFileType";
+import invalidChars from "@/util/invalidChars";
 
 interface ViewFileProps {
   file: LsResult;
@@ -139,19 +140,6 @@ const ViewFile = ({
   // Replace trailing slash for directories
   const [newName, setNewName] = useState(file.filename.replace("/", ""));
   const [nameUpdating, setNameUpdating] = useState(false);
-
-  // Matches these characters:
-  //
-  // /
-  // <
-  // >
-  // :
-  // "
-  // \
-  // |
-  // ?
-  // *
-  const invalidChars = /\/|<|>|:|\"|\\|\||\?|\*/g;
 
   const [editor, setEditor] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState<Languages>("shell");
