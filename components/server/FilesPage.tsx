@@ -74,13 +74,19 @@ const FilesPage = () => {
   const [fabState, setFabState] = useState({ open: false });
 
   const onFabStateChange = ({ open }: { open: boolean }) => setFabState({ open });
+  const toggleFab = () => {
+    haptic();
+    setFabState({ open: !open });
+  }
   const { open } = fabState;
   const [createDiag, setCreateDiag] = useState(false);
   const openCreateFile = () => {
+    haptic();
     setFileType("file");
     setCreateDiag(true);
   }
   const openCreateFolder = () => {
+    haptic();
     setFileType("folder");
     setCreateDiag(true);
   }
@@ -178,7 +184,7 @@ const FilesPage = () => {
         }
       ]}
       onStateChange={onFabStateChange}
-      onPress={() => setFabState({ open: !open })}
+      onPress={toggleFab}
     />
   );
 
