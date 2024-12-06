@@ -40,6 +40,7 @@ import CodeEditor, {
 } from "@rivascva/react-native-code-editor";
 import {
   cacheDirectory,
+  getInfoAsync,
   readAsStringAsync,
   writeAsStringAsync
 } from "expo-file-system";
@@ -236,28 +237,46 @@ const ViewFile = ({
       return;
     }
 
-    console.log(`Downloading "${path}" to "${internalPath}"`);
+    const handleContent = (content: string) => {
+      setCodeLanguage(determineFileType(file.filename));
+      setPrevText(content);
+      setEditorText(content);
+      setEditor(true);
+      setDownloading(false);
+    }
 
-    client
-      .sftpDownload(path, internalPath.substring(0, internalPath.length - 1))
-      .then(dlPath => {
-        readAsStringAsync("file://" + dlPath)
-          .then(content => {
-            setCodeLanguage(determineFileType(file.filename));
-            setPrevText(content);
-            setEditorText(content);
-            setEditor(true);
-            setDownloading(false);
-          })
-          .catch(err => {
-            haptic("notificationError");
-            console.log(err);
-          });
+    const handleErr = (err: any) => {
+      haptic("notificationError");
+      console.log(err);
+    }
+
+    const handleNotCached = (err?: any) => {
+      err && console.error("Reading file failed due to:", err);
+      console.log(`Downloading "${path}" to "${internalPath}"`);
+
+      client
+        .sftpDownload(path, internalPath.substring(0, internalPath.length - 1))
+        .then(dlPath => {
+          readAsStringAsync("file://" + dlPath)
+            .then(handleContent)
+            .catch(handleErr);
+        })
+        .catch(handleErr);
+    }
+
+    getInfoAsync("file://" + internalPath + file.filename, { size: true })
+      .then(info => {
+        // Why is expo-file-system not properly typed? I have no idea. This field exists... for now.
+        // I guess i'll f-around and find out.
+        //
+        // @ts-ignore
+        info.size === file.fileSize 
+          ? readAsStringAsync("file://" + internalPath + file.filename)
+              .then(handleContent)
+              .catch(handleNotCached)
+          : handleNotCached();
       })
-      .catch(err => {
-        haptic("notificationError");
-        console.log(err);
-      });
+      .catch(handleNotCached);
   };
 
   const handleSave = () => {
@@ -283,6 +302,7 @@ const ViewFile = ({
           .sftpUpload(filePath.replace("file://", ""), serverPath)
           .then(() => {
             setPrevText(editorText);
+            setRefresh(Math.random());
             haptic("notificationSuccess");
           })
           .catch(err => handleErr(err))
