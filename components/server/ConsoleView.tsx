@@ -23,6 +23,7 @@ import { useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";
 import Panel from "@/util/Panel";
 import { useLocalSearchParams } from "expo-router";
+import { AnsiComponent } from "react-native-ansi-view";
 
 interface ConsoleViewProps {
   logs: string[];
@@ -87,17 +88,17 @@ const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
           <ScrollView horizontal>
             <Text
               selectable
-              style={{
-                fontSize: 11,
-                fontFamily: "NotoSansMono_400Regular"
-              }}
             >
-              {logs.map(line =>
-                line.replaceAll(
-                  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-                  ""
-                )
-              )}
+              {logs.map((line, index) => (
+                <AnsiComponent
+                  containerStyle={{
+                    fontSize: 11,
+                    fontFamily: "NotoSansMono_400Regular"
+                  }}
+                  ansi={line}
+                  key={`k-${index}`}
+                />
+              ))}
             </Text>
           </ScrollView>
         </ScrollView>
