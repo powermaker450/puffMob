@@ -1,4 +1,4 @@
-package com.anonymous.puffMob
+package com.povario.puffmob
 
 import android.app.Application
 import android.content.res.Configuration

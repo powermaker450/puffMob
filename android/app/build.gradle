@@ -109,9 +109,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.puffMob'
+    namespace 'com.povario.puffmob'
     defaultConfig {
-        applicationId 'com.anonymous.puffMob'
+        applicationId 'com.povario.puffmob'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

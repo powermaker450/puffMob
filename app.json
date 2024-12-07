@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.anonymous.puffMob"
+      "package": "com.povario.puffmob"
     },
     "web": {
       "bundler": "metro",
