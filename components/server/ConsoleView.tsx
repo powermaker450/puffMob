@@ -19,25 +19,46 @@
 import { Surface, Text, TextInput, useTheme } from "react-native-paper";
 import CustomView from "../CustomView";
 import { ScrollView } from "react-native";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";
 import Panel from "@/util/Panel";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { AnsiComponent } from "react-native-ansi-view";
+import PufferpanelSocket from "@/util/PufferpanelSocket";
 
-interface ConsoleViewProps {
-  logs: string[];
-  running?: boolean;
-  sendConsolePerms?: boolean;
-}
-
-const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
+const ConsoleView = () => {
   const theme = useTheme();
   const scrollViewRef = useRef<ScrollView>(null);
   const control = Panel.getPanel();
   const { id } = useLocalSearchParams();
+  const navigation = useNavigation();
+  let socket: PufferpanelSocket;
 
+  const [running, setRunning] = useState(false);
+  const [logs, setLogs] = useState<string[]>([]);
   const [command, setCommand] = useState("");
+  const [sendConsolePerms, setSendConsolePerms] = useState(false);
+
+  useEffect(() => {
+    control.get.server(id as string).then(({ permissions }) => {
+      setSendConsolePerms(permissions.sendServerConsole);
+
+      if (permissions.viewServerConsole) {
+        socket = control.getSocket(id as string);
+        navigation.addListener("beforeRemove", () => socket && socket.close());
+
+        socket.on("status", e => {
+          setRunning(e.running);
+        });
+
+        socket.on("console", e => {
+          setLogs(logs => logs.concat(e.logs));
+        });
+      } else {
+        setLogs(["No logs :("]);
+      }
+    });
+  }, []);
 
   const handleCommand = () => {
     if (!command) {
@@ -86,9 +107,7 @@ const ConsoleView = ({ logs, running, sendConsolePerms }: ConsoleViewProps) => {
           ref={scrollViewRef}
         >
           <ScrollView horizontal>
-            <Text
-              selectable
-            >
+            <Text selectable>
               {logs.map((line, index) => (
                 <AnsiComponent
                   containerStyle={{

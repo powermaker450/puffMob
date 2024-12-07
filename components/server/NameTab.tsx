@@ -17,8 +17,9 @@
  */
 
 import Panel from "@/util/Panel";
+import PufferpanelSocket from "@/util/PufferpanelSocket";
 import haptic, { handleTouch } from "@/util/haptic";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -32,14 +33,34 @@ import {
   useTheme
 } from "react-native-paper";
 
-interface NameTabProps {
-  running: boolean;
-}
-
-const NameTab = ({ running }: NameTabProps) => {
+const NameTab = () => {
   const { id } = useLocalSearchParams();
+  const navigation = useNavigation();
   const theme = useTheme();
   const control = Panel.getPanel();
+  let socket: PufferpanelSocket;
+
+  const [running, setRunning] = useState(false);
+
+  useEffect(() => {
+    control.get.server(id as string).then(({ server, permissions }) => {
+      setServerName(server.name);
+      setNewName(server.name);
+
+      setEditServer(permissions.editServerData);
+      setStartPerms(permissions.startServer);
+      setStopPerms(permissions.stopServer);
+
+      if (permissions.viewServerConsole) {
+        socket = control.getSocket(id as string);
+        navigation.addListener("beforeRemove", () => socket && socket.close());
+
+        socket.on("status", e => {
+          setRunning(e.running);
+        });
+      }
+    });
+  }, []);
 
   const [serverName, setServerName] = useState("");
   const [newName, setNewName] = useState("");
@@ -149,17 +170,6 @@ const NameTab = ({ running }: NameTabProps) => {
       />
     </Tooltip>
   );
-
-  useEffect(() => {
-    control.get.server(id as string).then(({ server, permissions }) => {
-      setServerName(server.name);
-      setNewName(server.name);
-
-      setEditServer(permissions.editServerData);
-      setStartPerms(permissions.startServer);
-      setStopPerms(permissions.stopServer);
-    });
-  }, []);
 
   return (
     <>
