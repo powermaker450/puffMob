@@ -124,6 +124,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+          if (project.hasProperty('PUFFMOB_UPLOAD_STORE_FILE')) {
+            storeFile file(PUFFMOB_UPLOAD_STORE_FILE)
+            storePassword PUFFMOB_UPLOAD_STORE_PASSWORD
+            keyAlias PUFFMOB_UPLOAD_KEY_ALIAS
+            keyPassword PUFFMOB_UPLOAD_KEY_PASSWORD
+          }
+        }
     }
     buildTypes {
         debug {
@@ -133,6 +141,7 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
