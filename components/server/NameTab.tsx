@@ -64,6 +64,7 @@ const NameTab = () => {
 
   const [serverName, setServerName] = useState("");
   const [newName, setNewName] = useState("");
+  const changeNewName = (newText: string) => setNewName(newText);
   const [editServer, setEditServer] = useState(false);
   const openNameChange = () => {
     if (!editServer) {
@@ -82,54 +83,48 @@ const NameTab = () => {
   const [stopPerms, setStopPerms] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const startLoading = () => setLoading(true);
+  const stopLoading = () => setLoading(false);
   const [nameUpdating, setNameUpdating] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  const handleErr = (err: any) =>
+    console.warn("An unexpected error occured:", err);
+
   const handleStart = () => {
-    setLoading(true);
-    control.get
-      .server(id as string)
-      .then(({ server }) => server.actions.start())
-      .catch(err => console.warn("An unexpected error occured:", err))
-      .finally(() => {
-        setLoading(false);
-      });
+    startLoading();
+    control.actions
+      .start(id as string)
+      .catch(handleErr)
+      .finally(stopLoading);
   };
 
   const handleStop = () => {
-    setLoading(true);
-    control.get
-      .server(id as string)
-      .then(({ server }) => server.actions.stop())
-      .catch(err => console.warn("An unexpected error occured:", err))
-      .finally(() => {
-        setLoading(false);
-      });
+    startLoading();
+    control.actions
+      .stop(id as string)
+      .catch(handleErr)
+      .finally(stopLoading);
   };
 
   const handleKill = () => {
-    setLoading(true);
-    control.get
-      .server(id as string)
-      .then(({ server }) => server.actions.kill())
-      .catch(err => console.warn("An unexpected error occured:", err))
-      .finally(() => {
-        setLoading(false);
-      });
+    startLoading();
+    control.actions
+      .kill(id as string)
+      .catch(handleErr)
+      .finally(stopLoading);
   };
 
   const handleNameChange = () => {
     setNameUpdating(true);
-    control.get
-      .server(id as string)
-      .then(({ server }) => {
-        server.edit.name(newName).then(() => {
-          setServerName(newName);
-          setNewName(newName);
-          haptic("notificationSuccess");
-        });
+    control.edit
+      .serverName(id as string, newName)
+      .then(() => {
+        setServerName(newName);
+        setNewName(newName);
+        haptic("notificationSuccess");
       })
-      .catch(err => console.warn("An unexpected error occured:", err))
+      .catch(handleErr)
       .finally(() => {
         setNameUpdating(false);
         closeNameChange();
@@ -206,7 +201,7 @@ const NameTab = () => {
               mode="outlined"
               label="Server Name"
               value={newName}
-              onChangeText={newText => setNewName(newText)}
+              onChangeText={changeNewName}
             />
           </Dialog.Content>
           <Dialog.Actions>

@@ -58,8 +58,11 @@ export default function Index() {
   const [error, setError] = useState(false);
 
   const [serverUrl, setServerUrl] = useState(settings.serverUrl);
+  const changeServerUrl = (newText: string) => setServerUrl(newText);
   const [email, setEmail] = useState(settings.email);
+  const changeEmail = (newText: string) => setEmail(newText);
   const [password, setPassword] = useState(settings.password);
+  const changePassword = (newText: string) => setPassword(newText);
 
   useEffect(() => {
     if (!cachedToken) {
@@ -125,9 +128,7 @@ export default function Index() {
         label="Endpoint"
         value={serverUrl}
         placeholder="http://localhost:8080"
-        onChangeText={newText => {
-          setServerUrl(newText);
-        }}
+        onChangeText={changeServerUrl}
       />
 
       <TextInput
@@ -135,7 +136,7 @@ export default function Index() {
         style={textInputStyle}
         label="Email"
         value={email}
-        onChangeText={newText => setEmail(newText)}
+        onChangeText={changeEmail}
         textContentType="emailAddress"
       />
 
@@ -146,7 +147,7 @@ export default function Index() {
         value={password}
         secureTextEntry
         textContentType="password"
-        onChangeText={newText => setPassword(newText)}
+        onChangeText={changePassword}
       />
 
       <ButtonContainer>

@@ -33,7 +33,7 @@ import {
   RadioButton,
   Surface,
   Text,
-  TextInput,
+  TextInput
 } from "react-native-paper";
 
 export default function panel_settings() {
@@ -46,6 +46,7 @@ export default function panel_settings() {
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const toggleExpanded = () => setExpanded(expanded => !expanded);
   const [noticeText, setNoticeText] = useState("");
   const showNotice = (error?: boolean) => {
     setNotice(true);
@@ -60,16 +61,22 @@ export default function panel_settings() {
   // User Settings
   const [masterUrl, setMasterUrl] = useState("");
   const [newMasterUrl, setNewMasterUrl] = useState("");
+  const changeNewMasterUrl = (newText: string) => setNewMasterUrl(newText);
   const [companyName, setCompanyName] = useState("");
   const [newCompanyName, setNewCompanyName] = useState("");
+  const changeNewCompanyName = (newText: string) => setNewCompanyName(newText);
   const [allowReg, setAllowReg] = useState(false);
   const [newAllowReg, setNewAllowReg] = useState(false);
   const [defaultTheme, setDefaultTheme] = useState("");
   const [newDefaultTheme, setNewDefaultTheme] = useState("");
+  const changeNewDefaultTheme = (newTheme: string) => {
+    haptic();
+    setNewDefaultTheme(newTheme);
+  };
   const [themeList, setThemeList] = useState<string[]>([]);
   const changeReg = () => {
     newAllowReg ? haptic() : haptic("soft");
-    setNewAllowReg(!newAllowReg);
+    setNewAllowReg(reg => !reg);
   };
 
   const reset = () => {
@@ -234,7 +241,7 @@ export default function panel_settings() {
             style={textInputMargin}
             label="Master URL"
             value={newMasterUrl}
-            onChangeText={text => setNewMasterUrl(text)}
+            onChangeText={changeNewMasterUrl}
             disabled={loading || urlLoad}
           />
 
@@ -243,7 +250,7 @@ export default function panel_settings() {
             style={textInputMargin}
             label="Company Name"
             value={newCompanyName}
-            onChangeText={text => setNewCompanyName(text)}
+            onChangeText={changeNewCompanyName}
             disabled={loading || nameLoad}
           />
 
@@ -251,7 +258,7 @@ export default function panel_settings() {
             <List.Accordion
               title={newDefaultTheme}
               expanded={expanded}
-              onPress={() => setExpanded(!expanded)}
+              onPress={toggleExpanded}
             >
               <ScrollView
                 style={{ maxHeight: 100 }}
@@ -259,10 +266,7 @@ export default function panel_settings() {
               >
                 <RadioButton.Group
                   value={newDefaultTheme}
-                  onValueChange={val => {
-                    haptic();
-                    setNewDefaultTheme(val);
-                  }}
+                  onValueChange={changeNewDefaultTheme}
                 >
                   {themeList.map((theme, index) => {
                     return (

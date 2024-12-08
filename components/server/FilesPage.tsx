@@ -29,9 +29,7 @@ import {
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import Panel from "@/util/Panel";
-import SSHClient, {
-  LsResult,
-} from "@dylankenneally/react-native-ssh-sftp";
+import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import ViewFile from "./ViewFile";
 import { ScrollView, View } from "react-native";
 import ButtonContainer from "../ButtonContainer";
@@ -39,7 +37,11 @@ import haptic, { handleTouch } from "@/util/haptic";
 import { storage } from "@/util/storage";
 import PathList from "./PathList";
 import expandPath from "@/util/expandPath";
-import { cacheDirectory, deleteAsync, writeAsStringAsync } from "expo-file-system";
+import {
+  cacheDirectory,
+  deleteAsync,
+  writeAsStringAsync
+} from "expo-file-system";
 import invalidChars from "@/util/invalidChars";
 
 const FilesPage = () => {
@@ -51,9 +53,12 @@ const FilesPage = () => {
   const [overrideUrl, setOverrideUrl] = useState(
     storage.getString(id + "_overrideUrl") || ""
   );
+  const changeOverrideUrl = (newText: string) => setOverrideUrl(newText);
   const [overridePort, setOverridePort] = useState(
     storage.getString(id + "_overridePort") || ""
   );
+  const changeOverridePort = (newPort: string) =>
+    setOverridePort(newPort.replaceAll(/\D+/g, ""));
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -73,26 +78,29 @@ const FilesPage = () => {
 
   const [fabState, setFabState] = useState({ open: false });
 
-  const onFabStateChange = ({ open }: { open: boolean }) => setFabState({ open });
+  const onFabStateChange = ({ open }: { open: boolean }) =>
+    setFabState({ open });
   const toggleFab = () => {
     haptic();
     setFabState({ open: !open });
-  }
+  };
   const { open } = fabState;
   const [createDiag, setCreateDiag] = useState(false);
   const openCreateFile = () => {
     haptic();
     setFileType("file");
     setCreateDiag(true);
-  }
+  };
   const openCreateFolder = () => {
     haptic();
     setFileType("folder");
     setCreateDiag(true);
-  }
+  };
   const closeCreateDiag = () => setCreateDiag(false);
 
   const [filename, setFilename] = useState("");
+  const changeFilename = (newText: string) =>
+    setFilename(newText.replace(invalidChars, ""));
   const [fileType, setFileType] = useState<"file" | "folder">("file");
 
   const handleCreate = () => {
@@ -106,12 +114,12 @@ const FilesPage = () => {
       haptic("notificationSuccess");
       setRetry(Math.random());
       setFilename("");
-    }
+    };
 
     const handleErr = (err: any) => {
       haptic("notificationError");
       console.error(err);
-    }
+    };
 
     if (fileType === "file") {
       const f = filename + ".txt";
@@ -119,13 +127,14 @@ const FilesPage = () => {
       const remoteLocation = expandPath(pathList);
 
       writeAsStringAsync(location, "")
-        .then(() => client.sftpUpload(location.replace("file://", ""), remoteLocation)
-          .then(() => {
-            handleComplete();
-            deleteAsync(location)
-              .catch(err => handleErr(err));
-          })
-          .catch(err => handleErr(err))
+        .then(() =>
+          client
+            .sftpUpload(location.replace("file://", ""), remoteLocation)
+            .then(() => {
+              handleComplete();
+              deleteAsync(location).catch(err => handleErr(err));
+            })
+            .catch(err => handleErr(err))
         )
         .catch(err => handleErr(err));
 
@@ -133,33 +142,31 @@ const FilesPage = () => {
     }
 
     if (fileType === "folder") {
-      client.sftpMkdir(expandPath(pathList) + filename)
+      client
+        .sftpMkdir(expandPath(pathList) + filename)
         .then(handleComplete)
-        .catch(err => handleErr(err))
+        .catch(err => handleErr(err));
 
       return;
     }
-  }
+  };
 
   const createFileDialog = (
     <Dialog visible={createDiag} onDismiss={closeCreateDiag}>
       <Dialog.Title>Create {fileType}</Dialog.Title>
-      
+
       <Dialog.Content>
         <TextInput
           mode="outlined"
           label={(fileType === "file" ? "File" : "Folder") + " name"}
           value={filename}
-          onChangeText={text => setFilename(text.replace(invalidChars, ""))}
+          onChangeText={changeFilename}
         />
       </Dialog.Content>
 
       <Dialog.Actions>
         <Button onPress={closeCreateDiag}>Cancel</Button>
-        <Button
-          onPress={handleCreate}
-          disabled={!filename}
-        >
+        <Button onPress={handleCreate} disabled={!filename}>
           Create {fileType}
         </Button>
       </Dialog.Actions>
@@ -226,14 +233,14 @@ const FilesPage = () => {
           style={{ marginBottom: 10 }}
           label="SFTP URL"
           value={overrideUrl}
-          onChangeText={text => setOverrideUrl(text)}
+          onChangeText={changeOverrideUrl}
         />
 
         <TextInput
           mode="outlined"
           label="Port"
           value={overridePort}
-          onChangeText={text => setOverridePort(text.replaceAll(/\D+/g, ""))}
+          onChangeText={changeOverridePort}
         />
       </View>
 
@@ -255,7 +262,6 @@ const FilesPage = () => {
       </ButtonContainer>
     </View>
   );
-
 
   useEffect(() => {
     storage.set(id + "_overrideUrl", overrideUrl);
@@ -340,7 +346,7 @@ const FilesPage = () => {
         )}
       </ScrollView>
 
-      {(!loading && !error) && createFileButton}
+      {!loading && !error && createFileButton}
 
       <Portal>{createFileDialog}</Portal>
     </>

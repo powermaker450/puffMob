@@ -71,11 +71,14 @@ export default function account() {
 
   const [username, setUsername] = useState("");
   const [newUsername, setNewUsername] = useState("");
+  const changeNewUsername = (newText: string) => setNewUsername(newText);
 
   const [email, setEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const changeNewEmail = (newText: string) => setNewEmail(newText);
 
   const [password, setPassword] = useState("");
+  const changePassword = (newText: string) => setPassword(newText);
 
   const handleLogout = () => {
     storage.delete("settings");
@@ -207,7 +210,7 @@ export default function account() {
             label="Username"
             value={newUsername}
             disabled={gettingDetails}
-            onChangeText={text => setNewUsername(text)}
+            onChangeText={changeNewUsername}
           />
 
           <TextInput
@@ -215,7 +218,7 @@ export default function account() {
             style={textInputMargin}
             label="Email"
             value={newEmail}
-            onChangeText={text => setNewEmail(text)}
+            onChangeText={changeNewEmail}
             disabled={gettingDetails}
             textContentType="emailAddress"
           />
@@ -225,7 +228,7 @@ export default function account() {
             style={textInputMargin}
             label="Password"
             value={password}
-            onChangeText={text => setPassword(text)}
+            onChangeText={changePassword}
             secureTextEntry
             disabled={gettingDetails}
             textContentType="password"

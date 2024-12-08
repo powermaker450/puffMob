@@ -39,6 +39,7 @@ export default function addUser() {
   const theme = useTheme();
   const panel = Panel.getPanel();
   const [email, setEmail] = useState("");
+  const changeEmail = (newEmail: string) => setEmail(newEmail);
 
   const [editServer, setEditServer] = useState(false);
   const [installServer, setInstallServer] = useState(false);
@@ -157,9 +158,7 @@ export default function addUser() {
               disabled={loading}
               style={{ width: "95%", margin: "auto" }}
               value={email}
-              onChangeText={newText => {
-                setEmail(newText);
-              }}
+              onChangeText={changeEmail}
             />
           </List.Section>
 

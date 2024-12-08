@@ -37,6 +37,8 @@ const ConsoleView = () => {
   const [running, setRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [command, setCommand] = useState("");
+  const changeCommand = (newText: string) => setCommand(newText);
+  const clearCommand = () => setCommand("");
   const [sendConsolePerms, setSendConsolePerms] = useState(false);
 
   useEffect(() => {
@@ -60,21 +62,18 @@ const ConsoleView = () => {
     });
   }, []);
 
+  const handleErr = (err: any) =>
+    console.warn("An unexpected error occured: ", err);
+
   const handleCommand = () => {
     if (!command) {
       return;
     }
 
-    control.get
-      .server(id as string)
-      .then(({ server }) => {
-        server.actions.execute(command);
-        setCommand("");
-      })
-      .catch(err => {
-        console.warn("An unexpected error occured:", err);
-        setCommand("");
-      });
+    control.actions
+      .execute(id as string, command)
+      .catch(handleErr)
+      .finally(clearCommand);
   };
 
   const sendButton = (
@@ -128,7 +127,7 @@ const ConsoleView = () => {
             mode="outlined"
             value={command}
             disabled={!running}
-            onChangeText={newText => setCommand(newText)}
+            onChangeText={changeCommand}
             right={sendButton}
           />
         )}

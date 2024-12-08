@@ -52,6 +52,7 @@ const VariableView = ({
 
   if (variable.type === "string") {
     const [val, setVal] = useState(variable.value);
+    const changeVal = (newVal: string) => setVal(newVal);
 
     useEffect(() => {
       (res.data[variableKey] as StringVariable).value = val;
@@ -65,7 +66,7 @@ const VariableView = ({
           multiline
           label={variable.display}
           value={val}
-          onChangeText={text => setVal(text)}
+          onChangeText={changeVal}
           style={{ marginBottom: 10 }}
         />
 
@@ -78,6 +79,10 @@ const VariableView = ({
 
   if (variable.type === "boolean") {
     const [val, setVal] = useState(variable.value);
+    const toggleVal = () => {
+      haptic(val ? "contextClick" : "soft");
+      setVal(val => !val);
+    };
 
     useEffect(() => {
       (res.data[variableKey] as BooleanVariable).value = val;
@@ -88,10 +93,7 @@ const VariableView = ({
       <List.Item
         title={variable.display}
         style={sectionStyle}
-        onPress={() => {
-          haptic(val ? "contextClick" : "soft");
-          setVal(!val);
-        }}
+        onPress={toggleVal}
         description={variable.desc}
         right={() => <Checkbox status={val ? "checked" : "unchecked"} />}
       />
@@ -100,6 +102,7 @@ const VariableView = ({
 
   if (variable.type === "integer") {
     const [val, setVal] = useState(variable.value.toString());
+    const changeVal = (newVal: string) => setVal(newVal.replaceAll(/\D+/g, ""));
 
     useEffect(() => {
       (res.data[variableKey] as NumberVariable).value = Number(val);
@@ -112,7 +115,7 @@ const VariableView = ({
           mode="outlined"
           label={variable.display}
           value={val}
-          onChangeText={text => setVal(text.replaceAll(/\D+/g, ""))}
+          onChangeText={changeVal}
           style={{ marginBottom: 10 }}
         />
 

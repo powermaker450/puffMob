@@ -36,8 +36,7 @@ import {
   TextInput,
   useTheme
 } from "react-native-paper";
-import CodeEditor, {
-} from "@rivascva/react-native-code-editor";
+import CodeEditor from "@rivascva/react-native-code-editor";
 import {
   cacheDirectory,
   getInfoAsync,
@@ -140,12 +139,15 @@ const ViewFile = ({
 
   // Replace trailing slash for directories
   const [newName, setNewName] = useState(file.filename.replace("/", ""));
+  const changeNewName = (newText: string) =>
+    setNewName(newText.replaceAll(invalidChars, ""));
   const [nameUpdating, setNameUpdating] = useState(false);
 
   const [editor, setEditor] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState<Languages>("shell");
   const [prevText, setPrevText] = useState("");
   const [editorText, setEditorText] = useState("");
+  const changeEditorText = (newText: string) => setEditorText(newText);
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -243,12 +245,12 @@ const ViewFile = ({
       setEditorText(content);
       setEditor(true);
       setDownloading(false);
-    }
+    };
 
     const handleErr = (err: any) => {
       haptic("notificationError");
       console.log(err);
-    }
+    };
 
     const handleNotCached = (err?: any) => {
       err && console.error("Reading file failed due to:", err);
@@ -262,7 +264,7 @@ const ViewFile = ({
             .catch(handleErr);
         })
         .catch(handleErr);
-    }
+    };
 
     getInfoAsync("file://" + internalPath + file.filename, { size: true })
       .then(info => {
@@ -270,7 +272,7 @@ const ViewFile = ({
         // I guess i'll f-around and find out.
         //
         // @ts-ignore
-        info.size === file.fileSize 
+        info.size === file.fileSize
           ? readAsStringAsync("file://" + internalPath + file.filename)
               .then(handleContent)
               .catch(handleNotCached)
@@ -383,7 +385,7 @@ const ViewFile = ({
           mode="outlined"
           label="File Name"
           value={newName}
-          onChangeText={text => setNewName(text.replaceAll(invalidChars, ""))}
+          onChangeText={changeNewName}
         />
       </Dialog.Content>
 
@@ -473,7 +475,7 @@ const ViewFile = ({
         }}
         language={codeLanguage}
         initialValue={editorText}
-        onChange={newText => setEditorText(newText)}
+        onChange={changeEditorText}
         showLineNumbers
       />
     </>
