@@ -42,7 +42,8 @@ import {
   PufferpanelDaemonRunning,
   PermissionsUpdate,
   NewServerUser,
-  ModelsUserSearchResponse
+  ModelsUserSearchResponse,
+  NewUser
 } from "./models";
 import { storage } from "./storage";
 
@@ -943,6 +944,28 @@ export default class Panel {
       //   console.warn("An unexpected error occured", err);
       //   throw err;
       // }
+    },
+
+    /**
+     * Creates a new user on the panel. Requires admin privledges.
+     *
+     * @params - The details to create the user with
+     * @throws PufferpanelError
+     */
+    user: async (params: NewUser): Promise<void> => {
+      const res = await fetch(`${this.api}/users`, {
+        method: MethodOpts.post,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(params)
+      });
+
+      if (!res.ok) {
+        throw res.status === 404
+          ? { error: { code: "NotFound", msg: "404 Not Found" } }
+          : await res
+              .json()
+              .catch(() => ({ error: { code: "ErrGeneric", msg: "" } }));
+      }
     },
 
     serverUser: async (

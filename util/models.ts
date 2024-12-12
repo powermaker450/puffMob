@@ -113,6 +113,25 @@ export interface ModelsPermissionView {
   viewUsers: boolean;
 }
 
+export interface NewUser {
+  email: string;
+  username: string;
+  password: string;
+  admin?: boolean;
+  createServers?: boolean;
+  deleteServers?: boolean;
+  deployNodes?: boolean;
+  editNodes?: boolean;
+  editServerAdmin?: boolean;
+  editTemplates?: boolean;
+  editUsers?: boolean;
+  panelSettings?: boolean;
+  viewNodes?: boolean;
+  viewServers?: boolean;
+  viewTemplates?: boolean;
+  viewUsers?: boolean;
+}
+
 export interface NewServerUser {
   email: string;
   new: true;
@@ -320,9 +339,11 @@ export interface PufferpanelDaemonRunning {
 }
 
 export interface PufferpanelError {
-  code: string;
-  metadata: object;
-  msg: string;
+  error: {
+    code: string;
+    metadata?: object;
+    msg: string;
+  };
 }
 
 export interface PufferpanelExecution {

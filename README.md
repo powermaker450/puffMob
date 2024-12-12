@@ -33,10 +33,10 @@ A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with
   - [ ] Manage existing nodes
   - [ ] Create new nodes
      
-- [ ] Users
+- [x] Users
   - [x] View existing users
   - [x] Manage existing users
-  - [ ] Create new users
+  - [x] Create new users
      
 - [ ] Templates
   - [ ] View existing templates

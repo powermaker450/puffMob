@@ -2,32 +2,60 @@ import ButtonContainer from "@/components/ButtonContainer";
 import Notice from "@/components/Notice";
 import Panel from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
-import { ModelsPermissionView } from "@/util/models";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { NewUser, PufferpanelError } from "@/util/models";
+import { router } from "expo-router";
+import { useState } from "react";
 import { ScrollView } from "react-native";
 import {
-  ActivityIndicator,
   Appbar,
   Button,
   Checkbox,
-  Dialog,
   FAB,
   List,
-  Portal,
-  Text,
   TextInput,
   useTheme
 } from "react-native-paper";
 
-export default function userById() {
-  const { id } = useLocalSearchParams();
+export default function add() {
   const theme = useTheme();
   const control = Panel.getPanel();
-  const [header, setHeader] = useState("");
 
-  const [user, setUser] = useState<ModelsPermissionView>();
-  const [newUser, setNewUser] = useState<ModelsPermissionView>(user!);
+  const [updating, setUpdating] = useState(false);
+  const startUpdating = () => setUpdating(true);
+  const stopUpdating = () => setUpdating(false);
+
+  const [notice, setNotice] = useState(false);
+  const [noticeText, setNoticeText] = useState("");
+  const showErr = (err: string) => {
+    setNoticeText(err);
+    setNotice(true);
+    setTimeout(() => {
+      setNoticeText("");
+      setNotice(false);
+    }, 2000);
+  };
+
+  const [newUser, setNewUser] = useState<NewUser>({
+    username: "",
+    email: "",
+    password: ""
+  });
+
+  const { username, email, password } = newUser;
+
+  const setUsername = (username: string) =>
+    setNewUser(v => ({ ...v, username }));
+  const setEmail = (email: string) => setNewUser(v => ({ ...v, email }));
+  const setPassword = (password: string) =>
+    setNewUser(v => ({ ...v, password }));
+
+  const detailsChanged =
+    !username.match(/\s/) &&
+    username.length > 4 &&
+    email.match(/[A-Za-z0-9].*@[A-Za-z0-9].*\.[A-Za-z0-9].*/) &&
+    !!password;
+  const isAdmin = updating || newUser ? newUser.admin : false;
+
   const toggleAdmin = () => {
     haptic(newUser.admin ? "contextClick" : "soft");
     setNewUser(v => ({ ...v, admin: !v.admin }));
@@ -81,82 +109,13 @@ export default function userById() {
     setNewUser(v => ({ ...v, editUsers: !v.editUsers }));
   };
 
-  const [notice, setNotice] = useState(false);
-  const [noticeText, setNoticeText] = useState("");
-  const resetNotice = () => {
-    setNotice(false);
-    setNoticeText("");
-  };
-  const detailsUpdateComplete = () => {
-    setNotice(true);
-    setNoticeText("Success!");
-    setTimeout(resetNotice, 2000);
-    haptic("notificationSuccess");
-    setUser({ ...user!, email, username });
-    setHeader(username);
-  };
-  const updateComplete = () => {
-    setNotice(true);
-    setNoticeText("Success!");
-    setTimeout(resetNotice, 2000);
-    haptic("notificationSuccess");
-    setUser(newUser);
-  };
-  const deleteComplete = () => {
-    router.back();
-    haptic("notificationSuccess");
-  };
-  const handleErr = (err: any) => {
-    setNotice(true);
-    setNoticeText(`Error: ${err}`);
-    setTimeout(resetNotice, 2000);
-    haptic("notificationError");
-    console.error(err);
-  };
-
-  // Used when confirming a user delete
-  const [dialog, setDialog] = useState(false);
-  const showDialog = () => setDialog(true);
-  const hideDialog = () => setDialog(false);
-
-  // Used when updating user data
-  const [updating, setUpdating] = useState(false);
-  const startUpdating = () => setUpdating(true);
-  const stopUpdating = () => setUpdating(false);
-
-  // New values, existing values are just in the user state
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const detailsChanged =
-    (!username.match(/\s/) && username !== user?.username) ||
-    (email.match(/[A-Za-z0-9].*@[A-Za-z0-9].*\.[A-Za-z0-9].*/) &&
-      email !== user?.email) ||
-    password;
-  const isAdmin = updating || newUser ? newUser.admin : false;
-
-  useEffect(() => {
-    control.get
-      .userPerms(id as string)
-      .then(user => {
-        setUser(user);
-        setNewUser(user);
-
-        // Sometimes user.username is undefined. This might be a bug with Pufferpanel
-        setUsername(user.username || "");
-        setHeader(user.username);
-        setEmail(user.email);
-      })
-      .catch(console.error);
-  }, []);
-
   const styles: {
     view: any;
     accordion: any;
     input: any;
     button: any;
     icon: any;
+    fab: any;
   } = {
     view: {
       width: "95%",
@@ -181,70 +140,42 @@ export default function userById() {
     },
     icon: {
       marginLeft: 15
+    },
+    fab: {
+      position: "absolute",
+      margin: 16,
+      right: 0,
+      bottom: 0
     }
   };
 
-  const handleDetailsChange = () => {
+  const handleSuccess = () => {
+    haptic("notificationSuccess");
+    router.back();
+  };
+
+  const handleErr = (err: any) => {
+    const { error }: PufferpanelError = err;
+    console.log(err);
+    haptic("notificationError");
+    showErr(error.msg);
+  };
+
+  const handleAddUser = () => {
     startUpdating();
 
-    if (!user) {
-      haptic("notificationError");
-      return;
-    }
-
-    control.edit
-      .user(Number(id), { ...user, username, email, password })
-      .then(detailsUpdateComplete)
+    control.create
+      .user(newUser)
+      .then(handleSuccess)
       .catch(handleErr)
       .finally(stopUpdating);
   };
-
-  const handlePermsChange = () => {
-    startUpdating();
-
-    if (!newUser) {
-      haptic("notificationError");
-      return;
-    }
-
-    control.edit
-      .userPerms(id as string, newUser)
-      .then(updateComplete)
-      .catch(handleErr)
-      .finally(stopUpdating);
-  };
-
-  const handleDelete = () => {
-    startUpdating();
-
-    control.delete
-      .user(id as string)
-      .then(deleteComplete)
-      .catch(handleErr);
-  };
-
-  const loadingText = <ActivityIndicator animating />;
-  const modalButtons = (
-    <>
-      <Button onPress={hideDialog}>Cancel</Button>
-
-      <Button onPress={handleDelete} textColor={theme.colors.error}>
-        Delete
-      </Button>
-    </>
-  );
 
   return (
     <>
       <Appbar.Header>
         <Appbar.BackAction onPressIn={handleTouch} onPress={router.back} />
-        <Appbar.Content title={header} />
-
-        <Appbar.Action
-          onPressIn={handleTouch}
-          onPress={showDialog}
-          icon="trash-can"
-        />
+        <Appbar.Content title="Add User" />
       </Appbar.Header>
 
       <ScrollView style={styles.view}>
@@ -260,6 +191,7 @@ export default function userById() {
             style={styles.input}
             value={username}
             onChangeText={setUsername}
+            disabled={updating}
           />
 
           <TextInput
@@ -268,6 +200,7 @@ export default function userById() {
             style={styles.input}
             value={email}
             onChangeText={setEmail}
+            disabled={updating}
           />
 
           <TextInput
@@ -276,19 +209,8 @@ export default function userById() {
             style={styles.input}
             value={password}
             onChangeText={setPassword}
+            disabled={updating}
           />
-
-          <ButtonContainer>
-            <Button
-              mode="contained"
-              style={styles.button}
-              disabled={updating || !detailsChanged}
-              onPressIn={handleTouch}
-              onPress={handleDetailsChange}
-            >
-              Save
-            </Button>
-          </ButtonContainer>
         </List.Accordion>
 
         <List.Accordion
@@ -452,38 +374,15 @@ export default function userById() {
               />
             )}
           />
-
-          <ButtonContainer>
-            <Button
-              mode="contained"
-              style={styles.button}
-              disabled={updating}
-              onPressIn={handleTouch}
-              onPress={handlePermsChange}
-            >
-              Save
-            </Button>
-          </ButtonContainer>
         </List.Accordion>
       </ScrollView>
 
-      <Portal>
-        <Dialog visible={dialog} onDismiss={hideDialog}>
-          <Dialog.Content>
-            <Text variant="bodyMedium">
-              Are you sure you want to delete{" "}
-              <Text style={{ fontWeight: "bold" }}>
-                {user?.username || user?.email}
-              </Text>
-              ?
-            </Text>
-          </Dialog.Content>
-
-          <Dialog.Actions>
-            {updating ? loadingText : modalButtons}
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <FAB
+        icon="check"
+        disabled={updating || !detailsChanged}
+        style={styles.fab}
+        onPress={handleAddUser}
+      />
 
       <Notice condition={notice} setCondition={setNotice} text={noticeText} />
     </>
