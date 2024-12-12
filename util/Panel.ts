@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { lazy } from "react";
 import PufferpanelSocket from "./PufferpanelSocket";
 import {
   ModelsChangeUserSetting,
@@ -466,18 +465,8 @@ export default class Panel {
         };
 
         data.server.get = {
-          // TODO: Until I find a way to use the color codes, they will be killed
-          // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-          console: async (): Promise<string> =>
-            await this.get
-              .console(data.server.id)
-              .then(({ logs }) =>
-                logs.replace(
-                  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-                  ""
-                )
-              ),
-
+          console: async (): Promise<PufferpanelServerLogs> =>
+            await this.get.console(data.server.id),
           data: async (): Promise<ServerDataResponse> =>
             await this.get.data(data.server.id),
           file: async (filename?: string): Promise<MessagesFileDesc[]> =>

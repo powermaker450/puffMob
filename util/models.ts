@@ -238,7 +238,7 @@ export interface ModelsServerView {
   users: ModelsServerUserView[];
   running?: boolean;
   get: {
-    console: () => Promise<string>;
+    console: () => Promise<PufferpanelServerLogs>;
     data: () => Promise<ServerDataResponse>;
     file: (filename?: string) => Promise<MessagesFileDesc[]>;
     stats: () => Promise<PufferpanelServerStats>;

@@ -18,7 +18,7 @@
 
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
-import { Card, Icon, List, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 
 interface ServerProps {
   name: string;
