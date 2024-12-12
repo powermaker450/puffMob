@@ -94,6 +94,10 @@ export interface ModelsNodeView {
 }
 
 export interface ModelsPermissionView {
+  email: string;
+  username: string;
+  id: number;
+  password?: string;
   admin: boolean;
   createServers: boolean;
   deleteServers: boolean;
@@ -102,11 +106,8 @@ export interface ModelsPermissionView {
   editServerAdmin: boolean;
   editTemplates: boolean;
   editUsers: boolean;
-  email: string;
   panelSettings: boolean;
-  username: string;
-  viewNodes: string;
-  viewServerConsole: boolean;
+  viewNodes: boolean;
   viewServers: boolean;
   viewTemplates: boolean;
   viewUsers: boolean;
@@ -298,7 +299,7 @@ export interface ModelsUserSearch {
 
 export interface ModelsUserSearchResponse {
   paging: ResponsePaging;
-  users: ModelsServerUserView[];
+  users: ModelsPermissionView[];
 }
 
 export interface ModelsUserSettingView {

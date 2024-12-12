@@ -34,8 +34,8 @@ A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with
   - [ ] Create new nodes
      
 - [ ] Users
-  - [ ] View existing users
-  - [ ] Manage existing users
+  - [x] View existing users
+  - [x] Manage existing users
   - [ ] Create new users
      
 - [ ] Templates

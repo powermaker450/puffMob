@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { lazy } from "react";
 import PufferpanelSocket from "./PufferpanelSocket";
 import {
   ModelsChangeUserSetting,
@@ -40,7 +41,8 @@ import {
   PufferpanelError,
   PufferpanelDaemonRunning,
   PermissionsUpdate,
-  NewServerUser
+  NewServerUser,
+  ModelsUserSearchResponse
 } from "./models";
 import { storage } from "./storage";
 
@@ -717,6 +719,22 @@ export default class Panel {
     },
 
     /**
+     * Get the list of all users on the panel. Requires view user privledges.
+     *
+     * @returns A list of users with paging response
+     */
+    users: async (): Promise<ModelsUserSearchResponse> => {
+      const res = await fetch(`${this.api}/users`, {
+        headers: await this.defaultHeaders()
+      });
+
+      return (await this.handleResponse(
+        res,
+        this.get.users
+      )) as ModelsUserSearchResponse;
+    },
+
+    /**
      * Gets the global permissions of a given user. Requires admin privledges.
      *
      * @param id - The user ID to query
@@ -965,7 +983,7 @@ export default class Panel {
      *
      * @param params - An object containing the new user settings as well as the correct password
      */
-    user: async (params: UpdateUserParams): Promise<void> => {
+    self: async (params: UpdateUserParams): Promise<void> => {
       const res = await fetch(`${this.api}/self`, {
         method: MethodOpts.put,
         headers: await this.defaultHeaders(),
@@ -974,6 +992,50 @@ export default class Panel {
 
       if (!res.ok) {
         throw "Credentials invalid";
+      }
+    },
+
+    /**
+     * Updates details for a given user.
+     *
+     * @param id - The ID of the user to edit
+     */
+    user: async (
+      id: string | number,
+      params: ModelsPermissionView
+    ): Promise<void> => {
+      const res = await fetch(`${this.api}/users/${id}`, {
+        method: MethodOpts.post,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(params)
+      });
+
+      if (!res.ok) {
+        throw res.status === 404
+          ? "404 Not Found"
+          : await res.text().catch(() => "User not updated");
+      }
+    },
+
+    /**
+     * Updates permissions for a given user.
+     *
+     * @param id - The ID of the user to edit.
+     */
+    userPerms: async (
+      id: string | number,
+      params: ModelsPermissionView
+    ): Promise<void> => {
+      const res = await fetch(`${this.api}/users/${id}/perms`, {
+        method: MethodOpts.put,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(params)
+      });
+
+      if (!res.ok) {
+        throw res.status === 404
+          ? "404 Not Found"
+          : await res.text().catch(() => "User perms not updated.");
       }
     },
 

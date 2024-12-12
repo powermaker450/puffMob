@@ -120,7 +120,7 @@ export default function account() {
     }
 
     panel.edit
-      .user(obj)
+      .self(obj)
       .then(() => {
         showNotice();
         haptic("notificationSuccess");

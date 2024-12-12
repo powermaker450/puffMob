@@ -25,6 +25,7 @@ import Panel from "@/util/Panel";
 export default function SettingsPage() {
   const theme = useTheme();
   const [admin, setAdmin] = useState(false);
+  const [editUsers, setEditUsers] = useState(false);
 
   useEffect(() => {
     Panel.getCachedScopes().forEach(scope => {
@@ -32,6 +33,8 @@ export default function SettingsPage() {
         case "servers.admin":
           setAdmin(true);
           break;
+        case "users.edit":
+          setEditUsers(true);
         default: {
         }
       }
@@ -52,6 +55,16 @@ export default function SettingsPage() {
           onPress={() => router.navigate("/settings/panel_settings")}
           left={() => (
             <List.Icon icon="shield-edit" style={{ marginLeft: 15 }} />
+          )}
+        />
+
+        <List.Item
+          title="Users"
+          description="Manage users access to the panel"
+          style={{ display: admin || editUsers ? "flex" : "none" }}
+          onPress={() => router.navigate("/settings/user")}
+          left={() => (
+            <List.Icon icon="account-multiple" style={{ marginLeft: 15 }} />
           )}
         />
 
