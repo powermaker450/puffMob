@@ -18,7 +18,7 @@
 
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
-import { Card, Icon, useTheme } from "react-native-paper";
+import { Card, Icon, List, useTheme } from "react-native-paper";
 
 interface ServerProps {
   name: string;
@@ -38,6 +38,20 @@ export default function Server({
   running
 }: ServerProps) {
   const theme = useTheme();
+
+  const styles: { listItem: any; icon: any } = {
+    listItem: {
+      backgroundColor: theme.colors.surfaceVariant,
+      borderRadius: 20,
+      marginTop: 7,
+      marginBottom: 7,
+      width: "95%",
+      alignSelf: "center"
+    },
+    icon: {
+      marginLeft: 15
+    }
+  };
 
   const chooseColor = () =>
     running ? theme.colors.primary : theme.colors.surfaceDisabled;
@@ -59,24 +73,23 @@ export default function Server({
   };
 
   const serverIcon = () => (
-    <Icon
-      source={running ? "server" : "server-off"}
+    <List.Icon
+      icon={running ? "server" : "server-off"}
       color={chooseColor()}
-      size={25}
+      style={styles.icon}
     />
   );
 
+  const rightArrow = () => <List.Icon icon="chevron-right" />;
+
   return (
-    <Card
-      style={{
-        marginTop: 7,
-        marginBottom: 7,
-        width: "90%",
-        alignSelf: "center"
-      }}
+    <List.Item
+      title={name}
+      description={getDescription()}
+      left={serverIcon}
+      right={rightArrow}
+      style={styles.listItem}
       onPress={() => router.navigate(`/server/${id}`)}
-    >
-      <Card.Title title={name} subtitle={getDescription()} left={serverIcon} />
-    </Card>
+    />
   );
 }
