@@ -389,16 +389,8 @@ export default class Panel {
             server.get = {
               // TODO: Until I find a way to use the color codes, they will be killed
               // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-              console: async (): Promise<string> =>
-                await this.get
-                  .console(server.id)
-                  .then(({ logs }) =>
-                    logs.replace(
-                      /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-                      ""
-                    )
-                  ),
-
+              console: async (): Promise<PufferpanelServerLogs> =>
+                await this.get.console(server.id),
               data: async (): Promise<ServerDataResponse> =>
                 await this.get.data(server.id),
               file: async (filename?: string): Promise<MessagesFileDesc[]> =>
