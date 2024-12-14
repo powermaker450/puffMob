@@ -13,7 +13,7 @@ A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with
 - [ ] Account
   - [x] Change username, email, and password
   - [ ] Manage 2FA
-  - [ ] Manage OAuth2 clients
+  - [x] Manage OAuth2 clients
 
 - [ ] Servers
   - [x] View existing servers

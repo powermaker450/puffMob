@@ -78,6 +78,15 @@ export default function SettingsPage() {
         />
 
         <List.Item
+          title="OAuth2"
+          description="View and create user-scoped OAuth2 clients"
+          onPress={() => router.navigate("/settings/oauth")}
+          left={() => (
+            <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
+          )}
+        />
+
+        <List.Item
           title="Appearance"
           disabled
           description="Look and feel of the app"
