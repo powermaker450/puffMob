@@ -23,7 +23,7 @@ A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with
   - [x] Manage Users
   - [x] Manage Config
   - [x] Manage Files
-  - [ ] Manage OAuth2 clients
+  - [x] Manage OAuth2 clients
   - [ ] Create new servers
   - [ ] View performance stats
   - [ ] Admin controls

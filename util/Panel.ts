@@ -42,7 +42,8 @@ import {
   PermissionsUpdate,
   NewServerUser,
   ModelsUserSearchResponse,
-  NewUser
+  NewUser,
+  NewClient
 } from "./models";
 import { storage } from "./storage";
 
@@ -199,7 +200,7 @@ export default class Panel {
   private async handleResponse(
     res: Response,
     req: Function, // TODO: Definitely find a better way to type this
-    ...args: string[] // :skull:
+    ...args: any[] // :skull:
   ): Promise<unknown> {
     if (res.status === 400 || res.status === 500) {
       throw (await res.json()) as PufferpanelError;
@@ -896,11 +897,12 @@ export default class Panel {
     /**
      * Creates a new user-scoped oauth2 client.
      */
-    oauth2: async (): Promise<ModelsCreatedClient> => {
+    oauth2: async (client: NewClient): Promise<ModelsCreatedClient> => {
       try {
         const res = await fetch(`${this.api}/self/oauth2`, {
           method: MethodOpts.post,
-          headers: await this.defaultHeaders()
+          headers: await this.defaultHeaders(),
+          body: JSON.stringify(client)
         });
 
         return (await this.handleResponse(
@@ -911,6 +913,31 @@ export default class Panel {
         console.warn("An unexpected error occured", err);
         throw err;
       }
+    },
+
+    /**
+     * Creates a new server-scoped OAuth2 client.
+     *
+     * @param serverId - The server to create a new client for
+     * @param client - Client Details
+     * @returns The client id and secret of the new OAuth2 client.
+     */
+    serverOauth2: async (
+      serverId: string,
+      client: NewClient
+    ): Promise<ModelsCreatedClient> => {
+      const res = await fetch(`${this.api}/servers/${serverId}/oauth2`, {
+        method: MethodOpts.post,
+        headers: await this.defaultHeaders(),
+        body: JSON.stringify(client)
+      });
+
+      return (await this.handleResponse(
+        res,
+        this.create.serverOauth2,
+        serverId,
+        client
+      )) as ModelsCreatedClient;
     },
 
     /**

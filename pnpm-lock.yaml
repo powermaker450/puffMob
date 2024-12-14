@@ -23,6 +23,9 @@ importers:
       '@pchmn/expo-material3-theme':
         specifier: github:pchmn/expo-material3-theme
         version: https://codeload.github.com/pchmn/expo-material3-theme/tar.gz/a32494e4a40b69cecd288f6dd0b87239f1fa2fbe(expo@51.0.38(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0)))(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+      '@react-native-clipboard/clipboard':
+        specifier: ^1.15.0
+        version: 1.15.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       '@react-native-community/hooks':
         specifier: ^3.0.0
         version: 3.0.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
@@ -1209,6 +1212,19 @@ packages:
     resolution: {integrity: sha512-avutXAFL1ehGvAXtPquu0YK5oz6ctS474iM3vNGQIkswrVhdrS52e3uoMQBzZhNRAIE0jBnUyXWNmSjGHhCFcw==}
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
+
+  '@react-native-clipboard/clipboard@1.15.0':
+    resolution: {integrity: sha512-YDMC3E956jn9zE11uKGcQDKS1SO9q72iNHxZyrKY5y9XYwZcA9vo3Xk74+zRnf7cM48drDO0s9lyAPUlOvyhrw==}
+    peerDependencies:
+      react: '>= 16.9.0'
+      react-native: '>= 0.61.5'
+      react-native-macos: '>= 0.61.0'
+      react-native-windows: '>= 0.61.0'
+    peerDependenciesMeta:
+      react-native-macos:
+        optional: true
+      react-native-windows:
+        optional: true
 
   '@react-native-community/cli-clean@13.6.9':
     resolution: {integrity: sha512-7Dj5+4p9JggxuVNOjPbduZBAP1SUgNhLKVw5noBUzT/3ZpUZkDM+RCSwyoyg8xKWoE4OrdUAXwAFlMcFDPKykA==}
@@ -6900,6 +6916,11 @@ snapshots:
       '@babel/runtime': 7.26.0
       '@radix-ui/react-compose-refs': 1.0.0(react@18.2.0)
       react: 18.2.0
+
+  '@react-native-clipboard/clipboard@1.15.0(react-native@0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.2.79)(react@18.2.0)
 
   '@react-native-community/cli-clean@13.6.9':
     dependencies:

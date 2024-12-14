@@ -60,13 +60,9 @@ const ServerManagePage = () => {
       <List.Item
         title="OAuth2 Clients"
         description="Manage all your OAuth2 clients for this server"
-        disabled
+        onPress={() => router.navigate(`/server/${id}/oauth`)}
         left={() => (
-          <List.Icon
-            icon="server-security"
-            style={{ marginLeft: 15 }}
-            color={theme.colors.onSurfaceDisabled}
-          />
+          <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
         )}
       ></List.Item>
     </ScrollView>

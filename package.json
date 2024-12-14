@@ -20,6 +20,7 @@
     "@expo-google-fonts/noto-sans-mono": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
     "@pchmn/expo-material3-theme": "github:pchmn/expo-material3-theme",
+    "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-native-community/hooks": "^3.0.0",
     "@react-navigation/native": "^6.0.2",
     "@rivascva/react-native-code-editor": "^1.2.2",

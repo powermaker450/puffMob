@@ -53,6 +53,11 @@ export interface ModelsClient {
   name: string;
 }
 
+export interface NewClient {
+  description: string;
+  name: string;
+}
+
 export interface ModelsCreateServerResponse {
   id: string;
 }
