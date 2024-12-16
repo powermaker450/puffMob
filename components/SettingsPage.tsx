@@ -27,6 +27,8 @@ export default function SettingsPage() {
   const [admin, setAdmin] = useState(false);
   const [editUsers, setEditUsers] = useState(false);
 
+  const administrativePerms = admin || editUsers;
+
   useEffect(() => {
     Panel.getCachedScopes().forEach(scope => {
       switch (scope) {
@@ -48,45 +50,51 @@ export default function SettingsPage() {
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={{ justifyContent: "center" }}>
-        <List.Item
-          title="Panel Settings"
-          description="Manage your Pufferpanel instance"
-          style={{ display: admin ? "flex" : "none" }}
-          onPress={() => router.navigate("/settings/panel_settings")}
-          left={() => (
-            <List.Icon icon="shield-edit" style={{ marginLeft: 15 }} />
-          )}
-        />
+        <List.Section title="Personal Settings">
+          <List.Item
+            title="Account"
+            description="Manage account settings"
+            onPress={() => router.navigate("/settings/account")}
+            left={() => (
+              <List.Icon icon="account-circle" style={{ marginLeft: 15 }} />
+            )}
+          />
+        </List.Section>
 
-        <List.Item
-          title="Users"
-          description="Manage users access to the panel"
-          style={{ display: admin || editUsers ? "flex" : "none" }}
-          onPress={() => router.navigate("/settings/user")}
-          left={() => (
-            <List.Icon icon="account-multiple" style={{ marginLeft: 15 }} />
-          )}
-        />
+        {administrativePerms ? (
+          <List.Section title="Administrative Settings">
+            <List.Item
+              title="Panel Settings"
+              description="Manage your Pufferpanel instance"
+              style={{ display: admin ? "flex" : "none" }}
+              onPress={() => router.navigate("/settings/panel_settings")}
+              left={() => (
+                <List.Icon icon="shield-edit" style={{ marginLeft: 15 }} />
+              )}
+            />
 
-        <List.Item
-          title="Account"
-          description="Manage account settings"
-          onPress={() => router.navigate("/settings/account")}
-          left={() => (
-            <List.Icon icon="account-circle" style={{ marginLeft: 15 }} />
-          )}
-        />
+            <List.Item
+              title="Users"
+              description="Manage users access to the panel"
+              style={{ display: admin || editUsers ? "flex" : "none" }}
+              onPress={() => router.navigate("/settings/user")}
+              left={() => (
+                <List.Icon icon="account-multiple" style={{ marginLeft: 15 }} />
+              )}
+            />
 
-        <List.Item
-          title="OAuth2"
-          description="View and create user-scoped OAuth2 clients"
-          onPress={() => router.navigate("/settings/oauth")}
-          left={() => (
-            <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
-          )}
-        />
+            <List.Item
+              title="OAuth2"
+              description="View and create user-scoped OAuth2 clients"
+              onPress={() => router.navigate("/settings/oauth")}
+              left={() => (
+                <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
+              )}
+            />
+          </List.Section>
+        ) : null}
 
-        <List.Item
+        {/* <List.Item
           title="Appearance"
           disabled
           description="Look and feel of the app"
@@ -98,7 +106,7 @@ export default function SettingsPage() {
               style={{ marginLeft: 15 }}
             />
           )}
-        />
+        /> */}
       </ScrollView>
     </>
   );
