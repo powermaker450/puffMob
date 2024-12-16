@@ -132,6 +132,11 @@ const ViewFile = ({
   const loadingIcon = <ActivityIndicator animating />;
 
   const [visible, setVisible] = useState(false);
+  const showDialog = () => {
+    haptic();
+    setVisible(true);
+  };
+  const hideDialog = () => setVisible(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteVis, setDeleteVis] = useState(false);
 
@@ -313,6 +318,11 @@ const ViewFile = ({
       .catch(err => handleErr(err));
   };
 
+  const handleClick = () =>
+    file.isDirectory
+      ? setPath(path => path.concat([file.filename]))
+      : showDialog();
+
   const modalStyle = {
     backgroundColor: theme.colors.background,
     margin: 20,
@@ -487,13 +497,8 @@ const ViewFile = ({
         title={file.filename}
         description={file.isDirectory ? "Folder" : computeFileSize()}
         disabled={disableNav}
-        onPress={() =>
-          file.isDirectory && setPath(path => path.concat([file.filename]))
-        }
-        onLongPress={() => {
-          haptic();
-          setVisible(true);
-        }}
+        onPress={handleClick}
+        onLongPress={showDialog}
         delayLongPress={300}
         left={() => <List.Icon icon={fileType()} style={{ marginLeft: 15 }} />}
         style={{
