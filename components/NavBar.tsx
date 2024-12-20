@@ -34,7 +34,6 @@ const NavBar = ({ routes, renderScene }: NavBarProps) => {
     <BottomNavigation
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
-      onTabPress={handleTouch}
       sceneAnimationType="shifting"
       sceneAnimationEnabled
       renderScene={renderScene}
