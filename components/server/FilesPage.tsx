@@ -28,7 +28,6 @@ import {
 } from "react-native-paper";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import Panel from "@/util/Panel";
 import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
 import ViewFile from "./ViewFile";
 import { ScrollView, View } from "react-native";
@@ -43,12 +42,12 @@ import {
   writeAsStringAsync
 } from "expo-file-system";
 import invalidChars from "@/util/invalidChars";
+import { usePanel } from "@/contexts/PanelProvider";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
-  const { email, password } = Panel.getSettings();
-  const panel = Panel.getPanel();
+  const { settings, panel } = usePanel();
 
   const [overrideUrl, setOverrideUrl] = useState(
     storage.getString(id + "_overrideUrl") || ""
@@ -277,9 +276,9 @@ const FilesPage = () => {
     panel.get.server(id as string).then(({ server }) => {
       const url = overrideUrl || server.node.publicHost;
       const port = overridePort ? Number(overridePort) : server.node.sftpPort;
-      const username = email + "|" + id;
+      const username = settings.email + "|" + id;
 
-      SSHClient.connectWithPassword(url, port, username, password)
+      SSHClient.connectWithPassword(url, port, username, settings.password)
         .then(client => {
           console.log(`Connected to sftp://${url}:${port}@${username}`);
           setClient(client);

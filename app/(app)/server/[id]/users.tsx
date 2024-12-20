@@ -21,28 +21,38 @@ import { Appbar, FAB, Text } from "react-native-paper";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import haptic, { handleTouch } from "@/util/haptic";
 import { useEffect, useState } from "react";
-import Panel from "@/util/Panel";
 import { PermissionsUpdate } from "@/util/models";
 import ManageUser from "@/components/server/ManageUser";
 import { ScrollView } from "react-native";
+import { useServer } from "@/contexts/ServerProvider";
 
 export default function users() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
-  const panel = Panel.getPanel();
+  const { data } = useServer();
 
   const [userList, setUserList] = useState<PermissionsUpdate[]>([]);
   const [removed, setRemoved] = useState(0);
 
   useEffect(() => {
-    panel.get.serverUsers(id as string).then(users => setUserList(users));
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
+    server.get.users().then(setUserList).catch(console.error);
   }, [removed]);
 
   useEffect(() => {
     navigation.addListener("focus", () => {
-      panel.get.serverUsers(id as string).then(users => setUserList(users));
+      if (!data) {
+        return;
+      }
+      const { server } = data;
+
+      server.get.users().then(setUserList).catch(console.error);
     });
-  }, [navigation]);
+  }, []);
 
   const noUsers = (
     <CustomView>

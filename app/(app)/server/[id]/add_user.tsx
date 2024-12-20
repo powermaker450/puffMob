@@ -18,7 +18,7 @@
 
 import CustomView from "@/components/CustomView";
 import Notice from "@/components/Notice";
-import Panel from "@/util/Panel";
+import { useServer } from "@/contexts/ServerProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { NewServerUser } from "@/util/models";
 import { router, useLocalSearchParams } from "expo-router";
@@ -37,7 +37,7 @@ import {
 export default function addUser() {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
-  const panel = Panel.getPanel();
+  const { data } = useServer();
   const [email, setEmail] = useState("");
   const changeEmail = (newEmail: string) => setEmail(newEmail);
 
@@ -92,9 +92,14 @@ export default function addUser() {
   ]);
 
   const addUser = () => {
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
     setLoading(true);
 
-    panel.get.serverUsers(id as string).then(users => {
+    server.get.users().then(users => {
       for (const user of users) {
         if (user.email === email) {
           haptic("notificationError");
@@ -107,8 +112,8 @@ export default function addUser() {
         }
       }
 
-      panel.create
-        .serverUser(id as string, email, newUser)
+      server.create
+        .serverUser(email, newUser)
         .then(() => {
           haptic("notificationSuccess");
           router.back();

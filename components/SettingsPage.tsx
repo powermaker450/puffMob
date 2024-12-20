@@ -16,31 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Appbar, List, useTheme } from "react-native-paper";
+import { Appbar, List } from "react-native-paper";
 import { router } from "expo-router";
 import { ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 
 export default function SettingsPage() {
-  const theme = useTheme();
+  const { scopes } = usePanel();
   const [admin, setAdmin] = useState(false);
   const [editUsers, setEditUsers] = useState(false);
 
   const administrativePerms = admin || editUsers;
 
   useEffect(() => {
-    Panel.getCachedScopes().forEach(scope => {
+    for (const scope of scopes) {
       switch (scope) {
         case "servers.admin":
           setAdmin(true);
           break;
         case "users.edit":
           setEditUsers(true);
-        default: {
-        }
       }
-    });
+    }
   });
 
   return (

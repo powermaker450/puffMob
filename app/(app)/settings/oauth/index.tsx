@@ -18,7 +18,7 @@
 
 import CustomView from "@/components/CustomView";
 import OAuthClient from "@/components/settings/OAuthClient";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsClient } from "@/util/models";
 import { router, useNavigation } from "expo-router";
@@ -27,17 +27,18 @@ import { ScrollView } from "react-native";
 import { Appbar, FAB, Text } from "react-native-paper";
 
 export default function oauth() {
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
   const navigation = useNavigation();
 
   const [clients, setClients] = useState<ModelsClient[]>([]);
   const [refresh, setRefresh] = useState(0);
   const execRefresh = () => setRefresh(Math.random());
-  navigation.addListener("focus", execRefresh);
 
   useEffect(() => {
-    control.get.selfOauth2().then(setClients).catch(console.error);
+    panel.get.selfOauth2().then(setClients).catch(console.error);
   }, [refresh]);
+
+  useEffect(() => navigation.addListener("focus", execRefresh), []);
 
   const noClients = (
     <CustomView>

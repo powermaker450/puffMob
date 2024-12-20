@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel from "@/util/Panel";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { BottomNavigationRoute, BottomNavigation } from "react-native-paper";
 import ConsoleView from "@/components/server/ConsoleView";
@@ -25,10 +24,14 @@ import NavBar from "@/components/NavBar";
 import ServerManagePage from "@/components/server/ServerManagePage";
 import NameTab from "@/components/server/NameTab";
 import FilesPage from "@/components/server/FilesPage";
+import { usePanel } from "@/contexts/PanelProvider";
+import { useServer } from "@/contexts/ServerProvider";
 
 export default function ServerScreen() {
   const { id } = useLocalSearchParams();
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
+  const { data, setData } = useServer();
+  const navigation = useNavigation();
 
   const mainRoute: BottomNavigationRoute = {
     key: "console",
@@ -44,26 +47,39 @@ export default function ServerScreen() {
   });
 
   useEffect(() => {
-    control.get.server(id as string).then(({ permissions }) => {
-      // Getting and setting the rest of the user permissions
-      let newRoutes: BottomNavigationRoute[] = [mainRoute];
-      permissions.viewServerFiles &&
-        newRoutes.push({
-          key: "files",
-          title: "Files",
-          focusedIcon: "folder"
-        });
+    panel.get.server(id as string).then(setData);
 
-      permissions.editServerData &&
-        newRoutes.push({
-          key: "settings",
-          title: "Manage",
-          focusedIcon: "cog"
-        });
-
-      setRoutes(newRoutes);
+    navigation.addListener("beforeRemove", () => {
+      data && data.server.socket.close();
+      setData(undefined);
     });
   }, []);
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    const { permissions } = data;
+
+    // Getting and setting the rest of the user permissions
+    let newRoutes: BottomNavigationRoute[] = [mainRoute];
+    permissions.viewServerFiles &&
+      newRoutes.push({
+        key: "files",
+        title: "Files",
+        focusedIcon: "folder"
+      });
+
+    permissions.editServerData &&
+      newRoutes.push({
+        key: "settings",
+        title: "Manage",
+        focusedIcon: "cog"
+      });
+
+    setRoutes(newRoutes);
+  }, [data]);
 
   return (
     <>

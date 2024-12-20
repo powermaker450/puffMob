@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel from "@/util/Panel";
 import { ModelsClient } from "@/util/models";
 import { useState } from "react";
 import { View } from "react-native";
@@ -36,6 +35,7 @@ import {
 import Clipboard from "@react-native-clipboard/clipboard";
 import haptic, { handleTouch } from "@/util/haptic";
 import { useLocalSearchParams } from "expo-router";
+import { usePanel } from "@/contexts/PanelProvider";
 
 interface OAuthClientProps {
   client: ModelsClient;
@@ -44,7 +44,7 @@ interface OAuthClientProps {
 
 const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
   const theme = useTheme();
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
   const { id } = useLocalSearchParams();
 
   const [modal, setModal] = useState(false);
@@ -146,7 +146,7 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
   const handleDelete = () => {
     startLoading();
 
-    control.delete
+    panel.delete
       .serverOauth2(id as string, client.client_id)
       .then(() => {
         haptic("notificationSuccess");

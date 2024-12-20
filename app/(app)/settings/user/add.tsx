@@ -17,7 +17,7 @@
  */
 
 import Notice from "@/components/Notice";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { NewUser, PufferpanelError } from "@/util/models";
 import { router } from "expo-router";
@@ -34,7 +34,7 @@ import {
 
 export default function add() {
   const theme = useTheme();
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
 
   const [updating, setUpdating] = useState(false);
   const startUpdating = () => setUpdating(true);
@@ -180,7 +180,7 @@ export default function add() {
   const handleAddUser = () => {
     startUpdating();
 
-    control.create
+    panel.create
       .user(newUser)
       .then(handleSuccess)
       .catch(handleErr)

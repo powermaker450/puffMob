@@ -18,7 +18,7 @@
 
 import ButtonContainer from "@/components/ButtonContainer";
 import CustomView from "@/components/CustomView";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsCreatedClient, NewClient } from "@/util/models";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -38,7 +38,7 @@ import {
 
 export default function add() {
   const theme = useTheme();
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
 
   const [newClient, setNewClient] = useState<NewClient>({
     name: "",
@@ -139,7 +139,7 @@ export default function add() {
   const handleAdd = () => {
     startLoading();
 
-    control.create
+    panel.create
       .oauth2(newClient)
       .then(handleSuccess)
       .catch(handleErr)

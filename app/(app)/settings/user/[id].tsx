@@ -18,7 +18,7 @@
 
 import ButtonContainer from "@/components/ButtonContainer";
 import Notice from "@/components/Notice";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsPermissionView } from "@/util/models";
 import { router, useLocalSearchParams } from "expo-router";
@@ -40,7 +40,7 @@ import {
 export default function userById() {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
   const [header, setHeader] = useState("");
 
   const [user, setUser] = useState<ModelsPermissionView>();
@@ -154,7 +154,7 @@ export default function userById() {
   const isAdmin = updating || newUser ? newUser.admin : false;
 
   useEffect(() => {
-    control.get
+    panel.get
       .userPerms(id as string)
       .then(user => {
         setUser(user);
@@ -209,7 +209,7 @@ export default function userById() {
       return;
     }
 
-    control.edit
+    panel.edit
       .user(Number(id), { ...user, username, email, password })
       .then(detailsUpdateComplete)
       .catch(handleErr)
@@ -224,7 +224,7 @@ export default function userById() {
       return;
     }
 
-    control.edit
+    panel.edit
       .userPerms(id as string, newUser)
       .then(updateComplete)
       .catch(handleErr)
@@ -234,7 +234,7 @@ export default function userById() {
   const handleDelete = () => {
     startUpdating();
 
-    control.delete
+    panel.delete
       .user(id as string)
       .then(deleteComplete)
       .catch(handleErr);

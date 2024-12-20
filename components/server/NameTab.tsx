@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel from "@/util/Panel";
-import PufferpanelSocket from "@/util/PufferpanelSocket";
+import { useServer } from "@/contexts/ServerProvider";
 import haptic, { handleTouch } from "@/util/haptic";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -34,40 +33,32 @@ import {
 } from "react-native-paper";
 
 const NameTab = () => {
-  const { id } = useLocalSearchParams();
-  const navigation = useNavigation();
   const theme = useTheme();
-  const control = Panel.getPanel();
-  let socket: PufferpanelSocket;
+  const { data } = useServer();
 
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    control.get.server(id as string).then(({ server, permissions }) => {
-      setServerName(server.name);
-      setNewName(server.name);
+    if (!data) {
+      return;
+    }
+    const {
+      server: { name, socket },
+      permissions
+    } = data;
 
-      setEditServer(permissions.editServerData);
-      setStartPerms(permissions.startServer);
-      setStopPerms(permissions.stopServer);
+    setServerName(name);
+    permissions.viewServerConsole &&
+      socket.on("status", e => setRunning(e.running));
+  }, [data]);
 
-      if (permissions.viewServerConsole) {
-        socket = control.getSocket(id as string);
-        navigation.addListener("beforeRemove", () => socket && socket.close());
-
-        socket.on("status", e => {
-          setRunning(e.running);
-        });
-      }
-    });
-  }, []);
+  const startServer = data ? data.permissions.startServer : false;
+  const stopServer = data ? data.permissions.stopServer : false;
 
   const [serverName, setServerName] = useState("");
   const [newName, setNewName] = useState("");
-  const changeNewName = (newText: string) => setNewName(newText);
-  const [editServer, setEditServer] = useState(false);
   const openNameChange = () => {
-    if (!editServer) {
+    if (data ? data.permissions.editServerData : false) {
       return;
     }
 
@@ -78,9 +69,6 @@ const NameTab = () => {
     setVisible(false);
     setNewName(serverName);
   };
-
-  const [startPerms, setStartPerms] = useState(false);
-  const [stopPerms, setStopPerms] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const startLoading = () => setLoading(true);
@@ -93,32 +81,23 @@ const NameTab = () => {
 
   const handleStart = () => {
     startLoading();
-    control.actions
-      .start(id as string)
-      .catch(handleErr)
-      .finally(stopLoading);
+    data!.server.actions.start().catch(handleErr).finally(stopLoading);
   };
 
   const handleStop = () => {
     startLoading();
-    control.actions
-      .stop(id as string)
-      .catch(handleErr)
-      .finally(stopLoading);
+    data!.server.actions.stop().catch(handleErr).finally(stopLoading);
   };
 
   const handleKill = () => {
     startLoading();
-    control.actions
-      .kill(id as string)
-      .catch(handleErr)
-      .finally(stopLoading);
+    data!.server.actions.kill().catch(handleErr).finally(stopLoading);
   };
 
   const handleNameChange = () => {
     setNameUpdating(true);
-    control.edit
-      .serverName(id as string, newName)
+    data!.server.edit
+      .name(newName)
       .then(() => {
         setServerName(newName);
         setNewName(newName);
@@ -139,7 +118,7 @@ const NameTab = () => {
         icon="play-outline"
         onPress={handleStart}
         onPressIn={handleTouch}
-        disabled={!startPerms}
+        disabled={!startServer}
       />
     </Tooltip>
   );
@@ -150,7 +129,7 @@ const NameTab = () => {
         icon="stop"
         onPress={handleStop}
         onPressIn={handleTouch}
-        disabled={!stopPerms}
+        disabled={!stopServer}
       />
     </Tooltip>
   );
@@ -161,7 +140,7 @@ const NameTab = () => {
         icon="skull-outline"
         onPress={handleKill}
         onPressIn={handleTouch}
-        disabled={!stopPerms}
+        disabled={!(data ? data.permissions.stopServer : true)}
       />
     </Tooltip>
   );
@@ -182,7 +161,7 @@ const NameTab = () => {
           style={{ marginLeft: 10 }}
           title={serverName}
           onPress={openNameChange}
-          disabled={!editServer}
+          disabled={data ? data.permissions.editServerData : false}
         />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
@@ -201,7 +180,7 @@ const NameTab = () => {
               mode="outlined"
               label="Server Name"
               value={newName}
-              onChangeText={changeNewName}
+              onChangeText={setNewName}
             />
           </Dialog.Content>
           <Dialog.Actions>

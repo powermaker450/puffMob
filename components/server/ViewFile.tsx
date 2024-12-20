@@ -17,10 +17,8 @@
  */
 
 import expandPath from "@/util/expandPath";
-import Panel from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import SSHClient, { LsResult } from "@dylankenneally/react-native-ssh-sftp";
-import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import {
@@ -48,6 +46,7 @@ import { Languages } from "@rivascva/react-native-code-editor/lib/typescript/lan
 import { useKeyboard } from "@react-native-community/hooks";
 import determineFileType from "@/util/determineFileType";
 import invalidChars from "@/util/invalidChars";
+import { useServer } from "@/contexts/ServerProvider";
 
 interface ViewFileProps {
   file: LsResult;
@@ -156,10 +155,14 @@ const ViewFile = ({
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const { id } = useLocalSearchParams();
-  const panel = Panel.getPanel();
+  const { data } = useServer();
 
   const handleDelete = () => {
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
     setDeleting(true);
     const fullPath = expandPath(currentPath) + file.filename;
 
@@ -184,8 +187,8 @@ const ViewFile = ({
       return;
     }
 
-    panel.delete
-      .file(id as string, fullPath)
+    server.delete
+      .file(fullPath)
       .then(() => {
         setVisible(false);
         setDeleteVis(false);

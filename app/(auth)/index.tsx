@@ -18,13 +18,12 @@
 
 import ButtonContainer from "@/components/ButtonContainer";
 import CustomView from "@/components/CustomView";
-import Panel, { PanelParams } from "@/util/Panel";
+import LoadingScreen from "@/components/LoadingScreen";
+import { usePanel } from "@/contexts/PanelProvider";
 import { handleTouch } from "@/util/haptic";
-import { storage } from "@/util/storage";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { StyleProp, TextStyle } from "react-native";
-import { ActivityIndicator, Button, Text, TextInput } from "react-native-paper";
+import { Button, Text, TextInput } from "react-native-paper";
 
 const textInputStyle: StyleProp<TextStyle> = {
   maxHeight: 70,
@@ -33,68 +32,14 @@ const textInputStyle: StyleProp<TextStyle> = {
 };
 
 export default function Index() {
-  let settings: PanelParams = storage.getString("settings")
-    ? JSON.parse(storage.getString("settings")!)
-    : {
-        serverUrl: "",
-        email: "",
-        password: ""
-      };
-  const [cachedToken, setStateCachedToken] = useState(
-    storage.getString("cachedToken")
-  );
+  const { login, loggedIn, error, clearError } = usePanel();
 
-  const setSettings = (params: PanelParams) => {
-    storage.set("settings", JSON.stringify(params));
-    settings = JSON.parse(storage.getString("settings")!);
-  };
-
-  const setCachedToken = (token: string) => {
-    storage.set("cachedToken", token);
-    setStateCachedToken(storage.getString("cachedToken"));
-  };
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const [serverUrl, setServerUrl] = useState(settings.serverUrl);
+  const [serverUrl, setServerUrl] = useState("");
   const changeServerUrl = (newText: string) => setServerUrl(newText);
-  const [email, setEmail] = useState(settings.email);
+  const [email, setEmail] = useState("");
   const changeEmail = (newText: string) => setEmail(newText);
-  const [password, setPassword] = useState(settings.password);
+  const [password, setPassword] = useState("");
   const changePassword = (newText: string) => setPassword(newText);
-
-  useEffect(() => {
-    if (!cachedToken) {
-      setLoading(false);
-      return;
-    }
-
-    new Panel(settings).get
-      .self()
-      .then(() => {
-        setLoading(false);
-        router.replace("/home");
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, [cachedToken]);
-
-  const loadingText = (
-    <CustomView>
-      <ActivityIndicator
-        size="large"
-        animating={loading}
-        style={{ marginBottom: 20 }}
-      />
-
-      <Text variant="bodyLarge" style={{ margin: 30 }}>
-        Logging in...
-      </Text>
-    </CustomView>
-  );
 
   const errorText = (
     <CustomView>
@@ -107,8 +52,7 @@ export default function Index() {
         mode="contained"
         style={{ margin: 10 }}
         onPress={() => {
-          setError(false);
-          setLoading(false);
+          clearError();
         }}
       >
         Back to login
@@ -155,23 +99,7 @@ export default function Index() {
           style={{ margin: 10 }}
           mode="contained"
           onPressIn={handleTouch}
-          onPress={() => {
-            setLoading(true);
-
-            const params: PanelParams = {
-              serverUrl,
-              email,
-              password
-            };
-            setSettings(params);
-
-            Panel.getToken(params)
-              .then(token => setCachedToken(token))
-              .catch(() => {
-                setError(true);
-                setLoading(false);
-              });
-          }}
+          onPress={() => login({ serverUrl, email, password })}
           disabled={
             !(
               serverUrl.startsWith("http://") ||
@@ -187,5 +115,5 @@ export default function Index() {
     </CustomView>
   );
 
-  return <>{error ? errorText : loading ? loadingText : loginText}</>;
+  return <>{error ? errorText : loggedIn ? <LoadingScreen /> : loginText}</>;
 }

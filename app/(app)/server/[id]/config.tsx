@@ -18,10 +18,9 @@
 
 import Notice from "@/components/Notice";
 import VariableView from "@/components/server/VariableView";
-import Panel from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ServerDataResponse } from "@/util/models";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import {
@@ -34,12 +33,12 @@ import {
   Text,
   useTheme
 } from "react-native-paper";
+import { useServer } from "@/contexts/ServerProvider";
 
 export default function config() {
-  const { id } = useLocalSearchParams();
   const theme = useTheme();
   const navigation = useNavigation();
-  const panel = Panel.getPanel();
+  const { data } = useServer();
   const [serverData, setServerData] = useState<ServerDataResponse>();
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState(false);
@@ -47,18 +46,26 @@ export default function config() {
 
   useEffect(() => {
     navigation.addListener("focus", () => {
-      panel.get.data(id as string).then(data => {
-        setServerData(data);
-      });
+      if (!data) {
+        return;
+      }
+      const { server } = data;
+
+      server.get.data().then(setServerData).catch(console.error);
     });
-  }, [navigation]);
+  }, []);
 
   const updateData = () => {
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
     setLoading(true);
     haptic();
 
-    panel.edit
-      .serverData(id as string, serverData!)
+    server.edit
+      .data(serverData!)
       .then(() => {
         setText("Configuration saved!");
         haptic("notificationSuccess");
@@ -75,6 +82,26 @@ export default function config() {
           setText("");
         }, 2000);
       });
+  };
+
+  const handleInstall = () => {
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
+    setInstalling(true);
+    server.actions
+      .install()
+      .then(() => {
+        haptic("notificationSuccess");
+        setText("Installed!");
+        setNotice(true);
+        setInstalling(false);
+        setDialog(false);
+        setTimeout(() => setNotice(false), 2000);
+      })
+      .catch(console.error);
   };
 
   const [dialog, setDialog] = useState(false);
@@ -118,21 +145,7 @@ export default function config() {
             {installing ? (
               loadingText
             ) : (
-              <Button
-                onPressIn={handleTouch}
-                onPress={() => {
-                  setInstalling(true);
-
-                  panel.actions.install(id as string).then(() => {
-                    haptic("notificationSuccess");
-                    setText("Installed!");
-                    setNotice(true);
-                    setInstalling(false);
-                    setDialog(false);
-                    setTimeout(() => setNotice(false), 2000);
-                  });
-                }}
-              >
+              <Button onPressIn={handleTouch} onPress={handleInstall}>
                 Install
               </Button>
             )}

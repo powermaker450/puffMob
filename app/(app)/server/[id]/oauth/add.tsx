@@ -18,11 +18,11 @@
 
 import ButtonContainer from "@/components/ButtonContainer";
 import CustomView from "@/components/CustomView";
-import Panel from "@/util/Panel";
+import { useServer } from "@/contexts/ServerProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsCreatedClient, NewClient } from "@/util/models";
 import Clipboard from "@react-native-clipboard/clipboard";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import {
@@ -37,9 +37,8 @@ import {
 } from "react-native-paper";
 
 export default function add() {
-  const { id } = useLocalSearchParams();
   const theme = useTheme();
-  const control = Panel.getPanel();
+  const { data } = useServer();
 
   const [newClient, setNewClient] = useState<NewClient>({
     name: "",
@@ -138,10 +137,15 @@ export default function add() {
     console.error(err);
   };
   const handleAdd = () => {
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
     startLoading();
 
-    control.create
-      .serverOauth2(id as string, newClient)
+    server.create
+      .oauth2(newClient)
       .then(handleSuccess)
       .catch(handleErr)
       .finally(stopLoading);

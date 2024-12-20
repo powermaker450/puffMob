@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { PermissionsUpdate } from "@/util/models";
 import { useLocalSearchParams } from "expo-router";
@@ -40,7 +40,7 @@ interface ManageUserProps {
 const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
-  const panel = Panel.getPanel();
+  const { panel } = usePanel();
   let updatedUser = user;
 
   const [editServer, setEditServer] = useState(false);

@@ -31,14 +31,16 @@ import CustomView from "@/components/CustomView";
 import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import ButtonContainer from "@/components/ButtonContainer";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
-import Panel, { PanelParams, UpdateUserParams } from "@/util/Panel";
+import { PanelParams, UpdateUserParams } from "@/util/Panel";
 import UnsavedChanges from "@/components/UnsavedChanges";
 import Notice from "@/components/Notice";
+import { usePanel } from "@/contexts/PanelProvider";
 
 export default function account() {
-  const panel = Panel.getPanel();
+  const { panel, logout, settings, applyEmail, username, applyUsername } =
+    usePanel();
 
   const theme = useTheme();
 
@@ -67,51 +69,23 @@ export default function account() {
   };
 
   const [loading, setLoading] = useState(false);
-  const [gettingDetails, setGettingDetails] = useState(true);
 
-  const [username, setUsername] = useState("");
-  const [newUsername, setNewUsername] = useState("");
-  const changeNewUsername = (newText: string) => setNewUsername(newText);
-
-  const [email, setEmail] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const changeNewEmail = (newText: string) => setNewEmail(newText);
-
+  const [newUsername, setNewUsername] = useState(username);
+  const [newEmail, setNewEmail] = useState(settings.email);
   const [password, setPassword] = useState("");
-  const changePassword = (newText: string) => setPassword(newText);
-
-  const handleLogout = () => {
-    storage.delete("settings");
-    storage.delete("cachedToken");
-    storage.delete("cachedServerList");
-    router.replace("/");
-    setLogoutSplash(false);
-  };
 
   const reset = () => {
     setNewUsername(username);
-    setNewEmail(email);
+    setNewEmail(settings.email);
     setPassword("");
   };
-
-  useEffect(() => {
-    panel.get.self().then(({ username, email }) => {
-      setUsername(username!);
-      setNewUsername(username!);
-
-      setEmail(email!);
-      setNewEmail(email!);
-
-      setGettingDetails(false);
-    });
-  }, []);
 
   const handleDetailsChange = () => {
     setLoading(true);
     const settings: PanelParams = JSON.parse(storage.getString("settings")!);
     let obj: UpdateUserParams;
 
-    if (newUsername !== username && newEmail !== email) {
+    if (newUsername !== username && newEmail !== settings.email) {
       obj = { password, email: newEmail, username: newUsername };
     } else if (newUsername === username) {
       obj = { password, email: newEmail };
@@ -125,11 +99,11 @@ export default function account() {
         showNotice();
         haptic("notificationSuccess");
 
-        if (newUsername !== username && newEmail !== email) {
-          setUsername(newUsername);
-          setEmail(newEmail);
+        if (newUsername !== username && newEmail !== settings.email) {
+          applyUsername(newUsername);
+          applyEmail(newEmail);
         } else if (newUsername === username) {
-          setEmail(newEmail);
+          applyEmail(newEmail);
           storage.set(
             "settings",
             JSON.stringify({
@@ -139,7 +113,7 @@ export default function account() {
             })
           );
         } else {
-          setUsername(newUsername);
+          applyUsername(newUsername);
         }
 
         setPassword("");
@@ -165,7 +139,7 @@ export default function account() {
         <Appbar.BackAction
           onPressIn={handleTouch}
           onPress={() => router.back()}
-          disabled={username !== newUsername || email !== newEmail}
+          disabled={username !== newUsername || settings.email !== newEmail}
         />
         <Appbar.Content title="Account" />
       </Appbar.Header>
@@ -184,7 +158,7 @@ export default function account() {
             </Dialog.Content>
             <Dialog.Actions>
               <Button onPress={() => setLogoutSplash(false)}>Cancel</Button>
-              <Button onPress={handleLogout}>
+              <Button onPress={logout}>
                 <Text
                   style={{ color: theme.colors.tertiary, fontWeight: "bold" }}
                 >
@@ -199,7 +173,6 @@ export default function account() {
           <Text
             style={{ marginTop: 15, marginBottom: 15, alignSelf: "center" }}
             variant="titleLarge"
-            disabled={gettingDetails}
           >
             Account Details
           </Text>
@@ -209,8 +182,7 @@ export default function account() {
             style={textInputMargin}
             label="Username"
             value={newUsername}
-            disabled={gettingDetails}
-            onChangeText={changeNewUsername}
+            onChangeText={setNewUsername}
           />
 
           <TextInput
@@ -218,8 +190,7 @@ export default function account() {
             style={textInputMargin}
             label="Email"
             value={newEmail}
-            onChangeText={changeNewEmail}
-            disabled={gettingDetails}
+            onChangeText={setNewEmail}
             textContentType="emailAddress"
           />
 
@@ -228,9 +199,8 @@ export default function account() {
             style={textInputMargin}
             label="Password"
             value={password}
-            onChangeText={changePassword}
+            onChangeText={setPassword}
             secureTextEntry
-            disabled={gettingDetails}
             textContentType="password"
           />
 
@@ -242,7 +212,8 @@ export default function account() {
               onPressIn={handleTouch}
               onPress={handleDetailsChange}
               disabled={
-                !password || (username === newUsername && email === newEmail)
+                !password ||
+                (username === newUsername && settings.email === newEmail)
               }
               style={{
                 marginTop: 15,
@@ -271,7 +242,7 @@ export default function account() {
       <Notice condition={notice} setCondition={setNotice} text={noticeText} />
 
       <UnsavedChanges
-        condition={username !== newUsername || email !== newEmail}
+        condition={username !== newUsername || settings.email !== newEmail}
         reset={reset}
       />
     </>

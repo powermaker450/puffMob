@@ -114,8 +114,8 @@ android {
         applicationId 'com.povario.puffmob'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 3
+        versionName "0.2.1"
     }
     signingConfigs {
         debug {

@@ -18,23 +18,15 @@
 
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
-import { Stack } from "expo-router";
 import { View, useColorScheme } from "react-native";
+import { PanelProvider } from "@/contexts/PanelProvider";
+import RootNavigation from "@/components/RootNavigation";
+import { ServerProvider } from "@/contexts/ServerProvider";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#07a7e3" });
-  const getColor = () =>
-    colorScheme === "dark" ? theme.dark.background : theme.light.background;
-
-  const options = {
-    headerShown: false,
-    contentStyle: {
-      backgroundColor: getColor()
-    }
-  };
-
   const paperTheme =
     colorScheme === "dark"
       ? { ...MD3DarkTheme, colors: theme.dark }
@@ -42,19 +34,21 @@ export default function RootLayout() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor:
-            colorScheme === "dark"
-              ? theme.dark.background
-              : theme.light.background
-        }}
-      >
-        <Stack screenOptions={options}>
-          <Stack.Screen name="index" />
-        </Stack>
-      </View>
+      <PanelProvider>
+        <ServerProvider>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor:
+                colorScheme === "dark"
+                  ? theme.dark.background
+                  : theme.light.background
+            }}
+          >
+            <RootNavigation />
+          </View>
+        </ServerProvider>
+      </PanelProvider>
     </PaperProvider>
   );
 }

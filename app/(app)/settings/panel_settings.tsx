@@ -19,7 +19,7 @@
 import CustomView from "@/components/CustomView";
 import Notice from "@/components/Notice";
 import UnsavedChanges from "@/components/UnsavedChanges";
-import Panel, { UpdateServerParams } from "@/util/Panel";
+import { UpdateServerParams } from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -35,9 +35,10 @@ import {
   Text,
   TextInput
 } from "react-native-paper";
+import { usePanel } from "@/contexts/PanelProvider";
 
 export default function panel_settings() {
-  const panel = Panel.getPanel();
+  const { panel } = usePanel();
 
   const [urlLoad, setUrlLoad] = useState(true);
   const [nameLoad, setNameLoad] = useState(true);

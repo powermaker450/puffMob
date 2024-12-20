@@ -21,46 +21,39 @@ import CustomView from "../CustomView";
 import { ScrollView } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";
-import Panel from "@/util/Panel";
-import { useLocalSearchParams, useNavigation } from "expo-router";
 import { AnsiComponent } from "react-native-ansi-view";
-import PufferpanelSocket from "@/util/PufferpanelSocket";
+import { useServer } from "@/contexts/ServerProvider";
 
 const ConsoleView = () => {
   const theme = useTheme();
+  const { data } = useServer();
+
   const scrollViewRef = useRef<ScrollView>(null);
-  const control = Panel.getPanel();
-  const { id } = useLocalSearchParams();
-  const navigation = useNavigation();
-  let socket: PufferpanelSocket;
 
   const [running, setRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const changeCommand = (newText: string) => setCommand(newText);
   const clearCommand = () => setCommand("");
-  const [sendConsolePerms, setSendConsolePerms] = useState(false);
 
   useEffect(() => {
-    control.get.server(id as string).then(({ permissions }) => {
-      setSendConsolePerms(permissions.sendServerConsole);
+    if (!data) {
+      return;
+    }
+    const {
+      server: { socket },
+      permissions
+    } = data;
 
-      if (permissions.viewServerConsole) {
-        socket = control.getSocket(id as string);
-        navigation.addListener("beforeRemove", () => socket && socket.close());
+    if (permissions.viewServerConsole) {
+      socket.on("status", ({ running }) => setRunning(running));
+      socket.on("console", ({ logs }) => setLogs(v => v.concat(logs)));
+    } else {
+      setLogs(["No logs :("]);
+    }
+  }, [data]);
 
-        socket.on("status", e => {
-          setRunning(e.running);
-        });
-
-        socket.on("console", e => {
-          setLogs(logs => logs.concat(e.logs));
-        });
-      } else {
-        setLogs(["No logs :("]);
-      }
-    });
-  }, []);
+  const sendServerConsole = data ? data.permissions.sendServerConsole : false;
 
   const handleErr = (err: any) =>
     console.warn("An unexpected error occured: ", err);
@@ -70,8 +63,8 @@ const ConsoleView = () => {
       return;
     }
 
-    control.actions
-      .execute(id as string, command)
+    data!.server.actions
+      .execute(command)
       .catch(handleErr)
       .finally(clearCommand);
   };
@@ -121,7 +114,7 @@ const ConsoleView = () => {
           </ScrollView>
         </ScrollView>
 
-        {sendConsolePerms && (
+        {sendServerConsole && (
           <TextInput
             label={running ? "Enter command..." : "Server offline"}
             mode="outlined"

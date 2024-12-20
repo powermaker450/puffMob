@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import PufferpanelSocket from "./PufferpanelSocket";
+
 export interface DaemonFeatures {
   features: string[];
 }
@@ -247,9 +249,12 @@ export interface ModelsServerView {
     data: () => Promise<ServerDataResponse>;
     file: (filename?: string) => Promise<MessagesFileDesc[]>;
     stats: () => Promise<PufferpanelServerStats>;
+    users: () => Promise<PermissionsUpdate[]>;
+    oauth2: () => Promise<ModelsClient[]>;
   };
   create: {
     serverUser: (email: string, perms: NewServerUser) => Promise<void>;
+    oauth2: (client: NewClient) => Promise<ModelsCreatedClient>;
   };
   actions: {
     kill: () => Promise<void>;
@@ -270,6 +275,7 @@ export interface ModelsServerView {
     file: (filename: string) => Promise<void>;
     serverUser: (email: string) => Promise<void>;
   };
+  socket: PufferpanelSocket;
 }
 
 export interface ModelsSettingResponse {

@@ -18,7 +18,7 @@
 
 import CustomView from "@/components/CustomView";
 import OAuthClient from "@/components/server/OAuthClient";
-import Panel from "@/util/Panel";
+import { useServer } from "@/contexts/ServerProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsClient } from "@/util/models";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
@@ -28,17 +28,22 @@ import { Appbar, FAB, Text } from "react-native-paper";
 
 export default function oauth() {
   const { id } = useLocalSearchParams();
-  const control = Panel.getPanel();
+  const { data } = useServer();
   const navigation = useNavigation();
 
   const [clients, setClients] = useState<ModelsClient[]>([]);
   const [refresh, setRefresh] = useState(0);
   const execRefresh = () => setRefresh(Math.random());
-  navigation.addListener("focus", execRefresh);
+  useEffect(() => navigation.addListener("focus", execRefresh), []);
 
   useEffect(() => {
-    control.get
-      .serverOauth2(id as string)
+    if (!data) {
+      return;
+    }
+    const { server } = data;
+
+    server.get
+      .oauth2()
       .then(serverClients => setClients(serverClients))
       .catch(console.error);
   }, [refresh]);

@@ -17,7 +17,7 @@
  */
 
 import User from "@/components/settings/User";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsPermissionView, ModelsUserSearchResponse } from "@/util/models";
 import { router } from "expo-router";
@@ -26,7 +26,7 @@ import { ScrollView } from "react-native";
 import { Appbar, FAB } from "react-native-paper";
 
 export default function users() {
-  const control = Panel.getPanel();
+  const { panel } = usePanel();
   const [userList, setUserList] = useState<ModelsPermissionView[]>([]);
   const grabUsers = ({ users }: ModelsUserSearchResponse) => setUserList(users);
 
@@ -44,8 +44,8 @@ export default function users() {
   };
 
   useEffect(() => {
-    control.get.users().then(grabUsers).catch(console.error);
-  });
+    panel.get.users().then(grabUsers).catch(console.error);
+  }, []);
 
   const goToAdd = () => {
     haptic("contextClick");

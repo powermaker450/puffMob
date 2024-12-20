@@ -16,26 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel from "@/util/Panel";
+import { useServer } from "@/contexts/ServerProvider";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { List, useTheme } from "react-native-paper";
+import { List } from "react-native-paper";
 
 const ServerManagePage = () => {
   const { id } = useLocalSearchParams();
-  const theme = useTheme();
-
-  const panel = Panel.getPanel();
-  const [editPerms, setEditPerms] = useState(false);
-  const [userPerms, setUserPerms] = useState(false);
-
-  useEffect(() => {
-    panel.get.server(id as string).then(({ permissions }) => {
-      setEditPerms(permissions.editServerData);
-      setUserPerms(permissions.editServerUsers);
-    });
-  }, []);
+  const { data } = useServer();
 
   return (
     <ScrollView contentContainerStyle={{ justifyContent: "center" }}>
@@ -43,7 +31,11 @@ const ServerManagePage = () => {
         title="Config"
         description="Edit the config for your server"
         onPress={() => router.navigate(`/server/${id}/config`)}
-        style={{ display: editPerms ? "flex" : "none" }}
+        style={{
+          display: (data ? data.permissions.editServerData : false)
+            ? "flex"
+            : "none"
+        }}
         left={() => <List.Icon icon="file-code" style={{ marginLeft: 15 }} />}
       />
 
@@ -51,7 +43,11 @@ const ServerManagePage = () => {
         title="Users"
         description="Manage users access to the server"
         onPress={() => router.navigate(`/server/${id}/users`)}
-        style={{ display: userPerms ? "flex" : "none" }}
+        style={{
+          display: (data ? data.permissions.editServerUsers : false)
+            ? "flex"
+            : "none"
+        }}
         left={() => (
           <List.Icon icon="account-multiple-plus" style={{ marginLeft: 15 }} />
         )}

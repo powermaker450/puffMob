@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import CustomView from "@/components/CustomView";
 import NavBar from "@/components/NavBar";
 import ServerPage from "@/components/server/ServerPage";
 import SettingsPage from "@/components/SettingsPage";
-import Panel from "@/util/Panel";
+import { usePanel } from "@/contexts/PanelProvider";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, BottomNavigation, Text } from "react-native-paper";
+import { BottomNavigation } from "react-native-paper";
 
 interface NavigationRoute {
   key: "servers" | "nodes" | "users" | "templates" | "settings";
@@ -37,40 +36,25 @@ const mainRoute: NavigationRoute = {
 };
 
 export default function home() {
-  const [loading, setLoading] = useState(true);
-  const loadingScreen = (
-    <CustomView>
-      <ActivityIndicator animating={loading} size="large" />
-
-      <Text variant="bodyLarge" style={{ margin: 30 }}>
-        Checking permissions...
-      </Text>
-    </CustomView>
-  );
+  const { scopes } = usePanel();
 
   const [routes, setRoutes] = useState<NavigationRoute[]>([mainRoute]);
 
   useEffect(() => {
-    const panel = Panel.getPanel();
-    panel.getScopes().then(scopes => {
-      let newRoutes: NavigationRoute[] = [mainRoute];
+    let newRoutes: NavigationRoute[] = [mainRoute];
 
-      for (const scope of scopes) {
-        switch (scope) {
-          case "servers.view":
-            newRoutes.unshift({
-              key: "servers",
-              title: "Servers",
-              focusedIcon: "server"
-            });
-          default: {
-          }
-        }
+    for (const scope of scopes) {
+      switch (scope) {
+        case "servers.view":
+          newRoutes.unshift({
+            key: "servers",
+            title: "Servers",
+            focusedIcon: "server"
+          });
       }
+    }
 
-      setRoutes(newRoutes);
-      setLoading(false);
-    });
+    setRoutes(newRoutes);
   }, []);
 
   const renderScene = BottomNavigation.SceneMap({
@@ -78,13 +62,5 @@ export default function home() {
     settings: SettingsPage
   });
 
-  return (
-    <>
-      {loading ? (
-        loadingScreen
-      ) : (
-        <NavBar routes={routes} renderScene={renderScene} />
-      )}
-    </>
-  );
+  return <NavBar routes={routes} renderScene={renderScene} />;
 }

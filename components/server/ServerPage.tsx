@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Panel, { PanelParams } from "@/util/Panel";
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
 import { router, useNavigation } from "expo-router";
@@ -25,11 +24,11 @@ import { ScrollView, View } from "react-native";
 import { ActivityIndicator, Appbar, Button, Text } from "react-native-paper";
 import Server from "../Server";
 import CustomView from "../CustomView";
+import { usePanel } from "@/contexts/PanelProvider";
 
 export default function ServerPage() {
-  let settings: PanelParams = storage.getString("settings")
-    ? JSON.parse(storage.getString("settings")!)
-    : null;
+  const { panel, config } = usePanel();
+  const navigation = useNavigation();
 
   const [error, setError] = useState(false);
   const serverCache: ModelsServerView[] = storage.getString("cachedServerList")
@@ -37,15 +36,8 @@ export default function ServerPage() {
     : [];
   const [serverList, setServerList] = useState<ModelsServerView[]>(serverCache);
   const [loading, setLoading] = useState(true);
-  const [name, setName] = useState("");
 
-  let panel: Panel;
-  if (settings) {
-    panel = new Panel(settings);
-  }
-
-  const navigation = useNavigation();
-  useEffect(() => {
+  const refreshServerList = () =>
     panel.get
       .servers()
       .then(({ servers }) => {
@@ -53,25 +45,15 @@ export default function ServerPage() {
         setServerList(servers);
         setLoading(false);
       })
-      .catch(() => setError(true));
-
-    panel.get.config().then(({ branding }) => setName(branding.name));
-  }, []);
+      .catch(err => {
+        console.error(err);
+        setError(true);
+      });
 
   useEffect(() => {
-    navigation.addListener("focus", () => {
-      panel.get
-        .servers()
-        .then(({ servers }) => {
-          storage.set("cachedServerList", JSON.stringify(servers));
-          setServerList(servers);
-          setLoading(false);
-        })
-        .catch(() => setError(true));
-
-      panel.get.config().then(({ branding }) => setName(branding.name));
-    });
-  }, [navigation]);
+    refreshServerList();
+    navigation.addListener("focus", refreshServerList);
+  }, []);
 
   const errorScreen = (
     <CustomView>
@@ -131,7 +113,7 @@ export default function ServerPage() {
   return (
     <>
       <Appbar.Header>
-        <Appbar.Content title={name} />
+        <Appbar.Content title={config.branding.name} />
       </Appbar.Header>
 
       {error ? errorScreen : normalView}
