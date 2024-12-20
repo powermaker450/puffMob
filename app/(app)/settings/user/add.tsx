@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Notice from "@/components/Notice";
+import { useNotice } from "@/contexts/NoticeProvider";
 import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { NewUser, PufferpanelError } from "@/util/models";
@@ -35,21 +35,11 @@ import {
 export default function add() {
   const theme = useTheme();
   const { panel } = usePanel();
+  const notice = useNotice();
 
   const [updating, setUpdating] = useState(false);
   const startUpdating = () => setUpdating(true);
   const stopUpdating = () => setUpdating(false);
-
-  const [notice, setNotice] = useState(false);
-  const [noticeText, setNoticeText] = useState("");
-  const showErr = (err: string) => {
-    setNoticeText(err);
-    setNotice(true);
-    setTimeout(() => {
-      setNoticeText("");
-      setNotice(false);
-    }, 2000);
-  };
 
   const [newUser, setNewUser] = useState<NewUser>({
     username: "",
@@ -166,7 +156,7 @@ export default function add() {
   };
 
   const handleSuccess = () => {
-    haptic("notificationSuccess");
+    notice.show(`${newUser.username} created!`);
     router.back();
   };
 
@@ -174,7 +164,7 @@ export default function add() {
     const { error }: PufferpanelError = err;
     console.log(err);
     haptic("notificationError");
-    showErr(error.msg);
+    notice.error(error.msg ?? `${error}`);
   };
 
   const handleAddUser = () => {
@@ -399,8 +389,6 @@ export default function add() {
         style={styles.fab}
         onPress={handleAddUser}
       />
-
-      <Notice condition={notice} setCondition={setNotice} text={noticeText} />
     </>
   );
 }

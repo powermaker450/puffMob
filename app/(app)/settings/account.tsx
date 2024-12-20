@@ -35,12 +35,13 @@ import { useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
 import { PanelParams, UpdateUserParams } from "@/util/Panel";
 import UnsavedChanges from "@/components/UnsavedChanges";
-import Notice from "@/components/Notice";
 import { usePanel } from "@/contexts/PanelProvider";
+import { useNotice } from "@/contexts/NoticeProvider";
 
 export default function account() {
   const { panel, logout, settings, applyEmail, username, applyUsername } =
     usePanel();
+  const notice = useNotice();
 
   const theme = useTheme();
 
@@ -56,18 +57,6 @@ export default function account() {
   };
 
   const [logoutSplash, setLogoutSplash] = useState(false);
-  const [notice, setNotice] = useState(false);
-  const [noticeText, setNoticeText] = useState("");
-  const showNotice = (error?: boolean) => {
-    setNotice(true);
-    setNoticeText(error ? "Incorrect password." : "Saved!");
-    !notice &&
-      setTimeout(() => {
-        setNotice(false);
-        setNoticeText("");
-      }, 2000);
-  };
-
   const [loading, setLoading] = useState(false);
 
   const [newUsername, setNewUsername] = useState(username);
@@ -96,8 +85,7 @@ export default function account() {
     panel.edit
       .self(obj)
       .then(() => {
-        showNotice();
-        haptic("notificationSuccess");
+        notice.show("Saved!");
 
         if (newUsername !== username && newEmail !== settings.email) {
           applyUsername(newUsername);
@@ -119,7 +107,7 @@ export default function account() {
         setPassword("");
       })
       .catch(() => {
-        showNotice(true);
+        notice.error("Incorrect password.");
         haptic("notificationError");
       })
       .finally(() => setLoading(false));
@@ -238,8 +226,6 @@ export default function account() {
           </Button>
         </ButtonContainer>
       </CustomView>
-
-      <Notice condition={notice} setCondition={setNotice} text={noticeText} />
 
       <UnsavedChanges
         condition={username !== newUsername || settings.email !== newEmail}

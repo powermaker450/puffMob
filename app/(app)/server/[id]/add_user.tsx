@@ -17,7 +17,7 @@
  */
 
 import CustomView from "@/components/CustomView";
-import Notice from "@/components/Notice";
+import { useNotice } from "@/contexts/NoticeProvider";
 import { useServer } from "@/contexts/ServerProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { NewServerUser } from "@/util/models";
@@ -38,6 +38,8 @@ export default function addUser() {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
   const { data } = useServer();
+  const notice = useNotice();
+
   const [email, setEmail] = useState("");
   const changeEmail = (newEmail: string) => setEmail(newEmail);
 
@@ -54,8 +56,6 @@ export default function addUser() {
   const [editUsers, setEditUsers] = useState(false);
 
   const [loading, setLoading] = useState(false);
-
-  const [notice, setNotice] = useState(false);
 
   let newUser: NewServerUser;
 
@@ -102,10 +102,7 @@ export default function addUser() {
     server.get.users().then(users => {
       for (const user of users) {
         if (user.email === email) {
-          haptic("notificationError");
-
-          setNotice(true);
-          !notice && setTimeout(() => setNotice(false), 2000);
+          notice.show("That user already exists!", true);
 
           setLoading(false);
           return;
@@ -119,7 +116,10 @@ export default function addUser() {
           router.back();
         })
         .catch(() => haptic("notificationError"))
-        .finally(() => setLoading(false));
+        .finally(() => {
+          setLoading(false);
+          notice.show("User added!");
+        });
     });
   };
 
@@ -412,12 +412,6 @@ export default function addUser() {
           </List.Section>
         </View>
       </CustomView>
-
-      <Notice
-        condition={notice}
-        setCondition={setNotice}
-        text="That user already exists!"
-      />
     </>
   );
 }

@@ -22,6 +22,7 @@ import { View, useColorScheme } from "react-native";
 import { PanelProvider } from "@/contexts/PanelProvider";
 import RootNavigation from "@/components/RootNavigation";
 import { ServerProvider } from "@/contexts/ServerProvider";
+import { NoticeProvider } from "@/contexts/NoticeProvider";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -36,17 +37,19 @@ export default function RootLayout() {
     <PaperProvider theme={paperTheme}>
       <PanelProvider>
         <ServerProvider>
-          <View
-            style={{
-              flex: 1,
-              backgroundColor:
-                colorScheme === "dark"
-                  ? theme.dark.background
-                  : theme.light.background
-            }}
-          >
-            <RootNavigation />
-          </View>
+          <NoticeProvider>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor:
+                  colorScheme === "dark"
+                    ? theme.dark.background
+                    : theme.light.background
+              }}
+            >
+              <RootNavigation />
+            </View>
+          </NoticeProvider>
         </ServerProvider>
       </PanelProvider>
     </PaperProvider>

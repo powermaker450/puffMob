@@ -28,13 +28,13 @@ import {
   List,
   Modal,
   Portal,
-  Snackbar,
   Text,
   useTheme
 } from "react-native-paper";
 import Clipboard from "@react-native-clipboard/clipboard";
 import haptic, { handleTouch } from "@/util/haptic";
 import { usePanel } from "@/contexts/PanelProvider";
+import { useNotice } from "@/contexts/NoticeProvider";
 
 interface OAuthClientProps {
   client: ModelsClient;
@@ -44,6 +44,7 @@ interface OAuthClientProps {
 const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
   const theme = useTheme();
   const { panel } = usePanel();
+  const notice = useNotice();
 
   const [modal, setModal] = useState(false);
   const showModal = () => setModal(true);
@@ -59,13 +60,6 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
     setDialog(false);
     setUnderstood(false);
   };
-
-  const [notice, setNotice] = useState(false);
-  const showNotice = () => {
-    setNotice(true);
-    setTimeout(() => hideNotice(), 1500);
-  };
-  const hideNotice = () => setNotice(false);
 
   const [understood, setUnderstood] = useState(false);
   const toggleUnderstood = () => {
@@ -134,7 +128,6 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
   );
   const handleCopy = () => {
     haptic("rigid");
-    showNotice();
     Clipboard.setString(client.client_id);
   };
   const loadingText = <ActivityIndicator animating />;
@@ -147,12 +140,12 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
     panel.delete
       .oauth2(client.client_id)
       .then(() => {
-        haptic("notificationSuccess");
-        hideModal();
         refresh();
+        notice.show(`${client.name} deleted!`);
+        hideModal();
       })
       .catch(err => {
-        haptic("notificationError");
+        notice.error("An error occured.");
         console.error(err);
       })
       .finally(() => {
@@ -239,12 +232,6 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
             )}
           </Dialog.Actions>
         </Dialog>
-      </Portal>
-
-      <Portal>
-        <Snackbar style={styles.notice} visible={notice} onDismiss={hideNotice}>
-          Copied to clipboard!
-        </Snackbar>
       </Portal>
     </>
   );

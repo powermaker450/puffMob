@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useNotice } from "@/contexts/NoticeProvider";
 import { useServer } from "@/contexts/ServerProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { router } from "expo-router";
@@ -34,7 +35,8 @@ import {
 
 const NameTab = () => {
   const theme = useTheme();
-  const { data } = useServer();
+  const { data, setData } = useServer();
+  const notice = useNotice();
 
   const [running, setRunning] = useState(false);
 
@@ -47,28 +49,29 @@ const NameTab = () => {
       permissions
     } = data;
 
-    setServerName(name);
+    setNewName(name);
+
     permissions.viewServerConsole &&
       socket.on("status", e => setRunning(e.running));
   }, [data]);
 
   const startServer = data ? data.permissions.startServer : false;
   const stopServer = data ? data.permissions.stopServer : false;
+  const editServerData = data ? data.permissions.editServerData : false;
 
-  const [serverName, setServerName] = useState("");
   const [newName, setNewName] = useState("");
+  const nameNotChanged = data
+    ? newName === data.server.name || !newName.trim()
+    : true;
   const openNameChange = () => {
-    if (data ? data.permissions.editServerData : false) {
+    if (!editServerData) {
       return;
     }
 
     haptic();
     setVisible(true);
   };
-  const closeNameChange = () => {
-    setVisible(false);
-    setNewName(serverName);
-  };
+  const closeNameChange = () => setVisible(false);
 
   const [loading, setLoading] = useState(false);
   const startLoading = () => setLoading(true);
@@ -96,12 +99,15 @@ const NameTab = () => {
 
   const handleNameChange = () => {
     setNameUpdating(true);
+
     data!.server.edit
       .name(newName)
       .then(() => {
-        setServerName(newName);
+        setData(v =>
+          v ? { ...v, server: { ...v.server, name: newName } } : undefined
+        );
         setNewName(newName);
-        haptic("notificationSuccess");
+        notice.show("Name updated!");
       })
       .catch(handleErr)
       .finally(() => {
@@ -140,7 +146,7 @@ const NameTab = () => {
         icon="skull-outline"
         onPress={handleKill}
         onPressIn={handleTouch}
-        disabled={!(data ? data.permissions.stopServer : true)}
+        disabled={!stopServer}
       />
     </Tooltip>
   );
@@ -159,9 +165,9 @@ const NameTab = () => {
         />
         <Appbar.Content
           style={{ marginLeft: 10 }}
-          title={serverName}
+          title={data && data.server.name}
           onPress={openNameChange}
-          disabled={data ? data.permissions.editServerData : false}
+          disabled={!editServerData}
         />
 
         {loading ? loadingIcon : running ? stopButton : startButton}
@@ -191,9 +197,7 @@ const NameTab = () => {
               <Button
                 onPressIn={handleTouch}
                 onPress={handleNameChange}
-                disabled={newName === serverName || !newName.trim()}
-                mode="contained"
-                style={{ paddingLeft: 10, paddingRight: 10 }}
+                disabled={nameNotChanged}
               >
                 Save
               </Button>

@@ -17,7 +17,6 @@
  */
 
 import CustomView from "@/components/CustomView";
-import Notice from "@/components/Notice";
 import UnsavedChanges from "@/components/UnsavedChanges";
 import { UpdateServerParams } from "@/util/Panel";
 import haptic, { handleTouch } from "@/util/haptic";
@@ -36,28 +35,19 @@ import {
   TextInput
 } from "react-native-paper";
 import { usePanel } from "@/contexts/PanelProvider";
+import { useNotice } from "@/contexts/NoticeProvider";
 
 export default function panel_settings() {
   const { panel } = usePanel();
+  const notice = useNotice();
 
   const [urlLoad, setUrlLoad] = useState(true);
   const [nameLoad, setNameLoad] = useState(true);
   const [regLoad, setRegLoad] = useState(true);
 
   const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => setExpanded(expanded => !expanded);
-  const [noticeText, setNoticeText] = useState("");
-  const showNotice = (error?: boolean) => {
-    setNotice(true);
-    setNoticeText(error ? "Something went wrong." : "Saved!");
-    !notice &&
-      setTimeout(() => {
-        setNotice(false);
-        setNoticeText("");
-      }, 2000);
-  };
 
   // User Settings
   const [masterUrl, setMasterUrl] = useState("");
@@ -175,8 +165,7 @@ export default function panel_settings() {
     panel.edit
       .settings(obj)
       .then(() => {
-        showNotice();
-        haptic("notificationSuccess");
+        notice.show("Saved!");
 
         if (masterUrl !== newMasterUrl) {
           setMasterUrl(newMasterUrl);
@@ -194,10 +183,7 @@ export default function panel_settings() {
           setDefaultTheme(newDefaultTheme);
         }
       })
-      .catch(() => {
-        showNotice(true);
-        haptic("notificationError");
-      })
+      .catch(() => notice.error("An unknown error occured."))
       .finally(() => {
         setLoading(false);
         setExpanded(false);
@@ -321,8 +307,6 @@ export default function panel_settings() {
           )}
         </Surface>
       </CustomView>
-
-      <Notice condition={notice} setCondition={setNotice} text={noticeText} />
 
       <UnsavedChanges
         condition={

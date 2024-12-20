@@ -17,7 +17,7 @@
  */
 
 import ButtonContainer from "@/components/ButtonContainer";
-import Notice from "@/components/Notice";
+import { useNotice } from "@/contexts/NoticeProvider";
 import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsPermissionView } from "@/util/models";
@@ -41,8 +41,9 @@ export default function userById() {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
   const { panel } = usePanel();
-  const [header, setHeader] = useState("");
+  const notice = useNotice();
 
+  const [header, setHeader] = useState("");
   const [user, setUser] = useState<ModelsPermissionView>();
   const [newUser, setNewUser] = useState<ModelsPermissionView>(user!);
   const toggleAdmin = () => {
@@ -98,36 +99,21 @@ export default function userById() {
     setNewUser(v => ({ ...v, editUsers: !v.editUsers }));
   };
 
-  const [notice, setNotice] = useState(false);
-  const [noticeText, setNoticeText] = useState("");
-  const resetNotice = () => {
-    setNotice(false);
-    setNoticeText("");
-  };
   const detailsUpdateComplete = () => {
-    setNotice(true);
-    setNoticeText("Success!");
-    setTimeout(resetNotice, 2000);
-    haptic("notificationSuccess");
+    notice.show("Success!");
     setUser({ ...user!, email, username });
     setHeader(username);
   };
   const updateComplete = () => {
-    setNotice(true);
-    setNoticeText("Success!");
-    setTimeout(resetNotice, 2000);
-    haptic("notificationSuccess");
+    notice.show("Success!");
     setUser(newUser);
   };
   const deleteComplete = () => {
     router.back();
-    haptic("notificationSuccess");
+    notice.show(`${username || "User"} deleted!`);
   };
   const handleErr = (err: any) => {
-    setNotice(true);
-    setNoticeText(`Error: ${err}`);
-    setTimeout(resetNotice, 2000);
-    haptic("notificationError");
+    notice.error(`Error: ${err}`);
     console.error(err);
   };
 
@@ -501,8 +487,6 @@ export default function userById() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-
-      <Notice condition={notice} setCondition={setNotice} text={noticeText} />
     </>
   );
 }

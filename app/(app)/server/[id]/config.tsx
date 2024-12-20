@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Notice from "@/components/Notice";
 import VariableView from "@/components/server/VariableView";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ServerDataResponse } from "@/util/models";
@@ -34,15 +33,16 @@ import {
   useTheme
 } from "react-native-paper";
 import { useServer } from "@/contexts/ServerProvider";
+import { useNotice } from "@/contexts/NoticeProvider";
 
 export default function config() {
   const theme = useTheme();
   const navigation = useNavigation();
   const { data } = useServer();
+  const notice = useNotice();
+
   const [serverData, setServerData] = useState<ServerDataResponse>();
   const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState(false);
-  const [text, setText] = useState("");
 
   useEffect(() => {
     navigation.addListener("focus", () => {
@@ -66,22 +66,9 @@ export default function config() {
 
     server.edit
       .data(serverData!)
-      .then(() => {
-        setText("Configuration saved!");
-        haptic("notificationSuccess");
-      })
-      .catch(() => {
-        setText("An error occured.");
-        haptic("notificationError");
-      })
-      .finally(() => {
-        setLoading(false);
-        setNotice(true);
-        setTimeout(() => {
-          setNotice(false);
-          setText("");
-        }, 2000);
-      });
+      .then(() => notice.show("Configuration saved!"))
+      .catch(() => notice.error("An error occured."))
+      .finally(() => setLoading(false));
   };
 
   const handleInstall = () => {
@@ -94,14 +81,11 @@ export default function config() {
     server.actions
       .install()
       .then(() => {
-        haptic("notificationSuccess");
-        setText("Installed!");
-        setNotice(true);
+        notice.show("Server installed!");
         setInstalling(false);
         setDialog(false);
-        setTimeout(() => setNotice(false), 2000);
       })
-      .catch(console.error);
+      .catch(notice.error);
   };
 
   const [dialog, setDialog] = useState(false);
@@ -173,8 +157,6 @@ export default function config() {
         style={{ position: "absolute", bottom: 15, right: 15 }}
         onPress={updateData}
       />
-
-      <Notice condition={notice} setCondition={setNotice} text={text} />
     </>
   );
 }

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useNotice } from "@/contexts/NoticeProvider";
 import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { PermissionsUpdate } from "@/util/models";
@@ -41,6 +42,8 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
   const { panel } = usePanel();
+  const notice = useNotice();
+
   let updatedUser = user;
 
   const [editServer, setEditServer] = useState(false);
@@ -106,7 +109,7 @@ const ManageUser = ({ user, setRemoved }: ManageUserProps) => {
       .serverUser(user.serverIdentifier, user.email)
       .then(() => {
         setRemoved(Math.random());
-        haptic("notificationSuccess");
+        notice.show(`${user.username} removed!`);
       })
       .catch(() => haptic("notificationError"))
       .finally(() => setLoading(false));
