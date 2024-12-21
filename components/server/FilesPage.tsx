@@ -43,11 +43,14 @@ import {
 } from "expo-file-system";
 import invalidChars from "@/util/invalidChars";
 import { usePanel } from "@/contexts/PanelProvider";
+import { getDocumentAsync } from "expo-document-picker";
+import { useNotice } from "@/contexts/NoticeProvider";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const { settings, panel } = usePanel();
+  const notice = useNotice();
 
   const [overrideUrl, setOverrideUrl] = useState(
     storage.getString(id + "_overrideUrl") || ""
@@ -150,6 +153,46 @@ const FilesPage = () => {
     }
   };
 
+  const handleFileUpload = () =>
+    getDocumentAsync()
+      .then(result => {
+        console.log(result);
+        if (!client || result.canceled) {
+          return;
+        }
+
+        const remoteLocation = expandPath(pathList);
+
+        client
+          .sftpUpload(
+            result.assets[0].uri.replace("file://", ""),
+            remoteLocation
+          )
+          .then(() => {
+            const path = result.assets[0].uri.split("/");
+            const oldFileName = path[path.length - 1];
+            const newFileName = result.assets[0].name;
+
+            client
+              .sftpRename(
+                remoteLocation + oldFileName,
+                remoteLocation + newFileName
+              )
+              .then(() => {
+                notice.show("File upload completed!");
+                setRetry(Math.random());
+                deleteAsync(result.assets[0].uri).catch(console.error);
+              })
+              .catch(console.error);
+          })
+          .catch(err => {
+            notice.error("An unknown error occured.");
+            console.error(err);
+          })
+          .finally(toggleFab);
+      })
+      .catch(console.error);
+
   const createFileDialog = (
     <Dialog visible={createDiag} onDismiss={closeCreateDiag}>
       <Dialog.Title>Create {fileType}</Dialog.Title>
@@ -178,6 +221,11 @@ const FilesPage = () => {
       visible={!loading && !error}
       icon={open ? "file-question" : "plus"}
       actions={[
+        {
+          icon: "file-upload",
+          label: "Upload File",
+          onPress: handleFileUpload
+        },
         {
           icon: "file",
           label: "Create File",
