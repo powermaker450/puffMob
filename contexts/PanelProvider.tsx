@@ -135,7 +135,7 @@ export const PanelProvider = ({ children }: PanelProviderProps) => {
   }
 
   useEffect(() => {
-    if (!token) {
+    if (!token || loggedIn) {
       return;
     }
 

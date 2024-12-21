@@ -58,11 +58,6 @@ interface PanelData {
 export default class Panel {
   private readonly settings: PanelParams;
   private token: string;
-  private readonly defaultHeaders: {
-    Accept: "application/json";
-    Authorization: `Bearer ${string}`;
-    "User-Agent": "puffMob/0.2.0";
-  };
 
   private readonly api: string;
   private readonly daemon: string;
@@ -70,11 +65,6 @@ export default class Panel {
   constructor({ settings, token }: PanelData) {
     this.settings = settings;
     this.token = token;
-    this.defaultHeaders = {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-      "User-Agent": "puffMob/0.2.0"
-    };
 
     this.api = settings.serverUrl + "/api";
     this.daemon = settings.serverUrl + "/proxy/daemon";
@@ -121,6 +111,18 @@ export default class Panel {
     return (await res.json()) as ConfigResponse;
   }
 
+  private getDefaultHeaders(): {
+    Accept: "application/json";
+    Authorization: `Bearer ${string}`;
+    "User-Agent": "puffMob/0.2.0";
+  } {
+    return {
+      Accept: "application/json",
+      Authorization: `Bearer ${this.token}`,
+      "User-Agent": "puffMob/0.2.0"
+    };
+  }
+
   private async handleResponse(
     res: Response,
     req: Function, // TODO: Definitely find a better way to type this
@@ -160,7 +162,7 @@ export default class Panel {
     nodes: async (): Promise<ModelsNodeView[]> => {
       try {
         const res = await fetch(`${this.api}/nodes`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -182,7 +184,7 @@ export default class Panel {
     node: async (id: string): Promise<ModelsNodeView> => {
       try {
         const res = await fetch(`${this.api}/nodes/${id}`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -199,7 +201,7 @@ export default class Panel {
     nodeDeployment: async (id: string): Promise<ModelsDeployment> => {
       try {
         const res = await fetch(`${this.api}/nodes/${id}/deployment`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -221,7 +223,7 @@ export default class Panel {
     self: async (): Promise<ModelsUserView> => {
       try {
         const res = await fetch(`${this.api}/self`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -242,7 +244,7 @@ export default class Panel {
     selfOauth2: async (): Promise<ModelsClient[]> => {
       try {
         const res = await fetch(`${this.api}/self/oauth2`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -263,92 +265,101 @@ export default class Panel {
      */
     servers:
       async (/*{ username, node, name, limit, page }: ServerSearchParams*/): Promise<ModelsServerSearchResponse> => {
-        try {
-          const res = await fetch(`${this.api}/servers`, {
-            headers: this.defaultHeaders
-          });
+        let res = await fetch(`${this.api}/servers`, {
+          headers: this.getDefaultHeaders()
+        });
 
-          const data = (await this.handleResponse(
-            res,
-            this.get.servers
-          )) as ModelsServerSearchResponse;
-
-          for (const server of data.servers) {
-            server.running = await this.get
-              .serverStatus(server.id)
-              .then(({ running }) => running);
-
-            server.create = {
-              serverUser: async (
-                email: string,
-                perms: NewServerUser
-              ): Promise<void> =>
-                await this.create.serverUser(server.id, email, perms),
-              oauth2: async (client: NewClient): Promise<ModelsCreatedClient> =>
-                await this.create.serverOauth2(server.id, client)
-            };
-
-            server.actions = {
-              execute: async (command: string): Promise<void> =>
-                await this.actions.execute(server.id, command),
-              kill: async (): Promise<void> =>
-                await this.actions.kill(server.id),
-              start: async (): Promise<void> =>
-                await this.actions.start(server.id),
-              stop: async (): Promise<void> =>
-                await this.actions.stop(server.id),
-              extract: async (filename: string): Promise<void> =>
-                await this.get.extract(server.id, filename),
-              install: async (): Promise<void> =>
-                await this.actions.install(server.id)
-            };
-
-            server.edit = {
-              name: async (newName: string): Promise<void> =>
-                await this.edit.serverName(server.id, newName),
-              user: async (
-                email: string,
-                perms: PermissionsUpdate
-              ): Promise<void> =>
-                await this.edit.serverUser(server.id, email, perms),
-              data: async (serverData: ServerDataResponse): Promise<void> =>
-                await this.edit.serverData(server.id, serverData)
-            };
-
-            server.get = {
-              // TODO: Until I find a way to use the color codes, they will be killed
-              // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
-              console: async (): Promise<PufferpanelServerLogs> =>
-                await this.get.console(server.id),
-              data: async (): Promise<ServerDataResponse> =>
-                await this.get.data(server.id),
-              file: async (filename?: string): Promise<MessagesFileDesc[]> =>
-                await this.get.file(server.id, filename),
-              stats: async (): Promise<PufferpanelServerStats> =>
-                await this.get.stats(server.id),
-              users: async (): Promise<PermissionsUpdate[]> =>
-                await this.get.serverUsers(server.id),
-              oauth2: async (): Promise<ModelsClient[]> =>
-                await this.get.serverOauth2(server.id)
-            };
-
-            server.delete = {
-              oauth2: async (clientId: string): Promise<void> =>
-                await this.delete.serverOauth2(server.id, clientId),
-              user: async (userId: string): Promise<void> =>
-                await this.delete.serverUser(server.id, userId),
-              file: async (filename: string): Promise<void> =>
-                await this.delete.file(server.id, filename),
-              serverUser: async (email: string): Promise<void> =>
-                await this.delete.serverUser(server.id, email)
-            };
+        if (res.status === 401) {
+          try {
+            const { session } = await Panel.login(this.settings);
+            storage.set("cachedToken", session);
+            this.token = session;
+            res = await fetch(`${this.api}/servers`, {
+              headers: this.getDefaultHeaders()
+            });
+          } catch {
+            throw new Error(
+              `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`
+            );
           }
-
-          return data;
-        } catch (err) {
-          console.warn("An unexpected error occured:", err);
-          throw err;
         }
+
+        if (res.status === 404) {
+          throw new Error("Resource wasn't found.");
+        }
+
+        const data = (await res.json()) as ModelsServerSearchResponse;
+
+        for (const server of data.servers) {
+          server.running = await this.get
+            .serverStatus(server.id)
+            .then(({ running }) => running);
+
+          server.create = {
+            serverUser: async (
+              email: string,
+              perms: NewServerUser
+            ): Promise<void> =>
+              await this.create.serverUser(server.id, email, perms),
+            oauth2: async (client: NewClient): Promise<ModelsCreatedClient> =>
+              await this.create.serverOauth2(server.id, client)
+          };
+
+          server.actions = {
+            execute: async (command: string): Promise<void> =>
+              await this.actions.execute(server.id, command),
+            kill: async (): Promise<void> => await this.actions.kill(server.id),
+            start: async (): Promise<void> =>
+              await this.actions.start(server.id),
+            stop: async (): Promise<void> => await this.actions.stop(server.id),
+            extract: async (filename: string): Promise<void> =>
+              await this.get.extract(server.id, filename),
+            install: async (): Promise<void> =>
+              await this.actions.install(server.id)
+          };
+
+          server.edit = {
+            name: async (newName: string): Promise<void> =>
+              await this.edit.serverName(server.id, newName),
+            user: async (
+              email: string,
+              perms: PermissionsUpdate
+            ): Promise<void> =>
+              await this.edit.serverUser(server.id, email, perms),
+            data: async (serverData: ServerDataResponse): Promise<void> =>
+              await this.edit.serverData(server.id, serverData)
+          };
+
+          server.get = {
+            // TODO: Until I find a way to use the color codes, they will be killed
+            // https://stackoverflow.com/questions/7149601/how-to-remove-replace-ansi-color-codes-from-a-string-in-javascript
+            console: async (): Promise<PufferpanelServerLogs> =>
+              await this.get.console(server.id),
+            data: async (): Promise<ServerDataResponse> =>
+              await this.get.data(server.id),
+            file: async (filename?: string): Promise<MessagesFileDesc[]> =>
+              await this.get.file(server.id, filename),
+            stats: async (): Promise<PufferpanelServerStats> =>
+              await this.get.stats(server.id),
+            users: async (): Promise<PermissionsUpdate[]> =>
+              await this.get.serverUsers(server.id),
+            oauth2: async (): Promise<ModelsClient[]> =>
+              await this.get.serverOauth2(server.id)
+          };
+
+          server.delete = {
+            oauth2: async (clientId: string): Promise<void> =>
+              await this.delete.serverOauth2(server.id, clientId),
+            user: async (userId: string): Promise<void> =>
+              await this.delete.serverUser(server.id, userId),
+            file: async (filename: string): Promise<void> =>
+              await this.delete.file(server.id, filename),
+            serverUser: async (email: string): Promise<void> =>
+              await this.delete.serverUser(server.id, email)
+          };
+        }
+
+        return data;
       },
 
     /**
@@ -361,7 +372,7 @@ export default class Panel {
       try {
         // Perms is a constant parameter because without it `permissions` is null
         const res = await fetch(`${this.api}/servers/${id}?perms`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         const data = (await this.handleResponse(
@@ -455,7 +466,7 @@ export default class Panel {
     serverOauth2: async (id: string): Promise<ModelsClient[]> => {
       try {
         const res = await fetch(`${this.api}/servers/${id}/oauth2`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -478,7 +489,7 @@ export default class Panel {
     serverUsers: async (id: string): Promise<PermissionsUpdate[]> => {
       try {
         const res = await fetch(`${this.api}/servers/${id}/user`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -502,7 +513,7 @@ export default class Panel {
     serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
       try {
         const res = await fetch(`${this.daemon}/server/${id}/status`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -524,7 +535,7 @@ export default class Panel {
     setting: async (key: string): Promise<ModelsChangeUserSetting> => {
       try {
         const res = await fetch(`${this.api}/settings/${key}`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -546,7 +557,7 @@ export default class Panel {
     templates: async (): Promise<ModelsTemplate[]> => {
       try {
         const res = await fetch(`${this.api}/templates`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -567,7 +578,7 @@ export default class Panel {
     settings: async (): Promise<ModelsUserSettingView[]> => {
       try {
         const res = await fetch(`${this.api}/userSettings`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -590,7 +601,7 @@ export default class Panel {
       setting: PanelSetting
     ): Promise<PanelSettingResponse> => {
       const res = await fetch(`${this.api}/settings/${setting}`, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
 
       return (await this.handleResponse(
@@ -605,7 +616,7 @@ export default class Panel {
     // users: async (): Promise<ModelsUserSearchResponse> => {
     //   try {
     //     const res = await fetch(`${this.api}/users`, {
-    //       headers: this.defaultHeaders
+    //       headers: this.getDefaultHeaders()
     //     });
     //
     //     return (await this.handleResponse(
@@ -627,7 +638,7 @@ export default class Panel {
     user: async (id: string): Promise<ModelsUserView> => {
       try {
         const res = await fetch(`${this.api}/users/${id}`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -648,7 +659,7 @@ export default class Panel {
      */
     users: async (): Promise<ModelsUserSearchResponse> => {
       const res = await fetch(`${this.api}/users`, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
 
       return (await this.handleResponse(
@@ -666,7 +677,7 @@ export default class Panel {
     userPerms: async (id: string): Promise<ModelsPermissionView> => {
       try {
         const res = await fetch(`${this.api}/users/${id}/perms`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -687,7 +698,7 @@ export default class Panel {
      */
     daemon: async (): Promise<PufferpanelDaemonRunning> => {
       const res = await fetch(this.daemon, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
 
       return (await this.handleResponse(
@@ -704,7 +715,7 @@ export default class Panel {
     config: async (): Promise<ConfigResponse> => {
       try {
         const res = await fetch(`${this.api}/config`, {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -725,7 +736,7 @@ export default class Panel {
      */
     console: async (serverId: string): Promise<PufferpanelServerLogs> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/console`, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
 
       return (await this.handleResponse(
@@ -743,7 +754,7 @@ export default class Panel {
      */
     data: async (serverId: string): Promise<ServerDataResponse> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/data`, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
 
       return (await this.handleResponse(
@@ -761,7 +772,7 @@ export default class Panel {
      */
     extract: async (serverId: string, filename: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/extract/${filename}`, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -778,7 +789,7 @@ export default class Panel {
       const res = await fetch(
         `${this.daemon}/server/${serverId}/file/${filename}`,
         {
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         }
       );
 
@@ -799,7 +810,7 @@ export default class Panel {
      */
     stats: async (serverId: string): Promise<PufferpanelServerStats> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/stats`, {
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
 
       return (await this.handleResponse(
@@ -821,7 +832,7 @@ export default class Panel {
       try {
         const res = await fetch(`${this.api}/nodes`, {
           method: MethodOpts.post,
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         });
 
         return (await this.handleResponse(
@@ -841,7 +852,7 @@ export default class Panel {
       try {
         const res = await fetch(`${this.api}/self/oauth2`, {
           method: MethodOpts.post,
-          headers: this.defaultHeaders,
+          headers: this.getDefaultHeaders(),
           body: JSON.stringify(client)
         });
 
@@ -868,7 +879,7 @@ export default class Panel {
     ): Promise<ModelsCreatedClient> => {
       const res = await fetch(`${this.api}/servers/${serverId}/oauth2`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(client)
       });
 
@@ -903,7 +914,7 @@ export default class Panel {
     user: async (params: NewUser): Promise<void> => {
       const res = await fetch(`${this.api}/users`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(params)
       });
 
@@ -923,7 +934,7 @@ export default class Panel {
     ): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(perms)
       });
     }
@@ -944,7 +955,7 @@ export default class Panel {
         `${this.api}/servers/${serverId}/name/${encodeURIComponent(newName)}`,
         {
           method: MethodOpts.put,
-          headers: this.defaultHeaders
+          headers: this.getDefaultHeaders()
         }
       );
     },
@@ -957,7 +968,7 @@ export default class Panel {
     self: async (params: UpdateUserParams): Promise<void> => {
       const res = await fetch(`${this.api}/self`, {
         method: MethodOpts.put,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(params)
       });
 
@@ -977,7 +988,7 @@ export default class Panel {
     ): Promise<void> => {
       const res = await fetch(`${this.api}/users/${id}`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(params)
       });
 
@@ -999,7 +1010,7 @@ export default class Panel {
     ): Promise<void> => {
       const res = await fetch(`${this.api}/users/${id}/perms`, {
         method: MethodOpts.put,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(params)
       });
 
@@ -1018,7 +1029,7 @@ export default class Panel {
     settings: async (params: UpdateServerParams): Promise<void> => {
       const res = await fetch(`${this.api}/settings`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(params)
       });
 
@@ -1034,7 +1045,7 @@ export default class Panel {
     ): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}/user/${email}`, {
         method: MethodOpts.put,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(perms)
       });
     },
@@ -1045,7 +1056,7 @@ export default class Panel {
     ): Promise<void> => {
       const res = await fetch(`${this.daemon}/server/${serverId}/data`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: JSON.stringify(data)
       });
 
@@ -1067,7 +1078,7 @@ export default class Panel {
     node: async (nodeId: string): Promise<void> => {
       await fetch(`${this.api}/node/${nodeId}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1079,7 +1090,7 @@ export default class Panel {
     oauth2: async (clientId: string): Promise<void> => {
       await fetch(`${this.api}/self/oauth2/${clientId}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1091,7 +1102,7 @@ export default class Panel {
     server: async (serverId: string): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1104,7 +1115,7 @@ export default class Panel {
     serverOauth2: async (serverId: string, clientId: string): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}/oauth2/${clientId}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1117,7 +1128,7 @@ export default class Panel {
     serverUser: async (serverId: string, userEmail: string): Promise<void> => {
       await fetch(`${this.api}/servers/${serverId}/user/${userEmail}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1129,7 +1140,7 @@ export default class Panel {
     template: async (name: string): Promise<void> => {
       await fetch(`${this.api}/templates/${name}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1141,7 +1152,7 @@ export default class Panel {
     user: async (userId: string): Promise<void> => {
       await fetch(`${this.api}/users/${userId}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1153,7 +1164,7 @@ export default class Panel {
     serverByAdmin: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1166,7 +1177,7 @@ export default class Panel {
     file: async (serverId: string, filename: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/file/${filename}`, {
         method: MethodOpts.delete,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     }
   };
@@ -1184,7 +1195,7 @@ export default class Panel {
     execute: async (serverId: string, command: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/console`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders,
+        headers: this.getDefaultHeaders(),
         body: command
       });
     },
@@ -1197,7 +1208,7 @@ export default class Panel {
     kill: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/kill`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1209,7 +1220,7 @@ export default class Panel {
     start: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/start`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
@@ -1221,14 +1232,14 @@ export default class Panel {
     stop: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/stop`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     },
 
     install: async (serverId: string): Promise<void> => {
       await fetch(`${this.daemon}/server/${serverId}/install`, {
         method: MethodOpts.post,
-        headers: this.defaultHeaders
+        headers: this.getDefaultHeaders()
       });
     }
   };
