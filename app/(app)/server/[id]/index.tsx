@@ -48,11 +48,6 @@ export default function ServerScreen() {
 
   useEffect(() => {
     panel.get.server(id as string).then(setData);
-
-    navigation.addListener("beforeRemove", () => {
-      data && data.server.socket.close();
-      setData(undefined);
-    });
   }, []);
 
   useEffect(() => {
@@ -79,6 +74,8 @@ export default function ServerScreen() {
       });
 
     setRoutes(newRoutes);
+
+    navigation.addListener("beforeRemove", data.server.socket.close);
   }, [data]);
 
   return (
