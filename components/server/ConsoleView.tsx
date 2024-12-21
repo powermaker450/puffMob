@@ -53,7 +53,7 @@ const ConsoleView = () => {
     }
   }, [data]);
 
-  const sendServerConsole = data ? data.permissions.sendServerConsole : false;
+  const sendServerConsole = data?.permissions.sendServerConsole ?? false;
 
   const handleErr = (err: any) =>
     console.warn("An unexpected error occured: ", err);

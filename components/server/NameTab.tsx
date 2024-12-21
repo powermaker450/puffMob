@@ -55,9 +55,9 @@ const NameTab = () => {
       socket.on("status", e => setRunning(e.running));
   }, [data]);
 
-  const startServer = data ? data.permissions.startServer : false;
-  const stopServer = data ? data.permissions.stopServer : false;
-  const editServerData = data ? data.permissions.editServerData : false;
+  const startServer = data?.permissions.startServer ?? false;
+  const stopServer = data?.permissions.stopServer ?? false;
+  const editServerData = data?.permissions.editServerData ?? false;
 
   const [newName, setNewName] = useState("");
   const nameNotChanged = data
