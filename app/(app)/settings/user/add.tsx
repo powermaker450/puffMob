@@ -19,7 +19,7 @@
 import { useNotice } from "@/contexts/NoticeProvider";
 import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
-import { NewUser, PufferpanelError } from "@/util/models";
+import { NewUser, PufferpanelErrorResponse } from "@/util/models";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView } from "react-native";
@@ -161,7 +161,7 @@ export default function add() {
   };
 
   const handleErr = (err: any) => {
-    const { error }: PufferpanelError = err;
+    const { error }: PufferpanelErrorResponse = err;
     console.log(err);
     haptic("notificationError");
     notice.error(error.msg ?? `${error}`);

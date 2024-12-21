@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import PufferpanelError, { genericErr } from "./PufferpanelError";
 import PufferpanelSocket from "./PufferpanelSocket";
 import {
   ModelsChangeUserSetting,
@@ -37,7 +38,6 @@ import {
   ServerDataResponse,
   PufferpanelServerStats,
   MessagesFileDesc,
-  PufferpanelError,
   PufferpanelDaemonRunning,
   PermissionsUpdate,
   NewServerUser,
@@ -105,7 +105,7 @@ export default class Panel {
     const res = await fetch(`${serverName}/api/config`);
 
     if (!res.ok) {
-      throw await res.text().catch(() => "failed");
+      throw new Error(await res.text().catch(() => "failed"));
     }
 
     return (await res.json()) as ConfigResponse;
@@ -129,7 +129,7 @@ export default class Panel {
     ...args: any[] // :skull:
   ): Promise<unknown> {
     if (res.status === 400 || res.status === 500) {
-      throw (await res.json()) as PufferpanelError;
+      throw new PufferpanelError(await res.json().catch(genericErr));
     }
 
     if (res.status === 401) {
@@ -139,12 +139,14 @@ export default class Panel {
         this.token = session;
         return await req(...args);
       } catch {
-        throw `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`;
+        throw new Error(
+          `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`
+        );
       }
     }
 
     if (res.status === 404) {
-      throw "Resource wasn't found.";
+      throw new Error("Resource wasn't found.");
     }
 
     return await res.json();
@@ -160,19 +162,14 @@ export default class Panel {
      * @returns An array of nodes
      */
     nodes: async (): Promise<ModelsNodeView[]> => {
-      try {
-        const res = await fetch(`${this.api}/nodes`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/nodes`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.nodes
-        )) as ModelsNodeView[];
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.nodes
+      )) as ModelsNodeView[];
     },
 
     /**
@@ -182,37 +179,27 @@ export default class Panel {
      * @return The requested node associated with the node ID
      */
     node: async (id: string): Promise<ModelsNodeView> => {
-      try {
-        const res = await fetch(`${this.api}/nodes/${id}`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/nodes/${id}`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.node,
-          id
-        )) as ModelsNodeView;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.node,
+        id
+      )) as ModelsNodeView;
     },
 
     nodeDeployment: async (id: string): Promise<ModelsDeployment> => {
-      try {
-        const res = await fetch(`${this.api}/nodes/${id}/deployment`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/nodes/${id}/deployment`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.nodeDeployment,
-          id
-        )) as ModelsDeployment;
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.nodeDeployment,
+        id
+      )) as ModelsDeployment;
     },
 
     /**
@@ -221,19 +208,11 @@ export default class Panel {
      * @returns The email, ID, and username of the current user.
      */
     self: async (): Promise<ModelsUserView> => {
-      try {
-        const res = await fetch(`${this.api}/self`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/self`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.self
-        )) as ModelsUserView;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(res, this.get.self)) as ModelsUserView;
     },
 
     /**
@@ -242,19 +221,14 @@ export default class Panel {
      * @returns An array of OAUTH2 clients, with id, name and description
      */
     selfOauth2: async (): Promise<ModelsClient[]> => {
-      try {
-        const res = await fetch(`${this.api}/self/oauth2`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/self/oauth2`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.selfOauth2
-        )) as ModelsClient[];
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.selfOauth2
+      )) as ModelsClient[];
     },
 
     // TODO: Implement optional search parameters
@@ -270,14 +244,14 @@ export default class Panel {
         });
 
         if (res.status === 401) {
-          try {
-            const { session } = await Panel.login(this.settings);
-            storage.set("cachedToken", session);
-            this.token = session;
-            res = await fetch(`${this.api}/servers`, {
-              headers: this.getDefaultHeaders()
-            });
-          } catch {
+          const { session } = await Panel.login(this.settings);
+          storage.set("cachedToken", session);
+          this.token = session;
+          res = await fetch(`${this.api}/servers`, {
+            headers: this.getDefaultHeaders()
+          });
+
+          if (!res.ok) {
             throw new Error(
               `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`
             );
@@ -369,92 +343,99 @@ export default class Panel {
      * @return The server associated with the ID
      */
     server: async (id: string): Promise<ModelsGetServerResponse> => {
-      try {
-        // Perms is a constant parameter because without it `permissions` is null
-        const res = await fetch(`${this.api}/servers/${id}?perms`, {
+      // Perms is a constant parameter because without it `permissions` is null
+      let res = await fetch(`${this.api}/servers/${id}?perms`, {
+        headers: this.getDefaultHeaders()
+      });
+
+      if (res.status === 401) {
+        const { session } = await Panel.login(this.settings);
+        storage.set("cachedToken", session);
+        this.token = session;
+        res = await fetch(`${this.api}/servers`, {
           headers: this.getDefaultHeaders()
         });
 
-        const data = (await this.handleResponse(
-          res,
-          this.get.server,
-          id
-        )) as ModelsGetServerResponse;
-
-        data.server.running = await this.get
-          .serverStatus(id)
-          .then(({ running }) => running);
-
-        data.server.actions = {
-          execute: async (command: string): Promise<void> =>
-            await this.actions.execute(data.server.id, command),
-          kill: async (): Promise<void> =>
-            await this.actions.kill(data.server.id),
-          start: async (): Promise<void> =>
-            await this.actions.start(data.server.id),
-          stop: async (): Promise<void> =>
-            await this.actions.stop(data.server.id),
-          extract: async (filename: string): Promise<void> =>
-            await this.get.extract(data.server.id, filename),
-          install: async (): Promise<void> =>
-            await this.actions.install(data.server.id)
-        };
-
-        data.server.get = {
-          console: async (): Promise<PufferpanelServerLogs> =>
-            await this.get.console(data.server.id),
-          data: async (): Promise<ServerDataResponse> =>
-            await this.get.data(data.server.id),
-          file: async (filename?: string): Promise<MessagesFileDesc[]> =>
-            await this.get.file(data.server.id, filename),
-          stats: async (): Promise<PufferpanelServerStats> =>
-            await this.get.stats(data.server.id),
-          users: async (): Promise<PermissionsUpdate[]> =>
-            await this.get.serverUsers(data.server.id),
-          oauth2: async (): Promise<ModelsClient[]> =>
-            await this.get.serverOauth2(data.server.id)
-        };
-
-        data.server.create = {
-          serverUser: async (
-            email: string,
-            perms: NewServerUser
-          ): Promise<void> =>
-            await this.create.serverUser(data.server.id, email, perms),
-          oauth2: async (client: NewClient): Promise<ModelsCreatedClient> =>
-            await this.create.serverOauth2(data.server.id, client)
-        };
-
-        data.server.edit = {
-          name: async (newName: string): Promise<void> =>
-            await this.edit.serverName(data.server.id, newName),
-          user: async (
-            email: string,
-            perms: PermissionsUpdate
-          ): Promise<void> =>
-            await this.edit.serverUser(data.server.id, email, perms),
-          data: async (serverData: ServerDataResponse): Promise<void> =>
-            await this.edit.serverData(data.server.id, serverData)
-        };
-
-        data.server.delete = {
-          oauth2: async (clientId: string): Promise<void> =>
-            await this.delete.serverOauth2(data.server.id, clientId),
-          user: async (userId: string): Promise<void> =>
-            await this.delete.serverUser(data.server.id, userId),
-          file: async (filename: string): Promise<void> =>
-            await this.delete.file(data.server.id, filename),
-          serverUser: async (email: string): Promise<void> =>
-            await this.delete.serverUser(data.server.id, email)
-        };
-
-        data.server.socket = this.getSocket(data.server.id);
-
-        return data;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
+        if (!res.ok) {
+          throw new Error(
+            `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`
+          );
+        }
       }
+
+      if (res.status === 404) {
+        throw new Error("Resource wasn't found.");
+      }
+
+      const data = (await res.json()) as ModelsGetServerResponse;
+
+      data.server.running = await this.get
+        .serverStatus(id)
+        .then(({ running }) => running);
+
+      data.server.actions = {
+        execute: async (command: string): Promise<void> =>
+          await this.actions.execute(data.server.id, command),
+        kill: async (): Promise<void> =>
+          await this.actions.kill(data.server.id),
+        start: async (): Promise<void> =>
+          await this.actions.start(data.server.id),
+        stop: async (): Promise<void> =>
+          await this.actions.stop(data.server.id),
+        extract: async (filename: string): Promise<void> =>
+          await this.get.extract(data.server.id, filename),
+        install: async (): Promise<void> =>
+          await this.actions.install(data.server.id)
+      };
+
+      data.server.get = {
+        console: async (): Promise<PufferpanelServerLogs> =>
+          await this.get.console(data.server.id),
+        data: async (): Promise<ServerDataResponse> =>
+          await this.get.data(data.server.id),
+        file: async (filename?: string): Promise<MessagesFileDesc[]> =>
+          await this.get.file(data.server.id, filename),
+        stats: async (): Promise<PufferpanelServerStats> =>
+          await this.get.stats(data.server.id),
+        users: async (): Promise<PermissionsUpdate[]> =>
+          await this.get.serverUsers(data.server.id),
+        oauth2: async (): Promise<ModelsClient[]> =>
+          await this.get.serverOauth2(data.server.id)
+      };
+
+      data.server.create = {
+        serverUser: async (
+          email: string,
+          perms: NewServerUser
+        ): Promise<void> =>
+          await this.create.serverUser(data.server.id, email, perms),
+        oauth2: async (client: NewClient): Promise<ModelsCreatedClient> =>
+          await this.create.serverOauth2(data.server.id, client)
+      };
+
+      data.server.edit = {
+        name: async (newName: string): Promise<void> =>
+          await this.edit.serverName(data.server.id, newName),
+        user: async (email: string, perms: PermissionsUpdate): Promise<void> =>
+          await this.edit.serverUser(data.server.id, email, perms),
+        data: async (serverData: ServerDataResponse): Promise<void> =>
+          await this.edit.serverData(data.server.id, serverData)
+      };
+
+      data.server.delete = {
+        oauth2: async (clientId: string): Promise<void> =>
+          await this.delete.serverOauth2(data.server.id, clientId),
+        user: async (userId: string): Promise<void> =>
+          await this.delete.serverUser(data.server.id, userId),
+        file: async (filename: string): Promise<void> =>
+          await this.delete.file(data.server.id, filename),
+        serverUser: async (email: string): Promise<void> =>
+          await this.delete.serverUser(data.server.id, email)
+      };
+
+      data.server.socket = this.getSocket(data.server.id);
+
+      return data;
     },
 
     /**
@@ -464,20 +445,15 @@ export default class Panel {
      * @return An array of OAuth2 clients
      */
     serverOauth2: async (id: string): Promise<ModelsClient[]> => {
-      try {
-        const res = await fetch(`${this.api}/servers/${id}/oauth2`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/servers/${id}/oauth2`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.serverOauth2,
-          id
-        )) as ModelsClient[];
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.serverOauth2,
+        id
+      )) as ModelsClient[];
     },
 
     /**
@@ -487,20 +463,15 @@ export default class Panel {
      * @return An array of users and their permissions for this server
      */
     serverUsers: async (id: string): Promise<PermissionsUpdate[]> => {
-      try {
-        const res = await fetch(`${this.api}/servers/${id}/user`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/servers/${id}/user`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.serverUsers,
-          id
-        )) as PermissionsUpdate[];
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.serverUsers,
+        id
+      )) as PermissionsUpdate[];
     },
 
     /**
@@ -511,19 +482,15 @@ export default class Panel {
      * @returns An object with `running` as boolean
      */
     serverStatus: async (id: string): Promise<PufferpanelServerRunning> => {
-      try {
-        const res = await fetch(`${this.daemon}/server/${id}/status`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.daemon}/server/${id}/status`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.serverStatus,
-          id
-        )) as PufferpanelServerRunning;
-      } catch (err) {
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.serverStatus,
+        id
+      )) as PufferpanelServerRunning;
     },
 
     /**
@@ -533,20 +500,15 @@ export default class Panel {
      * @returns The value of the given setting
      */
     setting: async (key: string): Promise<ModelsChangeUserSetting> => {
-      try {
-        const res = await fetch(`${this.api}/settings/${key}`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/settings/${key}`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.setting,
-          key
-        )) as ModelsChangeUserSetting;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.setting,
+        key
+      )) as ModelsChangeUserSetting;
     },
 
     /**
@@ -555,19 +517,14 @@ export default class Panel {
      * @returns An array of available templates
      */
     templates: async (): Promise<ModelsTemplate[]> => {
-      try {
-        const res = await fetch(`${this.api}/templates`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/templates`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.templates
-        )) as ModelsTemplate[];
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.templates
+      )) as ModelsTemplate[];
     },
 
     /**
@@ -576,19 +533,14 @@ export default class Panel {
      * @returns An array of settings associated with the current user
      */
     settings: async (): Promise<ModelsUserSettingView[]> => {
-      try {
-        const res = await fetch(`${this.api}/userSettings`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/userSettings`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.settings
-        )) as ModelsUserSettingView[];
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.settings
+      )) as ModelsUserSettingView[];
     },
 
     /**
@@ -636,20 +588,15 @@ export default class Panel {
      * @returns Details associated with the given user ID
      */
     user: async (id: string): Promise<ModelsUserView> => {
-      try {
-        const res = await fetch(`${this.api}/users/${id}`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/users/${id}`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.user,
-          id
-        )) as ModelsUserView;
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.user,
+        id
+      )) as ModelsUserView;
     },
 
     /**
@@ -675,20 +622,15 @@ export default class Panel {
      * @returns An object containing the permissions the given user has
      */
     userPerms: async (id: string): Promise<ModelsPermissionView> => {
-      try {
-        const res = await fetch(`${this.api}/users/${id}/perms`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/users/${id}/perms`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.userPerms,
-          id
-        )) as ModelsPermissionView;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.userPerms,
+        id
+      )) as ModelsPermissionView;
     },
 
     /**
@@ -713,19 +655,14 @@ export default class Panel {
      * @returns An object containing the settings of the Pufferpanel Instance
      */
     config: async (): Promise<ConfigResponse> => {
-      try {
-        const res = await fetch(`${this.api}/config`, {
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/config`, {
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.get.config
-        )) as ConfigResponse;
-      } catch (err) {
-        console.warn("An unexpected error occured:", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.get.config
+      )) as ConfigResponse;
     },
 
     /**
@@ -829,41 +766,31 @@ export default class Panel {
      * Creates a new node.
      */
     node: async (): Promise<ModelsNodeView> => {
-      try {
-        const res = await fetch(`${this.api}/nodes`, {
-          method: MethodOpts.post,
-          headers: this.getDefaultHeaders()
-        });
+      const res = await fetch(`${this.api}/nodes`, {
+        method: MethodOpts.post,
+        headers: this.getDefaultHeaders()
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.create.node
-        )) as ModelsNodeView;
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.create.node
+      )) as ModelsNodeView;
     },
 
     /**
      * Creates a new user-scoped oauth2 client.
      */
     oauth2: async (client: NewClient): Promise<ModelsCreatedClient> => {
-      try {
-        const res = await fetch(`${this.api}/self/oauth2`, {
-          method: MethodOpts.post,
-          headers: this.getDefaultHeaders(),
-          body: JSON.stringify(client)
-        });
+      const res = await fetch(`${this.api}/self/oauth2`, {
+        method: MethodOpts.post,
+        headers: this.getDefaultHeaders(),
+        body: JSON.stringify(client)
+      });
 
-        return (await this.handleResponse(
-          res,
-          this.create.oauth2
-        )) as ModelsCreatedClient;
-      } catch (err) {
-        console.warn("An unexpected error occured", err);
-        throw err;
-      }
+      return (await this.handleResponse(
+        res,
+        this.create.oauth2
+      )) as ModelsCreatedClient;
     },
 
     /**
@@ -919,11 +846,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw res.status === 404
-          ? { error: { code: "NotFound", msg: "404 Not Found" } }
-          : await res
-              .json()
-              .catch(() => ({ error: { code: "ErrGeneric", msg: "" } }));
+        throw new PufferpanelError(await res.json().catch(genericErr));
       }
     },
 
@@ -973,7 +896,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw "Credentials invalid";
+        throw new PufferpanelError(await res.json().catch(genericErr));
       }
     },
 
@@ -993,9 +916,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw res.status === 404
-          ? "404 Not Found"
-          : await res.text().catch(() => "User not updated");
+        throw new PufferpanelError(await res.json().catch(genericErr));
       }
     },
 
@@ -1015,9 +936,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw res.status === 404
-          ? "404 Not Found"
-          : await res.text().catch(() => "User perms not updated.");
+        throw new PufferpanelError(await res.json().catch(genericErr));
       }
     },
 
@@ -1034,7 +953,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw "Invalid server response";
+        throw new PufferpanelError(await res.json().catch(genericErr));
       }
     },
 
@@ -1061,7 +980,7 @@ export default class Panel {
       });
 
       if (!res.ok) {
-        throw "Failed to update server data.";
+        throw new PufferpanelError(await res.json().catch(genericErr));
       }
     }
   };

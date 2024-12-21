@@ -349,7 +349,7 @@ export interface PufferpanelDaemonRunning {
   message: string;
 }
 
-export interface PufferpanelError {
+export interface PufferpanelErrorResponse {
   error: {
     code: string;
     metadata?: object;
@@ -476,10 +476,6 @@ export interface PufferpanelVariableOption {
 }
 
 export interface ResponseEmpty {}
-
-export interface ResponseError {
-  error: PufferpanelError;
-}
 
 export interface ResponsePaging {
   maxSize: number;
