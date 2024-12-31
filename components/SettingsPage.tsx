@@ -59,6 +59,15 @@ export default function SettingsPage() {
           />
         </List.Section>
 
+        <List.Section title="App Settings">
+          <List.Item
+            title="Appearance"
+            description="Look and feel of the app"
+            onPress={() => router.navigate("/settings/appearance")}
+            left={() => <List.Icon icon="palette" style={{ marginLeft: 15 }} />}
+          />
+        </List.Section>
+
         {administrativePerms ? (
           <List.Section title="Administrative Settings">
             <List.Item
@@ -91,20 +100,6 @@ export default function SettingsPage() {
             />
           </List.Section>
         ) : null}
-
-        {/* <List.Item
-          title="Appearance"
-          disabled
-          description="Look and feel of the app"
-          onPress={() => router.navigate("/settings/appearance")}
-          left={() => (
-            <List.Icon
-              icon="palette"
-              color={theme.colors.onSurfaceDisabled}
-              style={{ marginLeft: 15 }}
-            />
-          )}
-        /> */}
       </ScrollView>
     </>
   );
