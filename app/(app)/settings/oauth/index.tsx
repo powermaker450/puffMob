@@ -34,10 +34,10 @@ export default function oauth() {
   const [refresh, setRefresh] = useState(0);
   const execRefresh = () => setRefresh(Math.random());
 
-  useEffect(() => {
-    panel.get.selfOauth2().then(setClients).catch(console.error);
-  }, [refresh]);
-
+  useEffect(
+    () => void panel.get.selfOauth2().then(setClients).catch(console.error),
+    [refresh]
+  );
   useEffect(() => navigation.addListener("focus", execRefresh), []);
 
   const noClients = (

@@ -310,13 +310,11 @@ const FilesPage = () => {
     </View>
   );
 
-  useEffect(() => {
-    storage.set(id + "_overrideUrl", overrideUrl);
-  }, [overrideUrl]);
-
-  useEffect(() => {
-    storage.set(id + "_overridePort", overridePort);
-  }, [overridePort]);
+  useEffect(() => storage.set(id + "_overrideUrl", overrideUrl), [overrideUrl]);
+  useEffect(
+    () => storage.set(id + "_overridePort", overridePort),
+    [overridePort]
+  );
 
   useEffect(() => {
     setLoading(true);

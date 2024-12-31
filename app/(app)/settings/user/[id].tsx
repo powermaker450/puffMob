@@ -139,20 +139,22 @@ export default function userById() {
     password;
   const isAdmin = updating || newUser ? newUser.admin : false;
 
-  useEffect(() => {
-    panel.get
-      .userPerms(id as string)
-      .then(user => {
-        setUser(user);
-        setNewUser(user);
+  useEffect(
+    () =>
+      void panel.get
+        .userPerms(id as string)
+        .then(user => {
+          setUser(user);
+          setNewUser(user);
 
-        // Sometimes user.username is undefined. This might be a bug with Pufferpanel
-        setUsername(user.username || "");
-        setHeader(user.username);
-        setEmail(user.email);
-      })
-      .catch(console.error);
-  }, []);
+          // Sometimes user.username is undefined. This might be a bug with Pufferpanel
+          setUsername(user.username || "");
+          setHeader(user.username);
+          setEmail(user.email);
+        })
+        .catch(console.error),
+    []
+  );
 
   const styles: {
     view: any;

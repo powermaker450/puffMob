@@ -27,9 +27,10 @@ const RootNavigation = () => {
   const colorScheme = useColorScheme();
   const { loggedIn } = usePanel();
 
-  useEffect(() => {
-    router.replace(loggedIn ? "/(app)/home" : "/(auth)");
-  }, [loggedIn]);
+  useEffect(
+    () => router.replace(loggedIn ? "/(app)/home" : "/(auth)"),
+    [loggedIn]
+  );
 
   const getColor = () =>
     colorScheme === "dark" ? theme.dark.background : theme.light.background;

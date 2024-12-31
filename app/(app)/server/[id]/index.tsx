@@ -46,9 +46,7 @@ export default function ServerScreen() {
     settings: ServerManagePage
   });
 
-  useEffect(() => {
-    panel.get.server(id as string).then(setData);
-  }, []);
+  useEffect(() => void panel.get.server(id as string).then(setData), []);
 
   useEffect(() => {
     if (!data) {
