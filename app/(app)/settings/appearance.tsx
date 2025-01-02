@@ -16,22 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useAppearance } from "@/contexts/AppearanceProvider";
 import haptic, { handleTouch } from "@/util/haptic";
-import { storage } from "@/util/storage";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { ScrollView } from "react-native";
-import { useMMKVBoolean } from "react-native-mmkv";
 import { Appbar, List, Switch } from "react-native-paper";
 
 export default function appearance() {
-  const [contrastConsole, setContrastConsole] = useMMKVBoolean(
-    "contrastConsole",
-    storage
-  );
+  const { highContrastConsole, setHighContrastConsole } = useAppearance();
   const toggleContrastConsole = () => {
-    haptic(contrastConsole ? "contextClick" : "soft");
-    setContrastConsole(v => !v);
+    haptic(highContrastConsole ? "contextClick" : "soft");
+    setHighContrastConsole(v => !v);
   };
 
   const styles: { icon: any } = {
@@ -43,7 +38,7 @@ export default function appearance() {
   // Get it? sigh
   const eyeCon = () => <List.Icon style={styles.icon} icon="monitor-eye" />;
   const contrastConsoleSwitch = () => (
-    <Switch value={contrastConsole} onValueChange={toggleContrastConsole} />
+    <Switch value={highContrastConsole} onValueChange={toggleContrastConsole} />
   );
 
   return (

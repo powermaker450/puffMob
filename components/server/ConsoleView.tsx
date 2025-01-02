@@ -23,13 +23,18 @@ import { useEffect, useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";
 import { AnsiComponent } from "react-native-ansi-view";
 import { useServer } from "@/contexts/ServerProvider";
-import { useMMKVBoolean } from "react-native-mmkv";
-import { storage } from "@/util/storage";
+import { useAppearance } from "@/contexts/AppearanceProvider";
 
 const ConsoleView = () => {
   const theme = useTheme();
   const { data } = useServer();
-  const [contrastConsole] = useMMKVBoolean("contrastConsole", storage);
+  const { highContrastConsole } = useAppearance();
+  const consoleColor = highContrastConsole
+    ? "#000"
+    : theme.colors.surfaceVariant;
+  const consoleTextColor = highContrastConsole
+    ? { color: "#fff" }
+    : {};
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -85,11 +90,7 @@ const ConsoleView = () => {
     <CustomView>
       <Surface
         style={{
-          backgroundColor: contrastConsole
-            ? theme.dark
-              ? "#000"
-              : "#fff"
-            : theme.colors.surfaceVariant,
+          backgroundColor: consoleColor,
           paddingTop: 10,
           paddingBottom: 10,
           paddingLeft: 20,
@@ -112,9 +113,7 @@ const ConsoleView = () => {
                   containerStyle={{
                     fontSize: 11,
                     fontFamily: "NotoSansMono_400Regular",
-                    ...(contrastConsole && {
-                      color: theme.dark ? "#fff" : "#000"
-                    })
+                    ...consoleTextColor
                   }}
                   ansi={line}
                   key={`k-${index}`}

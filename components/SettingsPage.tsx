@@ -39,7 +39,7 @@ export default function SettingsPage() {
           setEditUsers(true);
       }
     }
-  });
+  }, []);
 
   return (
     <>
@@ -55,6 +55,15 @@ export default function SettingsPage() {
             onPress={() => router.navigate("/settings/account")}
             left={() => (
               <List.Icon icon="account-circle" style={{ marginLeft: 15 }} />
+            )}
+          />
+
+          <List.Item
+            title="OAuth2"
+            description="View and create user-scoped OAuth2 clients"
+            onPress={() => router.navigate("/settings/oauth")}
+            left={() => (
+              <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
             )}
           />
         </List.Section>
@@ -87,15 +96,6 @@ export default function SettingsPage() {
               onPress={() => router.navigate("/settings/user")}
               left={() => (
                 <List.Icon icon="account-multiple" style={{ marginLeft: 15 }} />
-              )}
-            />
-
-            <List.Item
-              title="OAuth2"
-              description="View and create user-scoped OAuth2 clients"
-              onPress={() => router.navigate("/settings/oauth")}
-              left={() => (
-                <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
               )}
             />
           </List.Section>

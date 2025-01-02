@@ -23,6 +23,7 @@ import { PanelProvider } from "@/contexts/PanelProvider";
 import RootNavigation from "@/components/RootNavigation";
 import { ServerProvider } from "@/contexts/ServerProvider";
 import { NoticeProvider } from "@/contexts/NoticeProvider";
+import { AppearanceProvider } from "@/contexts/AppearanceProvider";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -38,17 +39,19 @@ export default function RootLayout() {
       <PanelProvider>
         <ServerProvider>
           <NoticeProvider>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor:
-                  colorScheme === "dark"
-                    ? theme.dark.background
-                    : theme.light.background
-              }}
-            >
-              <RootNavigation />
-            </View>
+            <AppearanceProvider>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor:
+                    colorScheme === "dark"
+                      ? theme.dark.background
+                      : theme.light.background
+                }}
+              >
+                <RootNavigation />
+              </View>
+            </AppearanceProvider>
           </NoticeProvider>
         </ServerProvider>
       </PanelProvider>
