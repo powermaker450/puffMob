@@ -41,7 +41,6 @@ const ConsoleView = () => {
   const [running, setRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [command, setCommand] = useState("");
-  const changeCommand = (newText: string) => setCommand(newText);
   const clearCommand = () => setCommand("");
 
   useEffect(() => {
@@ -67,7 +66,7 @@ const ConsoleView = () => {
     console.warn("An unexpected error occured: ", err);
 
   const handleCommand = () => {
-    if (!command) {
+    if (!command.trim()) {
       return;
     }
 
@@ -129,8 +128,9 @@ const ConsoleView = () => {
             mode="outlined"
             value={command}
             disabled={!running}
-            onChangeText={changeCommand}
+            onChangeText={setCommand}
             right={sendButton}
+            onSubmitEditing={handleCommand}
           />
         )}
       </Surface>
