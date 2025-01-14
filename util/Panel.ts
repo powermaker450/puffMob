@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import AuthenticationError from "./AuthenticationError";
 import PufferpanelError, { genericErr } from "./PufferpanelError";
 import PufferpanelSocket from "./PufferpanelSocket";
 import {
@@ -239,7 +240,7 @@ export default class Panel {
      */
     servers:
       async (/*{ username, node, name, limit, page }: ServerSearchParams*/): Promise<ModelsServerSearchResponse> => {
-        let res = await fetch(`${this.api}/servers`, {
+        let res: Response = await fetch(`${this.api}/servers`, {
           headers: this.getDefaultHeaders()
         });
 
@@ -252,9 +253,7 @@ export default class Panel {
           });
 
           if (!res.ok) {
-            throw new Error(
-              `Unable to reauthenticate with the server: ${await res.text().catch(() => "failed")}`
-            );
+            throw new AuthenticationError(`Unable to reauthenticate`);
           }
         }
 

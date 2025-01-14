@@ -32,9 +32,7 @@ const ConsoleView = () => {
   const consoleColor = highContrastConsole
     ? "#000"
     : theme.colors.surfaceVariant;
-  const consoleTextColor = highContrastConsole
-    ? { color: "#fff" }
-    : {};
+  const consoleTextColor = highContrastConsole ? { color: "#fff" } : {};
 
   const scrollViewRef = useRef<ScrollView>(null);
 

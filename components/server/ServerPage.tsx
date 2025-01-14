@@ -18,22 +18,28 @@
 
 import { ModelsServerView } from "@/util/models";
 import { storage } from "@/util/storage";
-import { router, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { ActivityIndicator, Appbar, Button, Text } from "react-native-paper";
+import { ActivityIndicator, Appbar } from "react-native-paper";
 import Server from "../Server";
-import CustomView from "../CustomView";
 import { usePanel } from "@/contexts/PanelProvider";
+import { useNotice } from "@/contexts/NoticeProvider";
+import AuthenticationError from "@/util/AuthenticationError";
+import PufferpanelError from "@/util/PufferpanelError";
 
 export default function ServerPage() {
-  const { panel, config } = usePanel();
+  const { panel, config, logout } = usePanel();
+  const notice = useNotice();
   const navigation = useNavigation();
 
-  const [error, setError] = useState(false);
-  const serverCache: ModelsServerView[] = storage.getString("cachedServerList")
-    ? JSON.parse(storage.getString("cachedServerList")!)
-    : [];
+  const handleErr = (err: PufferpanelError | AuthenticationError | Error) => {
+    notice.error(err.message);
+    err instanceof AuthenticationError && logout();
+  };
+  const serverCache: ModelsServerView[] = JSON.parse(
+    storage.getString("cachedServerList") ?? "[]"
+  );
   const [serverList, setServerList] = useState<ModelsServerView[]>(serverCache);
   const [loading, setLoading] = useState(true);
 
@@ -45,34 +51,12 @@ export default function ServerPage() {
         setServerList(servers);
         setLoading(false);
       })
-      .catch(err => {
-        console.error(err);
-        setError(true);
-      });
+      .catch(handleErr);
 
   useEffect(() => {
     refreshServerList();
     navigation.addListener("focus", refreshServerList);
   }, []);
-
-  const errorScreen = (
-    <CustomView>
-      <Text style={{ maxWidth: "85%", margin: 10 }} variant="bodyLarge">
-        An error occured. Please check that your endpoint and credentials are
-        correct.
-      </Text>
-
-      <Button
-        mode="contained-tonal"
-        onPress={() => {
-          router.replace("/");
-          setError(false);
-        }}
-      >
-        Back
-      </Button>
-    </CustomView>
-  );
 
   const loadingIcon = (
     <ActivityIndicator
@@ -82,41 +66,37 @@ export default function ServerPage() {
     />
   );
 
-  const normalView = (
-    <View
-      style={{
-        maxHeight: "85%",
-        width: "100%",
-        borderRadius: 20
-      }}
-    >
-      <ScrollView>
-        {serverCache.length === 0 && loading
-          ? loadingIcon
-          : serverList.map((server, index) => {
-              return (
-                <Server
-                  name={server.name}
-                  id={server.id}
-                  ip={server.ip}
-                  port={server.port}
-                  key={index}
-                  node={server.node}
-                  running={server.running}
-                />
-              );
-            })}
-      </ScrollView>
-    </View>
-  );
-
   return (
     <>
       <Appbar.Header>
         <Appbar.Content title={config.branding.name} />
       </Appbar.Header>
 
-      {error ? errorScreen : normalView}
+      <View
+        style={{
+          maxHeight: "85%",
+          width: "100%",
+          borderRadius: 20
+        }}
+      >
+        <ScrollView>
+          {!serverCache.length && loading
+            ? loadingIcon
+            : serverList.map(server => {
+                return (
+                  <Server
+                    name={server.name}
+                    id={server.id}
+                    ip={server.ip}
+                    port={server.port}
+                    key={server.id}
+                    node={server.node}
+                    running={server.running}
+                  />
+                );
+              })}
+        </ScrollView>
+      </View>
     </>
   );
 }
