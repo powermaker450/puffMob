@@ -21,12 +21,13 @@ import { storage } from "@/util/storage";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { ActivityIndicator, Appbar } from "react-native-paper";
+import { Appbar } from "react-native-paper";
 import Server from "../Server";
 import { usePanel } from "@/contexts/PanelProvider";
 import { useNotice } from "@/contexts/NoticeProvider";
 import AuthenticationError from "@/util/AuthenticationError";
 import PufferpanelError from "@/util/PufferpanelError";
+import LoadingAnimation from "../LoadingAnimation";
 
 export default function ServerPage() {
   const { panel, config, logout } = usePanel();
@@ -41,7 +42,7 @@ export default function ServerPage() {
     storage.getString("cachedServerList") ?? "[]"
   );
   const [serverList, setServerList] = useState<ModelsServerView[]>(serverCache);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!serverList);
 
   const refreshServerList = () =>
     panel.get
@@ -58,14 +59,6 @@ export default function ServerPage() {
     navigation.addListener("focus", refreshServerList);
   }, []);
 
-  const loadingIcon = (
-    <ActivityIndicator
-      animating={true}
-      size="large"
-      style={{ paddingTop: 30, paddingBottom: 30 }}
-    />
-  );
-
   return (
     <>
       <Appbar.Header>
@@ -80,21 +73,18 @@ export default function ServerPage() {
         }}
       >
         <ScrollView>
-          {!serverCache.length && loading
-            ? loadingIcon
-            : serverList.map(server => {
-                return (
-                  <Server
-                    name={server.name}
-                    id={server.id}
-                    ip={server.ip}
-                    port={server.port}
-                    key={server.id}
-                    node={server.node}
-                    running={server.running}
-                  />
-                );
-              })}
+          {serverCache.length ? serverList.map(server => (
+            <Server
+              name={server.name}
+              id={server.id}
+              ip={server.ip}
+              port={server.port}
+              key={server.id}
+              node={server.node}
+              running={server.running}
+            />
+            )) : loading ? LoadingAnimation : null
+          }
         </ScrollView>
       </View>
     </>

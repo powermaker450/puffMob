@@ -17,6 +17,7 @@
  */
 
 import CustomView from "@/components/CustomView";
+import LoadingAnimation from "@/components/LoadingAnimation";
 import OAuthClient from "@/components/settings/OAuthClient";
 import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
@@ -30,12 +31,18 @@ export default function oauth() {
   const { panel } = usePanel();
   const navigation = useNavigation();
 
+  const [loading, setLoading] = useState(true);
+  const stopLoading = () => setLoading(false);
   const [clients, setClients] = useState<ModelsClient[]>([]);
+  const grabClients = (clients: ModelsClient[]) => {
+    setClients(clients);
+    stopLoading();
+  }
   const [refresh, setRefresh] = useState(0);
-  const execRefresh = () => setRefresh(Math.random());
+  const execRefresh = () => setRefresh(Math.random())
 
   useEffect(
-    () => void panel.get.selfOauth2().then(setClients).catch(console.error),
+    () => void panel.get.selfOauth2().then(grabClients).catch(console.error),
     [refresh]
   );
   useEffect(() => navigation.addListener("focus", execRefresh), []);
@@ -63,6 +70,7 @@ export default function oauth() {
       </Appbar.Header>
 
       <ScrollView style={{ width: "100%", margin: "auto" }}>
+        {loading && LoadingAnimation}
         {clients.length
           ? clients.map(client => (
               <OAuthClient

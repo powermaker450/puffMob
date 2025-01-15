@@ -17,7 +17,6 @@
  */
 
 import {
-  ActivityIndicator,
   Button,
   Dialog,
   FAB,
@@ -45,6 +44,7 @@ import invalidChars from "@/util/invalidChars";
 import { usePanel } from "@/contexts/PanelProvider";
 import { getDocumentAsync } from "expo-document-picker";
 import { useNotice } from "@/contexts/NoticeProvider";
+import LoadingAnimation from "../LoadingAnimation";
 
 const FilesPage = () => {
   const { id } = useLocalSearchParams();
@@ -136,9 +136,9 @@ const FilesPage = () => {
               handleComplete();
               deleteAsync(location).catch(err => handleErr(err));
             })
-            .catch(err => handleErr(err))
+            .catch(handleErr)
         )
-        .catch(err => handleErr(err));
+        .catch(handleErr);
 
       return;
     }
@@ -147,7 +147,7 @@ const FilesPage = () => {
       client
         .sftpMkdir(expandPath(pathList) + filename)
         .then(handleComplete)
-        .catch(err => handleErr(err));
+        .catch(handleErr);
 
       return;
     }
@@ -244,7 +244,6 @@ const FilesPage = () => {
 
   // End of the create file menus
 
-  const loadingText = <ActivityIndicator animating />;
   const noFilesFound = (
     <View
       style={{
@@ -364,13 +363,9 @@ const FilesPage = () => {
       {!error && <PathList pathList={pathList} setPath={setPathList} />}
 
       <ScrollView>
-        {loading ? (
-          error ? (
-            errorText
-          ) : (
-            loadingText
-          )
-        ) : !fileList.length ? (
+        {loading && LoadingAnimation}
+        {error && errorText}
+        {(!error && !loading) && !fileList.length ? (
           noFilesFound
         ) : (
           <List.Section style={{ width: "95%", margin: "auto" }}>

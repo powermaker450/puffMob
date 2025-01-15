@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import LoadingAnimation from "@/components/LoadingAnimation";
 import User from "@/components/settings/User";
 import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
@@ -28,8 +29,14 @@ import { Appbar, FAB } from "react-native-paper";
 export default function users() {
   const { panel } = usePanel();
   const navigation = useNavigation();
+
+  const [loading, setLoading] = useState(true);
+  const stopLoading = () => setLoading(false);
   const [userList, setUserList] = useState<ModelsPermissionView[]>([]);
-  const grabUsers = ({ users }: ModelsUserSearchResponse) => setUserList(users);
+  const grabUsers = ({ users }: ModelsUserSearchResponse) => {
+    setUserList(users);
+    stopLoading();
+  }
 
   const styles: { scrollView: any; fab: any } = {
     scrollView: {
@@ -65,6 +72,7 @@ export default function users() {
       </Appbar.Header>
 
       <ScrollView style={styles.scrollView}>
+        {loading && LoadingAnimation}
         {userList.length
           ? userList.map(user => <User user={user} key={user.id} />)
           : null}
