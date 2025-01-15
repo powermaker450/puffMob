@@ -25,7 +25,7 @@ A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with
   - [x] Manage Files
   - [x] Manage OAuth2 clients
   - [ ] Create new servers
-  - [ ] View performance stats
+  - [x] View performance stats
   - [ ] Admin controls
      
 - [ ] Nodes

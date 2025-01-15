@@ -39,7 +39,7 @@ type CallbackType<T extends PufferpanelEvent> = T extends "console"
   : T extends "status"
     ? (pse: { running: boolean }) => any
     : T extends "stat"
-      ? (pse: { memory: string; cpu: string }) => any
+      ? (pse: { memory: number; cpu: number }) => any
       : never;
 
 export default class PufferpanelSocket {
@@ -60,11 +60,11 @@ export default class PufferpanelSocket {
       this.send("status");
       this.send("replay");
 
-      const interval = setInterval(() => this.send("status"), 45_000);
+      const interval = setInterval(() => this.send("stat"), 2500);
 
-      this.socket.onclose = e => {
+      this.socket.onclose = ({ code, reason }) => {
         clearInterval(interval);
-        console.log(`(${this.socket.url}) Closed:`, `(${e.code}) ${e.reason}`);
+        console.log(`(${this.socket.url}) Closed:`, `(${code}) ${reason}`);
       };
     };
   }

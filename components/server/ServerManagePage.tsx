@@ -17,7 +17,9 @@
  */
 
 import { useServer } from "@/contexts/ServerProvider";
-import { router, useLocalSearchParams } from "expo-router";
+import toHumanSize from "@/util/toHumanSize";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { List } from "react-native-paper";
 
@@ -25,42 +27,74 @@ const ServerManagePage = () => {
   const { id } = useLocalSearchParams();
   const { data } = useServer();
 
+  const [cpu, setCpu] = useState("");
+  const [ram, setRam] = useState("");
+  
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    const { server: { socket }, permissions } = data;
+
+    permissions.viewServerStats && socket.on("stat", stats => {
+      const cpuStat = stats.cpu.toFixed(2) + " %";
+
+      setCpu(cpuStat);
+      setRam(toHumanSize(stats.memory));
+    });
+  }, [data]);
+
   return (
     <ScrollView contentContainerStyle={{ justifyContent: "center" }}>
-      <List.Item
-        title="Config"
-        description="Edit the config for your server"
-        onPress={() => router.navigate(`/server/${id}/config`)}
-        style={{
-          display: (data ? data.permissions.editServerData : false)
-            ? "flex"
-            : "none"
-        }}
-        left={() => <List.Icon icon="file-code" style={{ marginLeft: 15 }} />}
-      />
+      <List.Section title="Settings">
+        <List.Item
+          title="Config"
+          description="Edit the config for your server"
+          onPress={() => router.navigate(`/server/${id}/config`)}
+          style={{
+            display: (data ? data.permissions.editServerData : false)
+              ? "flex"
+              : "none"
+          }}
+          left={() => <List.Icon icon="file-code" style={{ marginLeft: 15 }} />}
+        />
 
-      <List.Item
-        title="Users"
-        description="Manage users access to the server"
-        onPress={() => router.navigate(`/server/${id}/users`)}
-        style={{
-          display: (data ? data.permissions.editServerUsers : false)
-            ? "flex"
-            : "none"
-        }}
-        left={() => (
-          <List.Icon icon="account-multiple-plus" style={{ marginLeft: 15 }} />
-        )}
-      />
+        <List.Item
+          title="Users"
+          description="Manage users access to the server"
+          onPress={() => router.navigate(`/server/${id}/users`)}
+          style={{
+            display: (data ? data.permissions.editServerUsers : false)
+              ? "flex"
+              : "none"
+          }}
+          left={() => (
+            <List.Icon icon="account-multiple-plus" style={{ marginLeft: 15 }} />
+          )}
+        />
 
-      <List.Item
-        title="OAuth2 Clients"
-        description="Manage all your OAuth2 clients for this server"
-        onPress={() => router.navigate(`/server/${id}/oauth`)}
-        left={() => (
-          <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
-        )}
-      ></List.Item>
+        <List.Item
+          title="OAuth2 Clients"
+          description="Manage all your OAuth2 clients for this server"
+          onPress={() => router.navigate(`/server/${id}/oauth`)}
+          left={() => (
+            <List.Icon icon="server-security" style={{ marginLeft: 15 }} />
+          )}
+        ></List.Item>
+      </List.Section>
+
+      {data?.permissions.viewServerStats && <List.Section title="Server Statistics">
+        <List.Item
+          title="CPU"
+          description={cpu}
+        />
+
+        <List.Item
+          title="RAM"
+          description={ram}
+        />
+      </List.Section> }
     </ScrollView>
   );
 };

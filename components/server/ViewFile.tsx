@@ -47,6 +47,7 @@ import { useKeyboard } from "@react-native-community/hooks";
 import determineFileType from "@/util/determineFileType";
 import invalidChars from "@/util/invalidChars";
 import { useServer } from "@/contexts/ServerProvider";
+import toHumanSize from "@/util/toHumanSize";
 
 interface ViewFileProps {
   file: LsResult;
@@ -67,12 +68,6 @@ const ViewFile = ({
 }: ViewFileProps) => {
   const theme = useTheme();
   const keyboard = useKeyboard();
-  const computeFileSize = () =>
-    file.fileSize === 4096
-      ? "Empty"
-      : file.fileSize < 1_000_000
-        ? (file.fileSize / 1000).toFixed(2) + " KB"
-        : (file.fileSize / 1_000_000).toFixed(2) + " MB";
 
   const isEditable = (): boolean => {
     if (file.isDirectory) {
@@ -498,7 +493,7 @@ const ViewFile = ({
     <>
       <List.Item
         title={file.filename}
-        description={file.isDirectory ? "Folder" : computeFileSize()}
+        description={file.isDirectory ? "Folder" : toHumanSize(file.fileSize)}
         disabled={disableNav}
         onPress={handleClick}
         onLongPress={showDialog}
