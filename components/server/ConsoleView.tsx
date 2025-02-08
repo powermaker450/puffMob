@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Surface, Text, TextInput, useTheme } from "react-native-paper";
+import { IconButton, Surface, Text, TextInput, useTheme } from "react-native-paper";
 import CustomView from "../CustomView";
-import { ScrollView } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import { ScrollView, View } from "react-native";
+import { ComponentProps, useEffect, useRef, useState } from "react";
 import { handleTouch } from "@/util/haptic";
 import { AnsiComponent } from "react-native-ansi-view";
 import { useServer } from "@/contexts/ServerProvider";
@@ -38,8 +38,39 @@ const ConsoleView = () => {
 
   const [running, setRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [command, setCommand] = useState("");
-  const clearCommand = () => setCommand("");
+  const [commands, setCommands] = useState<string[]>([""]);
+  const [commandIndex, setCommandIndex] = useState(commands.length - 1);
+  const setCurrentCommand = (value: string) => setCommands(v => v.map((command, index) => index === commandIndex ? value : command));
+  const pushCurrentCommand = () => setCommands(v => [...v, ""]);
+
+  const incrementCommandIndex = () => (commandIndex + 1 < commands.length) && setCommandIndex(v => v + 1);
+  const decrementCommandIndex = () => (commandIndex - 1 > -1) && setCommandIndex(v => v - 1);
+
+  const noCommand = !commands[commandIndex].trim();
+  
+  // Reset the command text box when the current command is pushed
+  useEffect(() => setCommandIndex(commands.length - 1), [commands]);
+
+  const styles: {
+    actionRow: ComponentProps<typeof View>["style"]
+    surfaceView: ComponentProps<typeof Surface>["style"]
+  } = {
+    actionRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "flex-start"
+    },
+    surfaceView: {
+      backgroundColor: consoleColor,
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingLeft: 20,
+      paddingRight: 20,
+      width: "90%",
+      height: "85%",
+      borderRadius: 20,
+    }
+  }
 
   useEffect(() => {
     if (!data) {
@@ -64,14 +95,14 @@ const ConsoleView = () => {
     console.warn("An unexpected error occured: ", err);
 
   const handleCommand = () => {
-    if (!command.trim()) {
+    if (noCommand) {
       return;
     }
 
     data!.server.actions
-      .execute(command)
+      .execute(commands[commandIndex])
       .catch(handleErr)
-      .finally(clearCommand);
+      .finally(pushCurrentCommand)
   };
 
   const sendButton = (
@@ -79,23 +110,14 @@ const ConsoleView = () => {
       icon="send-outline"
       onPress={handleCommand}
       onPressIn={handleTouch}
-      disabled={!running || !command.trim()}
+      disabled={!running || noCommand}
     />
   );
 
   return (
     <CustomView>
       <Surface
-        style={{
-          backgroundColor: consoleColor,
-          paddingTop: 10,
-          paddingBottom: 10,
-          paddingLeft: 20,
-          paddingRight: 20,
-          width: "90%",
-          height: "85%",
-          borderRadius: 20
-        }}
+        style={styles.surfaceView}
         elevation={2}
       >
         <ScrollView
@@ -121,15 +143,33 @@ const ConsoleView = () => {
         </ScrollView>
 
         {sendServerConsole && (
-          <TextInput
-            label={running ? "Enter command..." : "Server offline"}
-            mode="outlined"
-            value={command}
-            disabled={!running}
-            onChangeText={setCommand}
-            right={sendButton}
-            onSubmitEditing={handleCommand}
-          />
+          <>
+            <View style={styles.actionRow}>
+              <IconButton
+                icon="chevron-up"
+                onPressIn={handleTouch}
+                onPress={decrementCommandIndex}
+                disabled={!running || commandIndex === 0}
+              />
+              <IconButton
+                icon="chevron-down"
+                onPressIn={handleTouch}
+                onPress={incrementCommandIndex}
+                disabled={!running || commandIndex === commands.length - 1}
+              />
+            </View>
+
+            <TextInput
+              style={{ width: "100%" }}
+              label={running ? "Enter command..." : "Server offline"}
+              mode="outlined"
+              value={commands[commandIndex]}
+              disabled={!running}
+              onChangeText={setCurrentCommand}
+              right={sendButton}
+              onSubmitEditing={handleCommand}
+            />
+          </>
         )}
       </Surface>
     </CustomView>
