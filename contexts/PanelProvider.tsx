@@ -115,6 +115,17 @@ export const PanelProvider = ({ children }: PanelProviderProps) => {
   };
 
   const [panel, setPanel] = useState<Panel>(new Panel({ settings, token }));
+  useEffect(() => {
+    if (!loggedIn) {
+      console.log("Not logged in, not grabbing username");
+      return;
+    }
+
+    panel.get.self().then(({ username }) => {
+      console.log("Got username", username);
+      applyUsername(username ?? "nousername");
+    });
+  }, [loggedIn, panel]);
   useEffect(() => applyLoggedIn(!!token), [token]);
   const [error, setError] = useState(false);
   const clearError = () => setError(false);
@@ -129,18 +140,14 @@ export const PanelProvider = ({ children }: PanelProviderProps) => {
       applyScopes(scopes ?? []);
 
       applyConfig(await Panel.getConfig(user.serverUrl));
+      applyUsername(await panel.get.self().then(data => {
+        console.error(data);
+        return data.username ?? "nousername"
+      }));
     } catch {
       setError(true);
     }
   }
-
-  useEffect(() => {
-    if (!token || loggedIn) {
-      return;
-    }
-
-    panel.get.self().then(({ username }) => applyUsername(username ?? ""));
-  }, [panel]);
 
   function logout() {
     const empty: PanelParams = { serverUrl: "", email: "", password: "" };

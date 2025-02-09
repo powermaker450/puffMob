@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { usePanel } from "@/contexts/PanelProvider";
+import { useServer } from "@/contexts/ServerProvider";
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
 import { List, useTheme } from "react-native-paper";
@@ -37,7 +39,17 @@ export default function Server({
   node,
   running
 }: ServerProps) {
+  const { panel } = usePanel();
+  const { setData } = useServer();
   const theme = useTheme();
+
+  const navigate = () => {
+    panel.get.server(id)
+      .then(data => {
+        setData(data);
+        router.navigate(`/server/${id}`);
+      })
+  }
 
   const styles: { listItem: any; icon: any } = {
     listItem: {
@@ -89,7 +101,7 @@ export default function Server({
       left={serverIcon}
       right={rightArrow}
       style={styles.listItem}
-      onPress={() => router.navigate(`/server/${id}`)}
+      onPress={navigate}
     />
   );
 }

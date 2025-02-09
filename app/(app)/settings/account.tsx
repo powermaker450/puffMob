@@ -31,7 +31,7 @@ import CustomView from "@/components/CustomView";
 import { storage } from "@/util/storage";
 import { router } from "expo-router";
 import ButtonContainer from "@/components/ButtonContainer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import haptic, { handleTouch } from "@/util/haptic";
 import { PanelParams, UpdateUserParams } from "@/util/Panel";
 import UnsavedChanges from "@/components/UnsavedChanges";

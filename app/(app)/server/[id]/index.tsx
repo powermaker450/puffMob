@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { BottomNavigationRoute, BottomNavigation } from "react-native-paper";
 import ConsoleView from "@/components/server/ConsoleView";
@@ -24,13 +24,10 @@ import NavBar from "@/components/NavBar";
 import ServerManagePage from "@/components/server/ServerManagePage";
 import NameTab from "@/components/server/NameTab";
 import FilesPage from "@/components/server/FilesPage";
-import { usePanel } from "@/contexts/PanelProvider";
 import { useServer } from "@/contexts/ServerProvider";
 
 export default function ServerScreen() {
-  const { id } = useLocalSearchParams();
-  const { panel } = usePanel();
-  const { data, setData } = useServer();
+  const { data } = useServer();
   const navigation = useNavigation();
 
   const mainRoute: BottomNavigationRoute = {
@@ -45,8 +42,6 @@ export default function ServerScreen() {
     files: FilesPage,
     settings: ServerManagePage
   });
-
-  useEffect(() => void panel.get.server(id as string).then(setData), []);
 
   useEffect(() => {
     if (!data) {
