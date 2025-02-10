@@ -365,7 +365,7 @@ const FilesPage = () => {
       <ScrollView>
         {loading && LoadingAnimation}
         {error && errorText}
-        {(!error && !loading) && !fileList.length ? (
+        {!error && !loading && !fileList.length ? (
           noFilesFound
         ) : (
           <List.Section style={{ width: "95%", margin: "auto" }}>

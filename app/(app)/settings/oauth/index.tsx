@@ -37,9 +37,9 @@ export default function oauth() {
   const grabClients = (clients: ModelsClient[]) => {
     setClients(clients);
     stopLoading();
-  }
+  };
   const [refresh, setRefresh] = useState(0);
-  const execRefresh = () => setRefresh(Math.random())
+  const execRefresh = () => setRefresh(Math.random());
 
   useEffect(
     () => void panel.get.selfOauth2().then(grabClients).catch(console.error),

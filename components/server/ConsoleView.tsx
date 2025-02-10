@@ -16,7 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, Surface, Text, TextInput, useTheme } from "react-native-paper";
+import {
+  IconButton,
+  Surface,
+  Text,
+  TextInput,
+  useTheme
+} from "react-native-paper";
 import CustomView from "../CustomView";
 import { ScrollView, View } from "react-native";
 import { ComponentProps, useEffect, useRef, useState } from "react";
@@ -40,20 +46,25 @@ const ConsoleView = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const [commands, setCommands] = useState<string[]>([""]);
   const [commandIndex, setCommandIndex] = useState(commands.length - 1);
-  const setCurrentCommand = (value: string) => setCommands(v => v.map((command, index) => index === commandIndex ? value : command));
+  const setCurrentCommand = (value: string) =>
+    setCommands(v =>
+      v.map((command, index) => (index === commandIndex ? value : command))
+    );
   const pushCurrentCommand = () => setCommands(v => [...v, ""]);
 
-  const incrementCommandIndex = () => (commandIndex + 1 < commands.length) && setCommandIndex(v => v + 1);
-  const decrementCommandIndex = () => (commandIndex - 1 > -1) && setCommandIndex(v => v - 1);
+  const incrementCommandIndex = () =>
+    commandIndex + 1 < commands.length && setCommandIndex(v => v + 1);
+  const decrementCommandIndex = () =>
+    commandIndex - 1 > -1 && setCommandIndex(v => v - 1);
 
   const noCommand = !commands[commandIndex].trim();
-  
+
   // Reset the command text box when the current command is pushed
   useEffect(() => setCommandIndex(commands.length - 1), [commands]);
 
   const styles: {
-    actionRow: ComponentProps<typeof View>["style"]
-    surfaceView: ComponentProps<typeof Surface>["style"]
+    actionRow: ComponentProps<typeof View>["style"];
+    surfaceView: ComponentProps<typeof Surface>["style"];
   } = {
     actionRow: {
       flexDirection: "row",
@@ -68,9 +79,9 @@ const ConsoleView = () => {
       paddingRight: 20,
       width: "90%",
       height: "85%",
-      borderRadius: 20,
+      borderRadius: 20
     }
-  }
+  };
 
   useEffect(() => {
     if (!data) {
@@ -102,7 +113,7 @@ const ConsoleView = () => {
     data!.server.actions
       .execute(commands[commandIndex])
       .catch(handleErr)
-      .finally(pushCurrentCommand)
+      .finally(pushCurrentCommand);
   };
 
   const sendButton = (
@@ -116,10 +127,7 @@ const ConsoleView = () => {
 
   return (
     <CustomView>
-      <Surface
-        style={styles.surfaceView}
-        elevation={2}
-      >
+      <Surface style={styles.surfaceView} elevation={2}>
         <ScrollView
           style={{ marginBottom: 5 }}
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}

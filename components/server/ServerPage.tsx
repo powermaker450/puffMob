@@ -73,18 +73,21 @@ export default function ServerPage() {
         }}
       >
         <ScrollView>
-          {serverCache.length ? serverList.map(server => (
-            <Server
-              name={server.name}
-              id={server.id}
-              ip={server.ip}
-              port={server.port}
-              key={server.id}
-              node={server.node}
-              running={server.running}
-            />
-            )) : loading ? LoadingAnimation : null
-          }
+          {serverCache.length
+            ? serverList.map(server => (
+                <Server
+                  name={server.name}
+                  id={server.id}
+                  ip={server.ip}
+                  port={server.port}
+                  key={server.id}
+                  node={server.node}
+                  running={server.running}
+                />
+              ))
+            : loading
+              ? LoadingAnimation
+              : null}
         </ScrollView>
       </View>
     </>

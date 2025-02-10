@@ -29,20 +29,24 @@ const ServerManagePage = () => {
 
   const [cpu, setCpu] = useState("");
   const [ram, setRam] = useState("");
-  
+
   useEffect(() => {
     if (!data) {
       return;
     }
 
-    const { server: { socket }, permissions } = data;
+    const {
+      server: { socket },
+      permissions
+    } = data;
 
-    permissions.viewServerStats && socket.on("stat", stats => {
-      const cpuStat = stats.cpu.toFixed(2) + " %";
+    permissions.viewServerStats &&
+      socket.on("stat", stats => {
+        const cpuStat = stats.cpu.toFixed(2) + " %";
 
-      setCpu(cpuStat);
-      setRam(toHumanSize(stats.memory));
-    });
+        setCpu(cpuStat);
+        setRam(toHumanSize(stats.memory));
+      });
   }, [data]);
 
   return (
@@ -70,7 +74,10 @@ const ServerManagePage = () => {
               : "none"
           }}
           left={() => (
-            <List.Icon icon="account-multiple-plus" style={{ marginLeft: 15 }} />
+            <List.Icon
+              icon="account-multiple-plus"
+              style={{ marginLeft: 15 }}
+            />
           )}
         />
 
@@ -84,17 +91,13 @@ const ServerManagePage = () => {
         ></List.Item>
       </List.Section>
 
-      {data?.permissions.viewServerStats && <List.Section title="Server Statistics">
-        <List.Item
-          title="CPU"
-          description={cpu}
-        />
+      {data?.permissions.viewServerStats && (
+        <List.Section title="Server Statistics">
+          <List.Item title="CPU" description={cpu} />
 
-        <List.Item
-          title="RAM"
-          description={ram}
-        />
-      </List.Section> }
+          <List.Item title="RAM" description={ram} />
+        </List.Section>
+      )}
     </ScrollView>
   );
 };

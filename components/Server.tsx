@@ -44,12 +44,11 @@ export default function Server({
   const theme = useTheme();
 
   const navigate = () => {
-    panel.get.server(id)
-      .then(data => {
-        setData(data);
-        router.navigate(`/server/${id}`);
-      })
-  }
+    panel.get.server(id).then(data => {
+      setData(data);
+      router.navigate(`/server/${id}`);
+    });
+  };
 
   const styles: { listItem: any; icon: any } = {
     listItem: {

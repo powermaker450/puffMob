@@ -38,7 +38,7 @@ export default function oauth() {
   const applyClients = (newClients: ModelsClient[]) => {
     setClients(newClients);
     stopLoading();
-  }
+  };
   const [refresh, setRefresh] = useState(0);
   const execRefresh = () => setRefresh(Math.random());
   useEffect(() => navigation.addListener("focus", execRefresh), []);
@@ -49,10 +49,7 @@ export default function oauth() {
     }
     const { server } = data;
 
-    server.get
-      .oauth2()
-      .then(applyClients)
-      .catch(console.error);
+    server.get.oauth2().then(applyClients).catch(console.error);
   }, [refresh]);
 
   const noClients = (

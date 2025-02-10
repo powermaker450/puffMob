@@ -36,7 +36,7 @@ export default function users() {
   const grabUsers = ({ users }: ModelsUserSearchResponse) => {
     setUserList(users);
     stopLoading();
-  }
+  };
 
   const styles: { scrollView: any; fab: any } = {
     scrollView: {
