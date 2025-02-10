@@ -1,8 +1,12 @@
 # puffMob
-A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with <3, React Native, and [React Native Paper](https://reactnativepaper.com/)
+A (WIP) mobile client for [Pufferpanel](https://www.pufferpanel.com), built with React Native, [React Native Paper](https://reactnativepaper.com/), and <3
 
 
-# WARNING: This app is still in development. Expect bugs and missing features!
+> [!WARNING]
+> This app is still in development. Expect bugs and missing features!
+
+> [!NOTE]
+> **This app is currently only compatible with Pufferpanel V2.** Pufferpanel V3 support is planned.
 
 ## Unique features
 - More advanced file management with SFTP built in
