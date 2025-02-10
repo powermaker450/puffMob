@@ -86,41 +86,69 @@ const ViewFile = ({
   };
 
   const fileType = (): string => {
-    if (file.isDirectory) {
-      return "folder";
+    const { isDirectory, filename } = file;
+
+    if (isDirectory) {
+      // Common folder names
+      switch (filename) {
+        case "node_modules/":
+          return "nodejs";
+        case ".git/":
+          return "git";
+
+        // If the folder name did not match any common folder names
+        default:
+          return filename.startsWith(".") ? "folder-hidden" : "folder";
+      }
     }
 
-    const { filename } = file;
-    const isArchive =
-      filename.endsWith(".zip") ||
-      filename.endsWith(".tar") ||
-      filename.endsWith(".gz");
-
-    if (filename.endsWith(".properties") || filename.endsWith(".toml")) {
-      return "file-cog";
+    // Common filenames
+    switch (filename) {
+      case ".env":
+        return "currency-usd";
+      case ".gitignore":
+        return "git";
+      case "LICENSE":
+        return "license";
+      case "COPYING":
+        return "license";
+      case "README.md":
+        return "language-markdown";
     }
 
-    if (filename.endsWith(".txt")) {
-      return "text-box";
-    }
+    // If the filename did not match any common filenames
+    const split = filename.split(".");
+    const extension = split[split.length - 1];
 
-    if (filename.endsWith(".log")) {
-      return "file-chart";
-    }
+    switch (extension) {
+      case "zip":
+        return "zip-box";
+      case "tar":
+        return "zip-box";
+      case "gz":
+        return "zip-box";
 
-    if (filename.endsWith(".jar")) {
-      return "language-java";
-    }
+      case "properties":
+        return "file-cog";
+      case "txt":
+        return "text-box";
+      case "log":
+        return "file-chart";
+      case "jar":
+        return "language-java";
+      case "json":
+        return "code-json";
+      case "js":
+        return "language-javascript";
+      case "ts":
+        return "language-typescript";
+      case "html":
+        return "language-html5";
 
-    if (filename.endsWith(".json")) {
-      return "code-json";
+      // If the filename did not match any common file types
+      default:
+        return filename.startsWith(".") ? "file-hidden" : "file";
     }
-
-    if (isArchive) {
-      return "zip-box";
-    }
-
-    return "file-outline";
   };
 
   const loadingIcon = <ActivityIndicator animating />;

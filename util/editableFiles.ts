@@ -23,7 +23,14 @@ const editableFiles = [
   ".conf",
   ".toml",
   ".bat",
-  ".sh"
+  ".sh",
+  ".ts",
+  ".env",
+  ".yaml",
+  ".md",
+  "LICENSE",
+  "COPYING",
+  ".html"
 ];
 
 export default editableFiles;

@@ -35,6 +35,14 @@ const languageTypes: LanguageType[] = [
   {
     extensions: ["ps", "bat"],
     literalType: "powershell"
+  },
+  {
+    extensions: ["js"],
+    literalType: "javascript"
+  },
+  {
+    extensions: ["ts"],
+    literalType: "typescript"
   }
 ];
 
