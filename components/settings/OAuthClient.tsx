@@ -18,7 +18,6 @@
 
 import { ModelsClient } from "@/util/models";
 import { useState } from "react";
-import { View } from "react-native";
 import {
   ActivityIndicator,
   Button,
@@ -70,7 +69,7 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
   const styles: {
     listItem: any;
     modal: any;
-    modalView: any;
+    modalContent: any;
     modalButton: any;
     modalTitle: any;
     icon: any;
@@ -88,13 +87,13 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
     },
     modal: {
       backgroundColor: theme.colors.background,
-      margin: 40,
-      marginTop: 320,
-      marginBottom: 320,
+      margin: "10%",
+      marginTop: "75%",
+      marginBottom: "75%",
       padding: 20,
       borderRadius: 20
     },
-    modalView: {
+    modalContent: {
       alignItems: "center"
     },
     modalButton: {
@@ -167,35 +166,38 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
       />
 
       <Portal>
-        <Modal style={styles.modal} visible={modal} onDismiss={hideModal}>
-          <View style={styles.modalView}>
-            <Icon source="server-security" size={40} />
+        <Modal
+          style={styles.modal}
+          visible={modal}
+          onDismiss={hideModal}
+          contentContainerStyle={styles.modalContent}
+        >
+          <Icon source="server-security" size={40} />
 
-            <Text variant="titleLarge" style={styles.modalTitle}>
-              {client.name}
-            </Text>
+          <Text variant="titleLarge" style={styles.modalTitle}>
+            {client.name}
+          </Text>
 
-            <Button
-              mode="contained-tonal"
-              style={styles.modalButton}
-              onPressIn={handleTouch}
-              onPress={handleCopy}
-            >
-              Copy Client ID
-            </Button>
+          <Button
+            mode="contained-tonal"
+            style={styles.modalButton}
+            onPressIn={handleTouch}
+            onPress={handleCopy}
+          >
+            Copy Client ID
+          </Button>
 
-            <Button
-              mode="contained"
-              onPressIn={handleTouch}
-              onPress={showDialog}
-              style={{
-                ...styles.modalButton,
-                backgroundColor: theme.colors.error
-              }}
-            >
-              Delete Client
-            </Button>
-          </View>
+          <Button
+            mode="contained"
+            onPressIn={handleTouch}
+            onPress={showDialog}
+            style={{
+              ...styles.modalButton,
+              backgroundColor: theme.colors.error
+            }}
+          >
+            Delete Client
+          </Button>
         </Modal>
       </Portal>
 
