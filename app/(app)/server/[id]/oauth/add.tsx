@@ -23,7 +23,7 @@ import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsCreatedClient, NewClient } from "@/util/models";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { router } from "expo-router";
-import { useState } from "react";
+import { ComponentProps, useState } from "react";
 import { View } from "react-native";
 import {
   ActivityIndicator,
@@ -78,14 +78,14 @@ export default function add() {
   };
 
   const styles: {
-    view: any;
-    textInput: any;
-    modal: any;
-    modalView: any;
-    modalText: any;
-    mainButtons: any;
-    okButton: any;
-    bold: any;
+    view: ComponentProps<typeof View>["style"];
+    textInput: ComponentProps<typeof TextInput>["style"];
+    modal: ComponentProps<typeof Modal>["style"];
+    modalView: ComponentProps<typeof View>["style"];
+    modalText: ComponentProps<typeof Text>["style"];
+    mainButtons: ComponentProps<typeof Button>["style"];
+    okButton: ComponentProps<typeof Button>["style"];
+    bold: ComponentProps<typeof Text>["style"];
     mono: any;
   } = {
     view: {

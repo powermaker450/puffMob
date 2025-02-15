@@ -22,7 +22,7 @@ import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsPermissionView } from "@/util/models";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import {
   ActivityIndicator,
@@ -157,11 +157,11 @@ export default function userById() {
   );
 
   const styles: {
-    view: any;
-    accordion: any;
-    input: any;
-    button: any;
-    icon: any;
+    view: ComponentProps<typeof ScrollView>["style"];
+    accordion: ComponentProps<(typeof List)["Accordion"]>["style"];
+    input: ComponentProps<typeof TextInput>["style"];
+    button: ComponentProps<typeof Button>["style"];
+    icon: ComponentProps<(typeof List)["Icon"]>["style"];
   } = {
     view: {
       width: "95%",

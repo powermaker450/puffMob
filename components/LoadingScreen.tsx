@@ -16,35 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ComponentProps } from "react";
 import { View } from "react-native";
 import { Appbar, useTheme } from "react-native-paper";
 
 const LoadingScreen = () => {
   const theme = useTheme();
 
-  const styles: { scrollView: any; bottomBar: any; listItem: any; icon: any } =
-    {
-      scrollView: {
-        width: "100%"
-      },
-      bottomBar: {
-        position: "absoloute",
-        bottom: 0,
-        height: "8%",
-        backgroundColor: theme.colors.surfaceDisabled
-      },
-      listItem: {
-        backgroundColor: theme.colors.surfaceVariant,
-        borderRadius: 20,
-        marginTop: 7,
-        marginBottom: 7,
-        width: "95%",
-        alignSelf: "center"
-      },
-      icon: {
-        marginLeft: 15
-      }
-    };
+  const styles: { bottomBar: ComponentProps<typeof View>["style"] } = {
+    bottomBar: {
+      bottom: 0,
+      height: "8%",
+      backgroundColor: theme.colors.surfaceDisabled
+    }
+  };
 
   return (
     <>

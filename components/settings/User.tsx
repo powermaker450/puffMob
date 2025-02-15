@@ -18,6 +18,7 @@
 
 import { ModelsPermissionView } from "@/util/models";
 import { router } from "expo-router";
+import { ComponentProps } from "react";
 import { List, useTheme } from "react-native-paper";
 
 interface UserProps {
@@ -27,7 +28,10 @@ interface UserProps {
 const User = ({ user }: UserProps) => {
   const theme = useTheme();
 
-  const styles: { item: any; icon: any } = {
+  const styles: {
+    item: ComponentProps<(typeof List)["Item"]>["style"];
+    icon: ComponentProps<(typeof List)["Icon"]>["style"];
+  } = {
     item: {
       backgroundColor: theme.colors.surfaceVariant,
       borderRadius: 20,
@@ -37,14 +41,17 @@ const User = ({ user }: UserProps) => {
     icon: { marginLeft: 15 }
   };
 
+  const accountIcon = () => <List.Icon icon="account" style={styles.icon} />;
+  const rightArrowIcon = () => <List.Icon icon="chevron-right" />;
+
   return (
     <List.Item
       title={user.username}
       description={user.email}
       style={styles.item}
       onPress={() => router.navigate(`/settings/user/${user.id}`)}
-      left={() => <List.Icon icon="account" style={styles.icon} />}
-      right={() => <List.Icon icon="chevron-right" />}
+      left={accountIcon}
+      right={rightArrowIcon}
     />
   );
 };

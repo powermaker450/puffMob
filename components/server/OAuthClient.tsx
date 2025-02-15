@@ -17,8 +17,7 @@
  */
 
 import { ModelsClient } from "@/util/models";
-import { useState } from "react";
-import { View } from "react-native";
+import { ComponentProps, useState } from "react";
 import {
   ActivityIndicator,
   Button,
@@ -76,15 +75,16 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
   };
 
   const styles: {
-    listItem: any;
-    modal: any;
-    modalContent: any;
-    modalButton: any;
-    modalTitle: any;
-    icon: any;
-    bold: any;
-    notice: any;
-    checkbox: any;
+    listItem: ComponentProps<(typeof List)["Item"]>["style"];
+    modal: ComponentProps<typeof Modal>["style"];
+    modalContent: ComponentProps<typeof Modal>["contentContainerStyle"];
+    modalButton: ComponentProps<typeof Button>["style"];
+    modalDangerButton: ComponentProps<typeof Button>["style"];
+    modalTitle: ComponentProps<typeof Text>["style"];
+    icon: ComponentProps<(typeof List)["Icon"]>["style"];
+    bold: ComponentProps<typeof Text>["style"];
+    notice: ComponentProps<typeof Snackbar>["style"];
+    checkbox: ComponentProps<(typeof Checkbox)["Item"]>["style"];
   } = {
     listItem: {
       backgroundColor: theme.colors.surfaceVariant,
@@ -108,6 +108,11 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
     modalButton: {
       width: "95%",
       marginTop: 15
+    },
+    modalDangerButton: {
+      width: "95%",
+      marginTop: 15,
+      backgroundColor: theme.colors.error
     },
     modalTitle: {
       fontWeight: "bold",
@@ -201,10 +206,7 @@ const OAuthClient = ({ client, refresh }: OAuthClientProps) => {
             mode="contained"
             onPressIn={handleTouch}
             onPress={showDialog}
-            style={{
-              ...styles.modalButton,
-              backgroundColor: theme.colors.error
-            }}
+            style={styles.modalDangerButton}
           >
             Delete Client
           </Button>

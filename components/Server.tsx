@@ -21,6 +21,7 @@ import { useServer } from "@/contexts/ServerProvider";
 import { ModelsNodeView } from "@/util/models";
 import { router } from "expo-router";
 import { List, useTheme } from "react-native-paper";
+import { ComponentProps } from "react";
 
 interface ServerProps {
   name: string;
@@ -50,7 +51,10 @@ export default function Server({
     });
   };
 
-  const styles: { listItem: any; icon: any } = {
+  const styles: {
+    listItem: ComponentProps<(typeof List)["Item"]>["style"];
+    icon: ComponentProps<(typeof List)["Icon"]>["style"];
+  } = {
     listItem: {
       backgroundColor: theme.colors.surfaceVariant,
       borderRadius: 20,

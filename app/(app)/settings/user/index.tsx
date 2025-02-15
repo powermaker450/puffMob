@@ -22,7 +22,7 @@ import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsPermissionView, ModelsUserSearchResponse } from "@/util/models";
 import { router, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { Appbar, FAB } from "react-native-paper";
 
@@ -38,7 +38,10 @@ export default function users() {
     stopLoading();
   };
 
-  const styles: { scrollView: any; fab: any } = {
+  const styles: {
+    scrollView: ComponentProps<typeof ScrollView>["style"];
+    fab: ComponentProps<typeof FAB>["style"];
+  } = {
     scrollView: {
       width: "95%",
       margin: "auto"

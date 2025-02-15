@@ -23,7 +23,7 @@ import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { ModelsClient } from "@/util/models";
 import { router, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { Appbar, FAB, Text } from "react-native-paper";
 
@@ -53,7 +53,7 @@ export default function oauth() {
     </CustomView>
   );
 
-  const styles: { fab: any } = {
+  const styles: { fab: ComponentProps<typeof FAB>["style"] } = {
     fab: {
       position: "absolute",
       bottom: 0,

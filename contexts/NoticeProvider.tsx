@@ -17,7 +17,13 @@
  */
 
 import haptic from "@/util/haptic";
-import { ReactNode, createContext, useContext, useState } from "react";
+import {
+  ComponentProps,
+  ReactNode,
+  createContext,
+  useContext,
+  useState
+} from "react";
 import { Portal, Snackbar } from "react-native-paper";
 
 interface NoticeProviderProps {
@@ -53,7 +59,7 @@ export const NoticeProvider = ({ children }: NoticeProviderProps) => {
     setTimeout(hideNotice, 2000);
   };
 
-  const styles: { bar: any } = {
+  const styles: { bar: ComponentProps<typeof Snackbar>["style"] } = {
     bar: {
       width: "95%",
       alignSelf: "center",

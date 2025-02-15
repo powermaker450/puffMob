@@ -21,7 +21,7 @@ import { usePanel } from "@/contexts/PanelProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { NewUser, PufferpanelErrorResponse } from "@/util/models";
 import { router } from "expo-router";
-import { useState } from "react";
+import { ComponentProps, useState } from "react";
 import { ScrollView } from "react-native";
 import {
   Appbar,
@@ -116,12 +116,11 @@ export default function add() {
   };
 
   const styles: {
-    view: any;
-    accordion: any;
-    input: any;
-    button: any;
-    icon: any;
-    fab: any;
+    view: ComponentProps<typeof ScrollView>["style"];
+    accordion: ComponentProps<(typeof List)["Accordion"]>["style"];
+    input: ComponentProps<typeof TextInput>["style"];
+    icon: ComponentProps<(typeof List)["Icon"]>["style"];
+    fab: ComponentProps<typeof FAB>["style"];
   } = {
     view: {
       width: "95%",
@@ -138,11 +137,6 @@ export default function add() {
       margin: "auto",
       marginTop: 4,
       marginBottom: 4
-    },
-    button: {
-      width: "80%",
-      marginTop: 10,
-      marginBottom: 10
     },
     icon: {
       marginLeft: 15

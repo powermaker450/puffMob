@@ -19,6 +19,7 @@
 import { useAppearance } from "@/contexts/AppearanceProvider";
 import haptic, { handleTouch } from "@/util/haptic";
 import { router } from "expo-router";
+import { ComponentProps } from "react";
 import { ScrollView } from "react-native";
 import { Appbar, List, Switch } from "react-native-paper";
 
@@ -29,7 +30,7 @@ export default function appearance() {
     setHighContrastConsole(v => !v);
   };
 
-  const styles: { icon: any } = {
+  const styles: { icon: ComponentProps<(typeof List)["Icon"]>["style"] } = {
     icon: {
       marginLeft: 15
     }
