@@ -172,7 +172,7 @@ export default function add() {
           <TextInput
             mode="outlined"
             label="Description"
-            style={{ ...styles.textInput, marginBottom: 20 }}
+            style={{ ...styles.textInput as object, marginBottom: 20 }}
             value={newClient.description}
             disabled={loading}
             onChangeText={setDesc}

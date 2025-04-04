@@ -102,7 +102,7 @@ export default function addUser() {
     server.get.users().then(users => {
       for (const user of users) {
         if (user.email === email) {
-          notice.show("That user already exists!", true);
+          notice.show("That user already exists!");
 
           setLoading(false);
           return;
