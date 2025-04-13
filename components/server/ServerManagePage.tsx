@@ -18,7 +18,7 @@
 
 import { useServer } from "@/contexts/ServerProvider";
 import toHumanSize from "@/util/toHumanSize";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { List } from "react-native-paper";

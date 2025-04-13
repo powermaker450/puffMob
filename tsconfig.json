@@ -6,7 +6,8 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "noUnusedLocals": true
   },
   "include": [
     "**/*.ts",

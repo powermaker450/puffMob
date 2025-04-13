@@ -158,7 +158,6 @@ const ViewFile = ({
     haptic();
     setVisible(true);
   };
-  const hideDialog = () => setVisible(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteVis, setDeleteVis] = useState(false);
 

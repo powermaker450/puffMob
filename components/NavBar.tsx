@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { handleTouch } from "@/util/haptic";
 import { useState } from "react";
 import { BottomNavigation, BottomNavigationRoute } from "react-native-paper";
 
