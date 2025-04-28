@@ -48,12 +48,12 @@ export default class Panel {
   public get headers(): {
     Accept: "application/json";
     Authorization: `Bearer ${string}`;
-    "User-Agent": "puffMob/0.3.0";
+    "User-Agent": "puffMob/0.3.1";
   } {
     return {
       Accept: "application/json",
       Authorization: `Bearer ${this.token}`,
-      "User-Agent": "puffMob/0.3.0"
+      "User-Agent": "puffMob/0.3.1"
     };
   }
 
@@ -71,7 +71,7 @@ export default class Panel {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "User-Agent": "puffMob/0.3.0"
+        "User-Agent": "puffMob/0.3.1"
       },
       body: JSON.stringify({ email, password })
     });
